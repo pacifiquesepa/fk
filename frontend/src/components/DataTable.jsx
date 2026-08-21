@@ -1,0 +1,5 @@
+import { Inbox } from 'lucide-react';
+
+export default function DataTable({ columns, rows = [], emptyLabel = 'No records to display.' }) {
+  return <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="overflow-x-auto"><table className="min-w-full text-left text-xs"><thead className="border-b border-slate-100 bg-slate-50 text-[10px] uppercase tracking-wider text-slate-400"><tr>{columns.map((column) => <th className="whitespace-nowrap px-5 py-4 font-bold" key={column.key}>{column.label}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{rows.length ? rows.map((row, index) => <tr className="transition hover:bg-cyan-50/30" key={row.id || index}>{columns.map((column) => <td className="whitespace-nowrap px-5 py-4 text-slate-600" key={column.key}>{column.render ? column.render(row) : row[column.key] ?? '-'}</td>)}</tr>) : <tr><td colSpan={columns.length} className="px-5 py-14 text-center text-slate-400"><Inbox className="mx-auto mb-2 text-slate-300" size={25} /><span>{emptyLabel}</span></td></tr>}</tbody></table></div></div>;
+}
