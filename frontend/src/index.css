@@ -1,7 +1,145 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
 @import "tailwindcss";
 
-:root { font-synthesis: none; text-rendering: optimizeLegibility; }
-* { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; }
-button, input { font: inherit; }
+:root {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+#department-directory section.grid>button {
+    min-height: 12rem;
+    padding: 1.75rem;
+}
+
+#department-directory section.grid>button>div>span:first-child {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+}
+
+#department-directory section.grid>button>div>span:last-child {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+}
+
+#department-directory section.grid>button>div>span:last-child svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+#department-directory section.grid>button>strong {
+    margin-top: 1.75rem;
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+}
+
+#department-directory section.grid>button>span {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.print-header {
+    display: none;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .printable-area,
+    .printable-area * {
+        visibility: visible;
+    }
+
+    .printable-area {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        padding: 24px 24px 112px;
+        background: white;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .print-header {
+        display: flex;
+        position: relative;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 10px;
+        border-bottom: 2px solid #17333d;
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+        color: #17333d;
+        font-size: 14px;
+        font-weight: 700;
+        text-align: left;
+    }
+
+    .print-header>div:first-child {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .print-qr {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        text-align: center;
+    }
+
+    .print-qr small {
+        display: block;
+        max-width: 70px;
+        font-size: 9px;
+        font-weight: 600;
+    }
+
+    .printable-area::after {
+        position: fixed;
+        bottom: 30px;
+        left: 32px;
+        display: grid;
+        width: 76px;
+        height: 76px;
+        place-items: center;
+        border: 2px solid #1d5f91;
+        border-radius: 50%;
+        color: #1d5f91;
+        content: 'FOREVER KING\A ACADEMY\A OFFICIAL';
+        font-size: 8px;
+        font-weight: 800;
+        line-height: 1.25;
+        text-align: center;
+        white-space: pre;
+        transform: rotate(-12deg);
+    }
+
+    .printable-area section {
+        box-shadow: none !important;
+    }
+}

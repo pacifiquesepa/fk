@@ -14,6 +14,8 @@ import RoleWorkspacePage from './pages/RoleWorkspacePage';
 import RegistrationPage from './pages/RegistrationPage';
 import StudentProfilePage from './pages/StudentProfilePage';
 import TestRunnerPage from './pages/TestRunnerPage';
+import DepartmentDirectoryPage from './pages/DepartmentDirectoryPage';
+import DosClassManagementPage from './pages/DosClassManagementPage';
 import ClientHomePage from './pages/clientView/ClientHomePage';
 import AboutPage from './pages/clientView/AboutPage';
 import AcademicsPage from './pages/clientView/AcademicsPage';
@@ -40,7 +42,7 @@ export default function App() {
 	}, []);
 	function changeLanguage(next) { setLanguage(next); }
 	function authenticated(data) { localStorage.setItem('fkams_token', data.token); localStorage.setItem('fkams_user', JSON.stringify(data.user)); setUser(data.user); setPage('overview'); }
-	function logout() { localStorage.removeItem('fkams_token'); localStorage.removeItem('fkams_user'); setUser(null); }
+	function logout() { localStorage.removeItem('fkams_token'); localStorage.removeItem('fkams_user'); setUser(null); setPage('overview'); setPublicPage('home'); setShowLogin(false); }
 	const publicProps = { t, language, onLanguageChange: changeLanguage, onLogin: () => setShowLogin(true), onNavigate: setPublicPage };
 	const publicPages = {
 		home: <ClientHomePage {...publicProps} />,
@@ -67,14 +69,18 @@ export default function App() {
 	};
 	const content = page === 'overview'
 		? dashboards[user.role] || dashboards.student
-		: page === 'registration'
-			? <RegistrationPage onBack={() => setPage('overview')} />
-			: page === 'profile'
-				? <StudentProfilePage user={user} onBack={() => setPage('overview')} />
-				: page === 'test-runner'
-					? <TestRunnerPage t={t} onBack={() => setPage('overview')} />
-		: workspacePages.includes(page)
-			? <RoleWorkspacePage role={user.role} t={t} onNavigate={setPage} initialPage={page} />
-			: <ModulePage t={t} page={page} onBack={() => setPage('overview')} />;
+		: page === 'add-department' && user.role === 'admin'
+			? <DepartmentDirectoryPage user={user} onBack={() => setPage('overview')} />
+			: page === 'registration'
+				? <RegistrationPage onBack={() => setPage('overview')} />
+				: page === 'profile'
+					? <StudentProfilePage user={user} onBack={() => setPage('overview')} />
+					: page === 'test-runner'
+						? <TestRunnerPage t={t} onBack={() => setPage('overview')} />
+						: page === 'class-management' && ['admin', 'dos'].includes(user.role)
+							? <DosClassManagementPage t={t} onBack={() => setPage('overview')} />
+							: workspacePages.includes(page)
+								? <RoleWorkspacePage role={user.role} user={user} t={t} onNavigate={setPage} initialPage={page} />
+								: <ModulePage t={t} page={page} user={user} onBack={() => setPage('overview')} />;
 	return <AppShell t={t} language={language} onLanguageChange={changeLanguage} user={user} activePage={page} onNavigate={setPage} onLogout={logout}>{content}</AppShell>;
 }

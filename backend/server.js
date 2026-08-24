@@ -314,8 +314,46 @@ app.post('/api/users', requireAuth, authorize('admin', 'dos'), async (req, res) 
 });
 
 app.get('/api/users', requireAuth, authorize('admin'), async (_req, res) => {
-  const [rows] = await pool.query('SELECT id, full_name AS fullName, username, email, phone, role, is_active AS isActive, created_at AS createdAt FROM users ORDER BY full_name');
+  const [rows] = await pool.query(`SELECT u.id, u.full_name AS fullName, u.username, u.email, u.phone, u.role, u.is_active AS isActive, u.created_at AS createdAt,
+    s.id AS profileId, s.admission_number AS admissionNumber, s.class_name AS className, s.parent_phone AS parentPhone, s.gender, s.birthday, s.academic_year AS academicYear,
+    tp.employee_number AS employeeNumber, tp.subject_or_module AS subjectOrModule, tp.gender, tp.birthday, tp.diploma_key AS diplomaKey
+    FROM users u LEFT JOIN students s ON s.user_id = u.id LEFT JOIN teacher_profiles tp ON tp.user_id = u.id ORDER BY u.full_name`);
   res.json({ users: rows });
+});
+
+app.patch('/api/users/:id', requireAuth, authorize('admin'), async (req, res) => {
+  const userId = Number(req.params.id); const roles = ['admin', 'dos', 'teacher', 'student', 'parent', 'accountant', 'librarian'];
+  if (!Number.isInteger(userId)) return res.status(400).json({ error: 'A valid user id is required.' });
+  if (req.body.role !== undefined && !roles.includes(req.body.role)) return res.status(400).json({ error: 'Invalid user role.' });
+  if (userId === Number(req.user.sub) && req.body.role && req.body.role !== 'admin') return res.status(400).json({ error: 'You cannot remove your own admin role.' });
+  const fields = { fullName: 'full_name', email: 'email', phone: 'phone', role: 'role' }; const updates = []; const values = [];
+  Object.entries(fields).forEach(([key, column]) => { if (req.body[key] !== undefined) { if (key === 'role' && !roles.includes(req.body[key])) return; updates.push(`${column} = ?`); values.push(typeof req.body[key] === 'string' ? req.body[key].trim() : req.body[key]); } });
+  if (req.body.password !== undefined) { if (typeof req.body.password !== 'string' || req.body.password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' }); updates.push('password_hash = ?'); values.push(await bcrypt.hash(req.body.password, 12)); }
+  if (!updates.length) return res.status(400).json({ error: 'At least one user field is required.' }); values.push(userId);
+  try { const [result] = await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values); if (!result.affectedRows) return res.status(404).json({ error: 'User not found.' }); res.json({ message: 'User updated.' }); } catch (error) { if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'Email is already registered.' }); throw error; }
+});
+
+app.patch('/api/teachers/:id/profile', requireAuth, authorize('admin'), async (req, res) => {
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId)) return res.status(400).json({ error: 'A valid teacher id is required.' });
+  if (req.body.gender !== undefined && !['male', 'female', 'other'].includes(req.body.gender)) return res.status(400).json({ error: 'Invalid gender.' });
+  const [teachers] = await pool.query("SELECT id FROM users WHERE id = ? AND role = 'teacher'", [userId]);
+  if (!teachers.length) return res.status(404).json({ error: 'Teacher not found.' });
+  const fields = { gender: 'gender', birthday: 'birthday', subjectOrModule: 'subject_or_module', diplomaKey: 'diploma_key', employeeNumber: 'employee_number' };
+  const updates = []; const values = [];
+  Object.entries(fields).forEach(([key, column]) => { if (req.body[key] !== undefined) { updates.push(`${column} = ?`); values.push(typeof req.body[key] === 'string' ? req.body[key].trim() : req.body[key]); } });
+  if (!updates.length) return res.status(400).json({ error: 'At least one teacher profile field is required.' });
+  values.push(userId);
+  const [result] = await pool.query(`UPDATE teacher_profiles SET ${updates.join(', ')} WHERE user_id = ?`, values);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Teacher profile not found.' });
+  res.json({ message: 'Teacher profile updated.' });
+});
+
+app.delete('/api/users/:id', requireAuth, authorize('admin'), async (req, res) => {
+  const userId = Number(req.params.id); if (!Number.isInteger(userId)) return res.status(400).json({ error: 'A valid user id is required.' });
+  if (userId === Number(req.user.sub)) return res.status(400).json({ error: 'You cannot delete your own admin account.' });
+  const connection = await pool.getConnection();
+  try { await connection.beginTransaction(); await connection.query('DELETE FROM students WHERE user_id = ?', [userId]); await connection.query('DELETE FROM teacher_profiles WHERE user_id = ?', [userId]); const [result] = await connection.query('DELETE FROM users WHERE id = ?', [userId]); if (!result.affectedRows) { await connection.rollback(); return res.status(404).json({ error: 'User not found.' }); } await connection.commit(); res.json({ message: 'User and dependent records deleted.' }); } catch (error) { await connection.rollback(); if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.code === 'ER_ROW_IS_REFERENCED') return res.status(409).json({ error: 'This account has dependent records that must be reassigned before deletion.' }); throw error; } finally { connection.release(); }
 });
 
 app.patch('/api/users/:id/role', requireAuth, authorize('admin'), async (req, res) => {
@@ -385,7 +423,9 @@ app.get('/api/students', requireAuth, async (req, res) => {
 
 app.post('/api/students', requireAuth, authorize('admin', 'dos'), async (req, res) => {
   const error = bodyErrors(req.body, [['admissionNumber', 'Admission number', 40], ['fullName', 'Full name', 120], ['className', 'Class name', 80], ['parentPhone', 'Parent phone', 30]]);
+  const classId = Number(req.body?.classId);
   if (error) return res.status(400).json({ error });
+  if (!Number.isInteger(classId)) return res.status(400).json({ error: 'A valid class must be selected.' });
   if (!req.body.password || req.body.password !== req.body.repassword) return res.status(400).json({ error: 'Password and repassword must match.' });
   if (!['male', 'female', 'other'].includes(req.body.gender) || !req.body.birthday || !req.body.academicYear) return res.status(400).json({ error: 'Gender, birthday and academic year are required.' });
   const qrToken = crypto.randomUUID();
@@ -393,7 +433,7 @@ app.post('/api/students', requireAuth, authorize('admin', 'dos'), async (req, re
   const username = req.body.username?.trim().toLowerCase() || `student-${req.body.admissionNumber.trim().toLowerCase()}`;
   const email = req.body.email?.trim().toLowerCase() || `${username}@fkams.local`;
   const connection = await pool.getConnection();
-  try { await connection.beginTransaction(); const [userResult] = await connection.query('INSERT INTO users (full_name, username, email, password_hash, role) VALUES (?, ?, ?, ?, \'student\')', [req.body.fullName.trim(), username, email, passwordHash]); const [result] = await connection.query('INSERT INTO students (user_id, admission_number, full_name, gender, birthday, academic_year, class_name, parent_phone, qr_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [userResult.insertId, req.body.admissionNumber.trim(), req.body.fullName.trim(), req.body.gender, req.body.birthday, req.body.academicYear.trim(), req.body.className.trim(), req.body.parentPhone.trim(), qrToken]); await connection.commit(); res.status(201).json({ id: result.insertId, qrToken, username, message: 'Student created.' }); } catch (error) { await connection.rollback(); if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'Username, email or admission number already exists.' }); throw error; } finally { connection.release(); }
+  try { await connection.beginTransaction(); const [classes] = await connection.query('SELECT id, name FROM classes WHERE id = ? AND is_active = TRUE LIMIT 1', [classId]); if (!classes[0]) { await connection.rollback(); return res.status(400).json({ error: 'Selected class was not found or is inactive.' }); } const [userResult] = await connection.query('INSERT INTO users (full_name, username, email, password_hash, role) VALUES (?, ?, ?, ?, \'student\')', [req.body.fullName.trim(), username, email, passwordHash]); const [result] = await connection.query('INSERT INTO students (user_id, admission_number, full_name, gender, birthday, academic_year, class_name, parent_phone, date_of_birth, photo_key, qr_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [userResult.insertId, req.body.admissionNumber.trim(), req.body.fullName.trim(), req.body.gender, req.body.birthday, req.body.academicYear.trim(), classes[0].name, req.body.parentPhone.trim(), req.body.dateOfBirth || null, req.body.photoKey?.trim() || null, qrToken]); await connection.query('INSERT INTO student_classes (student_id, class_id, enrolled_at) VALUES (?, ?, CURRENT_DATE)', [result.insertId, classId]); await connection.commit(); res.status(201).json({ id: result.insertId, qrToken, username, classId, message: 'Student created and assigned to class.' }); } catch (error) { await connection.rollback(); if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'Username, email or admission number already exists.' }); throw error; } finally { connection.release(); }
 });
 
 app.post('/api/teachers/register', requireAuth, authorize('admin', 'dos'), async (req, res) => {
@@ -469,6 +509,22 @@ app.post('/api/classes', requireAuth, authorize('admin', 'dos'), async (req, res
   res.status(201).json({ id: result.insertId, message: 'Class created.' });
 });
 
+app.put('/api/classes/:id', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const classId = Number(req.params.id); const error = bodyErrors(req.body, [['name', 'Class name', 80], ['academicYear', 'Academic year', 20]]);
+  if (error || !Number.isInteger(classId)) return res.status(400).json({ error: error || 'A valid class id is required.' });
+  const [result] = await pool.query('UPDATE classes SET name = ?, academic_year = ? WHERE id = ?', [req.body.name.trim(), req.body.academicYear.trim(), classId]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Class not found.' });
+  res.json({ message: 'Class updated.' });
+});
+
+app.delete('/api/classes/:id', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const classId = Number(req.params.id);
+  if (!Number.isInteger(classId)) return res.status(400).json({ error: 'A valid class id is required.' });
+  const [result] = await pool.query('DELETE FROM classes WHERE id = ?', [classId]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Class not found.' });
+  res.json({ message: 'Class deleted.' });
+});
+
 app.get('/api/subjects', requireAuth, async (_req, res) => {
   const [rows] = await pool.query('SELECT id, name, code, is_active AS isActive FROM subjects ORDER BY name');
   res.json({ subjects: rows });
@@ -478,6 +534,8 @@ app.post('/api/subjects', requireAuth, authorize('admin', 'dos'), async (req, re
   const error = bodyErrors(req.body, [['name', 'Subject name', 100], ['code', 'Subject code', 30]]);
   if (error) return res.status(400).json({ error });
   const [result] = await pool.query('INSERT INTO subjects (name, code) VALUES (?, ?)', [req.body.name.trim(), req.body.code.trim().toUpperCase()]);
+  const classId = Number(req.body?.classId);
+  if (Number.isInteger(classId)) await pool.query('INSERT INTO class_subjects (class_id, subject_id) VALUES (?, ?)', [classId, result.insertId]);
   res.status(201).json({ id: result.insertId, message: 'Subject created.' });
 });
 
@@ -488,6 +546,37 @@ app.post('/api/teacher-assignments', requireAuth, authorize('admin', 'dos'), asy
   if (!teacher.length) return res.status(400).json({ error: 'The selected user is not an active teacher.' });
   await pool.query('INSERT INTO teacher_assignments (teacher_id, class_id, subject_id) VALUES (?, ?, ?)', [teacherId, classId, subjectId]);
   res.status(201).json({ message: 'Teacher assignment saved.' });
+});
+
+app.get('/api/teacher-assignments', requireAuth, authorize('admin', 'dos'), async (_req, res) => {
+  const [rows] = await pool.query(`SELECT ta.teacher_id AS teacherId, ta.class_id AS classId, ta.subject_id AS subjectId, u.full_name AS teacherName, c.name AS className, s.name AS subjectName, s.code AS subjectCode FROM teacher_assignments ta JOIN users u ON u.id = ta.teacher_id JOIN classes c ON c.id = ta.class_id JOIN subjects s ON s.id = ta.subject_id ORDER BY c.name, s.name, u.full_name`);
+  res.json({ assignments: rows });
+});
+
+app.get('/api/teacher/my-assignments', requireAuth, authorize('teacher'), async (req, res) => {
+  const [rows] = await pool.query(`SELECT ta.class_id AS classId, c.name AS className, ta.subject_id AS subjectId, s.name AS subjectName, s.code AS subjectCode FROM teacher_assignments ta JOIN classes c ON c.id = ta.class_id JOIN subjects s ON s.id = ta.subject_id WHERE ta.teacher_id = ? ORDER BY c.name, s.name`, [req.user.sub]);
+  res.json({ assignments: rows });
+});
+
+app.delete('/api/teacher-assignments', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const ids = ['teacherId', 'classId', 'subjectId'].map((key) => Number(req.body?.[key]));
+  if (!ids.every(Number.isInteger)) return res.status(400).json({ error: 'teacherId, classId and subjectId are required.' });
+  const [result] = await pool.query('DELETE FROM teacher_assignments WHERE teacher_id = ? AND class_id = ? AND subject_id = ?', ids);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Teacher assignment not found.' });
+  res.json({ message: 'Teacher assignment removed.' });
+});
+
+app.get('/api/dos/classes/:id', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const classId = Number(req.params.id);
+  if (!Number.isInteger(classId)) return res.status(400).json({ error: 'A valid class id is required.' });
+  const [[classRow]] = await pool.query('SELECT id, name, academic_year AS academicYear, is_active AS isActive FROM classes WHERE id = ? LIMIT 1', [classId]);
+  if (!classRow) return res.status(404).json({ error: 'Class not found.' });
+  const [subjects] = await pool.query(`SELECT s.id, s.name, s.code, u.id AS teacherId, u.full_name AS teacherName FROM class_subjects cs JOIN subjects s ON s.id = cs.subject_id LEFT JOIN teacher_assignments ta ON ta.subject_id = s.id AND ta.class_id = cs.class_id LEFT JOIN users u ON u.id = ta.teacher_id WHERE cs.class_id = ? ORDER BY s.name`, [classId]);
+  const [[students]] = await pool.query('SELECT COUNT(DISTINCT sc.student_id) AS total FROM student_classes sc JOIN students s ON s.id = sc.student_id WHERE sc.class_id = ? AND s.status = \'active\'', [classId]);
+  const [[tests]] = await pool.query('SELECT COUNT(*) AS total FROM tests WHERE class_id = ?', [classId]);
+  const [[grades]] = await pool.query('SELECT ROUND(AVG(g.score / NULLIF(g.max_score, 0) * 100), 1) AS average FROM grades g JOIN students st ON st.id = g.student_id JOIN student_classes sc ON sc.student_id = st.id WHERE sc.class_id = ?', [classId]);
+  const [subjectStats] = await pool.query(`SELECT s.id, s.name, ROUND(AVG(g.score / NULLIF(g.max_score, 0) * 100), 1) AS average, COUNT(DISTINCT g.student_id) AS gradedStudents, COUNT(DISTINCT t.id) AS tests, COUNT(DISTINCT ta.student_id) AS testParticipants FROM class_subjects cs JOIN subjects s ON s.id = cs.subject_id LEFT JOIN grades g ON g.subject_id = s.id LEFT JOIN students st ON st.id = g.student_id LEFT JOIN student_classes sc ON sc.student_id = st.id AND sc.class_id = cs.class_id LEFT JOIN tests t ON t.class_id = cs.class_id AND t.subject_id = s.id LEFT JOIN test_attempts ta ON ta.test_id = t.id WHERE cs.class_id = ? GROUP BY s.id, s.name ORDER BY s.name`, [classId]);
+  res.json({ class: classRow, subjects, subjectStats, metrics: { students: Number(students.total || 0), tests: Number(tests.total || 0), average: Number(grades.average || 0) } });
 });
 
 app.post('/api/tests', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => {
@@ -503,14 +592,29 @@ app.post('/api/tests', requireAuth, authorize('admin', 'dos', 'teacher'), async 
 });
 
 app.get('/api/tests', requireAuth, async (req, res) => {
-  let query = `SELECT t.id, t.title, t.class_id AS classId, t.subject_id AS subjectId, t.duration_minutes AS durationMinutes, t.starts_at AS startsAt, t.ends_at AS endsAt, t.is_published AS isPublished FROM tests t`;
+  let query = `SELECT t.id, t.title, t.class_id AS classId, c.name AS className, t.subject_id AS subjectId, s.name AS subjectName, t.duration_minutes AS durationMinutes, t.starts_at AS startsAt, t.ends_at AS endsAt, t.is_published AS isPublished FROM tests t JOIN classes c ON c.id = t.class_id JOIN subjects s ON s.id = t.subject_id`;
   const params = [];
   if (req.user.role === 'teacher') { query += ' WHERE t.teacher_id = ?'; params.push(req.user.sub); }
-  else if (req.user.role === 'student') { query += ' JOIN student_classes sc ON sc.class_id = t.class_id JOIN students s ON s.id = sc.student_id WHERE s.user_id = ? AND t.is_published = TRUE'; params.push(req.user.sub); }
+  else if (req.user.role === 'student') { query += ' JOIN student_classes sc ON sc.class_id = t.class_id JOIN students st ON st.id = sc.student_id WHERE st.user_id = ? AND t.is_published = TRUE'; params.push(req.user.sub); }
   else if (req.user.role === 'parent') { query += ' JOIN student_classes sc ON sc.class_id = t.class_id JOIN parent_students ps ON ps.student_id = sc.student_id WHERE ps.parent_id = ? AND t.is_published = TRUE'; params.push(req.user.sub); }
   query += ' ORDER BY t.starts_at DESC, t.id DESC';
   const [rows] = await pool.query(query, params);
   res.json({ tests: rows });
+});
+
+app.get('/api/teacher/dashboard', requireAuth, authorize('teacher'), async (req, res) => {
+  const teacherId = Number(req.user.sub);
+  const today = new Date().toISOString().slice(0, 10);
+  const [students, attendance, assessments, notices, timetable] = await Promise.all([
+    pool.query('SELECT DISTINCT s.id, s.full_name AS fullName, s.admission_number AS admissionNumber, s.class_name AS className FROM students s JOIN student_classes sc ON sc.student_id = s.id JOIN teacher_assignments ta ON ta.class_id = sc.class_id WHERE ta.teacher_id = ? AND s.status = \'active\' ORDER BY s.full_name', [teacherId]),
+    pool.query("SELECT COUNT(DISTINCT s.id) AS total, SUM(a.status = 'present') AS present FROM students s JOIN student_classes sc ON sc.student_id = s.id JOIN teacher_assignments ta ON ta.class_id = sc.class_id LEFT JOIN attendance a ON a.student_id = s.id AND a.attendance_date = ? WHERE ta.teacher_id = ? AND s.status = 'active'", [today, teacherId]),
+    pool.query("SELECT COUNT(*) AS total FROM tests WHERE teacher_id = ? AND is_published = TRUE AND (starts_at IS NULL OR starts_at <= NOW()) AND (ends_at IS NULL OR ends_at >= NOW())", [teacherId]),
+    pool.query("SELECT id, title, body, category, published_at AS publishedAt FROM notices WHERE audience IN ('all', 'teachers') ORDER BY published_at DESC LIMIT 5"),
+    pool.query('SELECT t.id, c.name AS className, s.name AS subjectName, t.day_of_week AS dayOfWeek, t.starts_at AS startsAt, t.ends_at AS endsAt, t.room FROM timetable_entries t JOIN classes c ON c.id = t.class_id JOIN subjects s ON s.id = t.subject_id WHERE t.teacher_id = ? ORDER BY t.day_of_week, t.starts_at LIMIT 8', [teacherId]),
+  ]);
+  const attendanceTotal = Number(attendance[0][0]?.total || 0);
+  const attendancePresent = Number(attendance[0][0]?.present || 0);
+  res.json({ students: students[0], attendance: { total: attendanceTotal, present: attendancePresent, percent: attendanceTotal ? Math.round((attendancePresent / attendanceTotal) * 100) : 0 }, activeAssessments: Number(assessments[0][0]?.total || 0), notices: notices[0], timetable: timetable[0] });
 });
 
 app.get('/api/tests/:id/questions', requireAuth, async (req, res) => {
@@ -518,7 +622,8 @@ app.get('/api/tests/:id/questions', requireAuth, async (req, res) => {
   let allowed = ['admin', 'dos', 'teacher'].includes(req.user.role);
   if (req.user.role === 'student') { const studentId = await getStudentForUser(req.user); const [rows] = await pool.query('SELECT 1 FROM tests t JOIN student_classes sc ON sc.class_id = t.class_id WHERE t.id = ? AND sc.student_id = ? AND t.is_published = TRUE', [testId, studentId]); allowed = rows.length > 0; }
   if (!allowed) return res.status(403).json({ error: 'You cannot access this test.' });
-  const [rows] = await pool.query('SELECT id, question_order AS questionOrder, question_type AS questionType, prompt, options_json AS options, points FROM test_questions WHERE test_id = ? ORDER BY question_order', [testId]);
+  const order = req.user.role === 'student' ? 'RAND()' : 'question_order';
+  const [rows] = await pool.query(`SELECT id, question_order AS questionOrder, question_type AS questionType, prompt, options_json AS options, points FROM test_questions WHERE test_id = ? ORDER BY ${order}`, [testId]);
   res.json({ questions: rows.map((question) => ({ ...question, options: typeof question.options === 'string' ? JSON.parse(question.options) : question.options })) });
 });
 
@@ -549,7 +654,7 @@ app.post('/api/tests/:id/attempts', requireAuth, authorize('student'), async (re
   if (!studentId) return res.status(404).json({ error: 'Student profile not found.' });
   const [tests] = await pool.query('SELECT t.id, t.duration_minutes AS durationMinutes FROM tests t JOIN student_classes sc ON sc.class_id = t.class_id WHERE t.id = ? AND sc.student_id = ? AND t.is_published = TRUE LIMIT 1', [req.params.id, studentId]);
   if (!tests[0]) return res.status(403).json({ error: 'This test is not available to you.' });
-  const [existing] = await pool.query('SELECT id, started_at AS startedAt, submitted_at AS submittedAt, status FROM test_attempts WHERE test_id = ? AND student_id = ?', [req.params.id, studentId]);
+  const [existing] = await pool.query('SELECT id, started_at AS startedAt, submitted_at AS submittedAt, score, status FROM test_attempts WHERE test_id = ? AND student_id = ?', [req.params.id, studentId]);
   if (existing[0]) return res.json({ attempt: existing[0] });
   const [result] = await pool.query('INSERT INTO test_attempts (test_id, student_id, started_at) VALUES (?, ?, NOW())', [req.params.id, studentId]);
   res.status(201).json({ attempt: { id: result.insertId, startedAt: new Date(), durationMinutes: tests[0].durationMinutes } });
@@ -557,10 +662,10 @@ app.post('/api/tests/:id/attempts', requireAuth, authorize('student'), async (re
 
 app.post('/api/test-attempts/:id/submit', requireAuth, authorize('student'), async (req, res) => {
   const studentId = await getStudentForUser(req.user);
-  const [attempts] = await pool.query('SELECT a.id, a.test_id AS testId, a.started_at AS startedAt, a.status, t.duration_minutes AS durationMinutes FROM test_attempts a JOIN tests t ON t.id = a.test_id WHERE a.id = ? AND a.student_id = ? LIMIT 1', [req.params.id, studentId]);
+  const [attempts] = await pool.query('SELECT a.id, a.test_id AS testId, a.started_at AS startedAt, a.score, a.status, t.duration_minutes AS durationMinutes FROM test_attempts a JOIN tests t ON t.id = a.test_id WHERE a.id = ? AND a.student_id = ? LIMIT 1', [req.params.id, studentId]);
   const attempt = attempts[0];
   if (!attempt) return res.status(404).json({ error: 'Test attempt not found.' });
-  if (attempt.status !== 'in_progress') return res.status(409).json({ error: 'This test attempt is already closed.' });
+  if (attempt.status !== 'in_progress') return res.json({ score: attempt.score, status: attempt.status, message: 'This test attempt was already submitted.' });
   const expired = Date.now() > new Date(attempt.startedAt).getTime() + attempt.durationMinutes * 60 * 1000;
   const answers = req.body?.answers && typeof req.body.answers === 'object' ? req.body.answers : {};
   const [questions] = await pool.query('SELECT id, answer_json AS answer, points FROM test_questions WHERE test_id = ?', [attempt.testId]);
@@ -568,7 +673,23 @@ app.post('/api/test-attempts/:id/submit', requireAuth, authorize('student'), asy
   questions.forEach((question) => { const expected = typeof question.answer === 'string' ? JSON.parse(question.answer) : question.answer; const actual = answers[String(question.id)]; if (JSON.stringify(expected) === JSON.stringify(actual)) score += Number(question.points); });
   const status = expired ? 'expired' : 'submitted';
   await pool.query('UPDATE test_attempts SET submitted_at = NOW(), score = ?, status = ? WHERE id = ?', [score, status, attempt.id]);
-  res.json({ score, status, message: expired ? 'Time expired. Your answers were submitted automatically.' : 'Test submitted successfully.' });
+  const breakdown = questions.map((question) => {
+    const expected = typeof question.answer === 'string' ? JSON.parse(question.answer) : question.answer;
+    const actual = answers[String(question.id)] ?? null;
+    return { questionId: question.id, expected, actual, correct: JSON.stringify(expected) === JSON.stringify(actual), points: Number(question.points) };
+  });
+  const maxScore = questions.reduce((total, question) => total + Number(question.points), 0);
+  res.json({ score, maxScore, percentage: maxScore ? Math.round((score / maxScore) * 100) : 0, status, breakdown, message: expired ? 'Time expired. Your answers were submitted automatically.' : 'Test submitted successfully.' });
+});
+
+app.post('/api/test-attempts/:id/cheating', requireAuth, authorize('student'), async (req, res) => {
+  const studentId = await getStudentForUser(req.user);
+  const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 160) : 'Suspicious test activity';
+  const [[attempt]] = await pool.query('SELECT a.id, t.title, t.teacher_id AS teacherId FROM test_attempts a JOIN tests t ON t.id = a.test_id WHERE a.id = ? AND a.student_id = ? LIMIT 1', [req.params.id, studentId]);
+  if (!attempt) return res.status(404).json({ error: 'Test attempt not found.' });
+  const [announcement] = await pool.query(`INSERT INTO announcements (title, message, type, related_test_id, created_by) SELECT ?, ?, 'general', t.id, ? FROM tests t WHERE t.id = (SELECT test_id FROM test_attempts WHERE id = ?)`, [`Test alert: ${req.user.name || 'Student'}`, `${req.user.name || 'A student'} may be attempting to copy during test "${attempt.title}". Reason: ${reason}`, studentId, req.params.id]);
+  await pool.query('INSERT IGNORE INTO announcement_recipients (announcement_id, user_id) VALUES (?, ?)', [announcement.insertId, attempt.teacherId]);
+  res.json({ message: 'Teacher has been notified.' });
 });
 
 app.post('/api/grades', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => {
@@ -784,6 +905,9 @@ app.post('/api/homework', requireAuth, authorize('admin', 'dos', 'teacher'), asy
 app.get('/api/notifications', requireAuth, async (req, res) => { const [rows] = await pool.query('SELECT id, channel, title, message, sent_at AS sentAt, read_at AS readAt, created_at AS createdAt FROM notifications WHERE recipient_id = ? ORDER BY created_at DESC LIMIT 100', [req.user.sub]); res.json({ notifications: rows }); });
 app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => { const [result] = await pool.query('UPDATE notifications SET read_at = NOW() WHERE id = ? AND recipient_id = ?', [req.params.id, req.user.sub]); if (!result.affectedRows) return res.status(404).json({ error: 'Notification not found.' }); res.json({ message: 'Notification marked as read.' }); });
 app.post('/api/notifications', requireAuth, authorize('admin', 'dos'), async (req, res) => { const recipientId = Number(req.body?.recipientId); const error = bodyErrors(req.body, [['title', 'Title', 180], ['message', 'Message', 5000]]); const channels = ['in_app', 'email', 'sms', 'whatsapp']; if (error || !Number.isInteger(recipientId) || !channels.includes(req.body.channel)) return res.status(400).json({ error: error || 'Recipient, channel, title and message are required.' }); const [result] = await pool.query('INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, ?, ?, ?, NOW())', [recipientId, req.body.channel, req.body.title.trim(), req.body.message.trim()]); res.status(201).json({ id: result.insertId, message: 'Notification queued.' }); });
+
+require('./test-builder-endpoints')({ app, pool, requireAuth, authorize, bodyErrors, positiveNumber });
+require('./announcements-endpoints')({ app, pool, requireAuth });
 
 app.post('/api/behavior', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => { const studentId = Number(req.body?.studentId); const categories = ['excellent', 'good', 'needs_improvement', 'discipline']; const error = bodyErrors(req.body, [['note', 'Behavior note', 3000]]); if (error || !Number.isInteger(studentId) || !categories.includes(req.body.category)) return res.status(400).json({ error: error || 'Student, category and note are required.' }); if (req.user.role === 'teacher' && !(await teacherCanAccessStudent(req.user.sub, studentId))) return res.status(403).json({ error: 'This student is outside your assignment.' }); const [result] = await pool.query('INSERT INTO behavior_records (student_id, category, note, recorded_by) VALUES (?, ?, ?, ?)', [studentId, req.body.category, req.body.note.trim(), req.user.sub]); res.status(201).json({ id: result.insertId, message: 'Behavior record saved.' }); });
 app.get('/api/behavior', requireAuth, async (req, res) => { const studentId = Number(req.query.studentId); if (!Number.isInteger(studentId)) return res.status(400).json({ error: 'studentId is required.' }); if (req.user.role === 'teacher' && !(await teacherCanAccessStudent(req.user.sub, studentId))) return res.status(403).json({ error: 'This student is outside your assignment.' }); if (req.user.role === 'student' && (await getStudentForUser(req.user)) !== studentId) return res.status(403).json({ error: 'You can only view your own behavior records.' }); if (req.user.role === 'parent') { const [linked] = await pool.query('SELECT 1 FROM parent_students WHERE parent_id = ? AND student_id = ?', [req.user.sub, studentId]); if (!linked.length) return res.status(403).json({ error: 'This student is not linked to your account.' }); } const [rows] = await pool.query('SELECT id, category, note, created_at AS createdAt FROM behavior_records WHERE student_id = ? ORDER BY created_at DESC', [studentId]); res.json({ records: rows }); });

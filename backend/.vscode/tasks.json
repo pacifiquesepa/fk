@@ -1,0 +1,26 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start FKAMS backend",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"start"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Seed FKAMS admin",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"seed:admin"
+			],
+			"problemMatcher": []
+		}
+	]
+}

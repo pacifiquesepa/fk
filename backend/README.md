@@ -22,6 +22,9 @@ After the base schema, apply later migrations in order:
 mysql -u root -p fkams < migrations/002_admission_profiles.sql
 mysql -u root -p fkams < migrations/003_publications.sql
 mysql -u root -p fkams < migrations/006_password_reset.sql
+mysql -u root -p fkams < migrations/007_extend_tests_schema.sql
+mysql -u root -p fkams < migrations/008_class_subjects.sql
+mysql -u root -p fkams < migrations/009_complete_test_questions.sql
 ```
 
 3. Copy `.env.example` to `.env` and set a long random `JWT_SECRET` plus the MySQL credentials.

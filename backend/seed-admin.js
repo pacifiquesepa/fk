@@ -12,11 +12,11 @@ const config = {
 };
 
 async function seedAdmin() {
-  const username = process.env.ADMIN_USERNAME || 'admin123';
+  const username = process.env.ADMIN_USERNAME || 'pacifiquesepa';
   const password = process.env.ADMIN_PASSWORD || 'Admin12345$';
   const fullName = process.env.ADMIN_NAME || 'System Administrator';
-  const email = process.env.ADMIN_EMAIL || 'admin@fkams.local';
-  const phone = process.env.ADMIN_PHONE || null;
+  const email = process.env.ADMIN_EMAIL || 'pacifiquesepa@gmail.com';
+  const phone = process.env.ADMIN_PHONE || "0793360920";
   const passwordHash = await bcrypt.hash(password, 12);
   const connection = await mysql.createConnection(config);
 
