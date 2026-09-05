@@ -1,0 +1,182 @@
+{
+    "Mathematics": {
+        "Algebra": {
+            "learning_outcomes": [
+                "Solve linear equations in one variable",
+                "Expand and factorise algebraic expressions",
+                "Interpret equations in real contexts"
+            ],
+            "levels": {
+                "easy": [
+                    {
+                        "prompt": "Solve 3x + 5 = 20.",
+                        "options": [
+                            "3",
+                            "5",
+                            "7",
+                            "25"
+                        ],
+                        "answer": 1,
+                        "points": 2
+                    },
+                    {
+                        "prompt": "Simplify 2a + 3a.",
+                        "options": [
+                            "5",
+                            "5a",
+                            "6a",
+                            "a^5"
+                        ],
+                        "answer": 1,
+                        "points": 2
+                    }
+                ],
+                "medium": [
+                    {
+                        "prompt": "Solve 4(2x - 1) = 3x + 16.",
+                        "options": [
+                            "4",
+                            "20/5",
+                            "4.0",
+                            "12"
+                        ],
+                        "answer": 0,
+                        "points": 3
+                    },
+                    {
+                        "prompt": "Factorise x^2 + 7x + 12.",
+                        "options": [
+                            "(x+3)(x+4)",
+                            "(x+2)(x+6)",
+                            "(x-3)(x-4)",
+                            "(x+1)(x+12)"
+                        ],
+                        "answer": 0,
+                        "points": 3
+                    }
+                ],
+                "strong": [
+                    {
+                        "prompt": "A rectangle has area x^2 + 5x + 6 square units. Its width is x + 2. Find its length and explain the restriction on x.",
+                        "options": [
+                            "x+3, x > -2",
+                            "x+6, x > 0",
+                            "x+2, x > -3",
+                            "x+5, x > 2"
+                        ],
+                        "answer": 0,
+                        "points": 5
+                    },
+                    {
+                        "prompt": "Solve 1/(x-1) + 2/(x+1) = 3/((x-1)(x+1)) and reject any value that makes a denominator zero.",
+                        "options": [
+                            "x=0",
+                            "x=1",
+                            "x=-1",
+                            "x=0, x=1"
+                        ],
+                        "answer": 0,
+                        "points": 5
+                    }
+                ]
+            }
+        },
+        "Geometry": {
+            "learning_outcomes": [
+                "Use angle properties",
+                "Apply Pythagoras theorem",
+                "Calculate area and volume"
+            ],
+            "levels": {
+                "easy": [
+                    {
+                        "prompt": "What is the sum of angles in a triangle?",
+                        "options": [
+                            "90°",
+                            "180°",
+                            "270°",
+                            "360°"
+                        ],
+                        "answer": 1,
+                        "points": 2
+                    }
+                ],
+                "medium": [
+                    {
+                        "prompt": "A right triangle has legs 6 cm and 8 cm. Find the hypotenuse.",
+                        "options": [
+                            "10 cm",
+                            "12 cm",
+                            "14 cm",
+                            "48 cm"
+                        ],
+                        "answer": 0,
+                        "points": 3
+                    }
+                ],
+                "strong": [
+                    {
+                        "prompt": "A circle has circumference 44 cm using pi=22/7. Find its area.",
+                        "options": [
+                            "154 cm²",
+                            "44 cm²",
+                            "308 cm²",
+                            "616 cm²"
+                        ],
+                        "answer": 0,
+                        "points": 5
+                    }
+                ]
+            }
+        }
+    },
+    "Biology": {
+        "Cell structure": {
+            "learning_outcomes": [
+                "Identify cell organelles",
+                "Explain specialised cell functions"
+            ],
+            "levels": {
+                "easy": [
+                    {
+                        "prompt": "Which organelle controls activities of a eukaryotic cell?",
+                        "options": [
+                            "Nucleus",
+                            "Ribosome",
+                            "Vacuole",
+                            "Cell wall"
+                        ],
+                        "answer": 0,
+                        "points": 2
+                    }
+                ],
+                "medium": [
+                    {
+                        "prompt": "Why do palisade cells contain many chloroplasts?",
+                        "options": [
+                            "To maximise light absorption",
+                            "To store water",
+                            "To digest proteins",
+                            "To control cell division"
+                        ],
+                        "answer": 0,
+                        "points": 3
+                    }
+                ],
+                "strong": [
+                    {
+                        "prompt": "Explain how a leaf is adapted for efficient photosynthesis, linking structure to function.",
+                        "options": [
+                            "Large surface, chloroplasts, veins and stomata",
+                            "Only a thick waxy cuticle",
+                            "Only root hairs",
+                            "No gas exchange"
+                        ],
+                        "answer": 0,
+                        "points": 5
+                    }
+                ]
+            }
+        }
+    }
+}

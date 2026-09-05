@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS transport_routes (
+  id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(100) NOT NULL,
+  bus_number VARCHAR(40) NOT NULL UNIQUE,
+  driver_name VARCHAR(120) NOT NULL,
+  driver_phone VARCHAR(30) NOT NULL,
+  capacity SMALLINT UNSIGNED NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS student_transport (
+  student_id INT UNSIGNED PRIMARY KEY,
+  route_id INT UNSIGNED NOT NULL,
+  pickup_point VARCHAR(160) NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+  FOREIGN KEY (route_id) REFERENCES transport_routes(id) ON DELETE CASCADE
+);

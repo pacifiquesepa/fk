@@ -304,8 +304,10 @@ export function MatchingEditor({ formData, setFormData, onCancel, onSave, disabl
     const [newRight, setNewRight] = useState('');
     const [error, setError] = useState('');
 
-    const pairs = Array.isArray(formData.options) && Array.isArray(formData.answer)
-        ? formData.options.map((left, idx) => ({ left, right: formData.answer[idx] || '' }))
+    const leftItems = formData.options?.leftItems || (Array.isArray(formData.options) ? formData.options : []);
+    const rightItems = formData.options?.rightItems || (formData.answer || []);
+    const pairs = Array.isArray(leftItems) && Array.isArray(formData.answer)
+        ? leftItems.map((left, idx) => ({ left, right: formData.answer[idx] || '' }))
         : [];
 
     const handleAddPair = () => {
@@ -314,14 +316,12 @@ export function MatchingEditor({ formData, setFormData, onCancel, onSave, disabl
             return;
         }
 
-        const newOptions = formData.options.map(o => o) || [];
         const newAnswers = (formData.answer || []).map(a => a);
-        newOptions.push(newLeft.trim());
         newAnswers.push(newRight.trim());
 
         setFormData({
             ...formData,
-            options: newOptions,
+            options: { leftItems: [...leftItems, newLeft.trim()], rightItems: [...rightItems, newRight.trim()] },
             answer: newAnswers
         });
 
@@ -333,7 +333,7 @@ export function MatchingEditor({ formData, setFormData, onCancel, onSave, disabl
     const handleRemovePair = (idx) => {
         setFormData({
             ...formData,
-            options: formData.options.filter((_, i) => i !== idx),
+            options: { leftItems: leftItems.filter((_, i) => i !== idx), rightItems: rightItems.filter((_, i) => i !== idx) },
             answer: formData.answer.filter((_, i) => i !== idx)
         });
     };
@@ -405,7 +405,7 @@ export function MatchingEditor({ formData, setFormData, onCancel, onSave, disabl
                                     disabled={disabled}
                                 >
                                     <option value="">Select matching answer</option>
-                                    {formData.answer.filter(Boolean).map((answer) => <option key={answer} value={answer}>{answer}</option>)}
+                                    {rightItems.filter(Boolean).map((answer) => <option key={answer} value={answer}>{answer}</option>)}
                                     {pair.right && !formData.answer.includes(pair.right) && <option value={pair.right}>{pair.right}</option>}
                                 </select>
                                 <button
@@ -654,7 +654,7 @@ export function RearrangeEditor({ formData, setFormData, onCancel, onSave, disab
     const [newItem, setNewItem] = useState('');
     const [error, setError] = useState('');
 
-    const items = Array.isArray(formData.answer) ? formData.answer : [];
+    const items = Array.isArray(formData.options) && formData.options.length ? formData.options : (Array.isArray(formData.answer) ? formData.answer : []);
 
     const handleAddItem = () => {
         if (!newItem.trim()) {
@@ -663,6 +663,7 @@ export function RearrangeEditor({ formData, setFormData, onCancel, onSave, disab
         }
         setFormData({
             ...formData,
+            options: [...items, newItem.trim()],
             answer: [...(formData.answer || []), newItem.trim()]
         });
         setNewItem('');
@@ -672,6 +673,7 @@ export function RearrangeEditor({ formData, setFormData, onCancel, onSave, disab
     const handleRemoveItem = (idx) => {
         setFormData({
             ...formData,
+            options: items.filter((_, i) => i !== idx),
             answer: (formData.answer || []).filter((_, i) => i !== idx)
         });
     };

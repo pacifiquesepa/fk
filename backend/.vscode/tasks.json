@@ -21,6 +21,27 @@
 				"seed:admin"
 			],
 			"problemMatcher": []
+		},
+		{
+			"label": "FKAMS backend syntax check",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Backend syntax check",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"server.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
 		}
 	]
 }

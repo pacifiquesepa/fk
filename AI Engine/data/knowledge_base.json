@@ -1,0 +1,11 @@
+[
+    {
+        "id": "algebra-approved-example",
+        "subject": "Mathematics",
+        "topic": "Algebra",
+        "title": "Verified algebra learning outcome",
+        "text": "Students should solve linear and quadratic equations, show working, reject invalid denominator values, and explain the meaning of solutions in context.",
+        "source_type": "curriculum",
+        "verified": true
+    }
+]

@@ -13,24 +13,24 @@ import {
 } from 'lucide-react';
 import api from '../lib/api';
 import {
-    MultipleChoiceEditor,
-    FillInGapEditor,
-    MatchingEditor,
-    DragDropEditor,
-    RearrangeEditor
-} from './QuestionEditors';
+    default as ChooseQuestion
+} from '../pages/typeQuestion/ChooseQuestion';
+import FillInGapQuestion from '../pages/typeQuestion/FillInGapQuestion';
+import MatchQuestion from '../pages/typeQuestion/MatchQuestion';
+import DropAndDragQuestion from '../pages/typeQuestion/DropAndDragQuestion';
+import ArrangeQuestion from '../pages/typeQuestion/ArrangeQuestion';
 
 /**
  * UploadTestSidebar Component
  * Main interface for teachers to create, edit, and manage tests
  * Serves as the entry point for the test builder workflow
  */
-export default function UploadTestSidebar({ t, onClose, classId, subjectId }) {
+export default function UploadTestSidebar({ t, onClose, classId, subjectId, fullPage = false }) {
     const [drafts, setDrafts] = useState([]);
     const [selectedTest, setSelectedTest] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [showNewTestForm, setShowNewTestForm] = useState(false);
+    const [showNewTestForm, setShowNewTestForm] = useState(fullPage);
     const [isExpanded, setIsExpanded] = useState(true);
     const [assignments, setAssignments] = useState([]);
     const [selectedClassId, setSelectedClassId] = useState(classId || '');
@@ -38,7 +38,8 @@ export default function UploadTestSidebar({ t, onClose, classId, subjectId }) {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        durationMinutes: 60
+        durationMinutes: 60,
+        questionPlan: { choice: 0, fill: 0, match: 0, rearrange: 0 }
     });
 
     useEffect(() => {
@@ -84,14 +85,15 @@ export default function UploadTestSidebar({ t, onClose, classId, subjectId }) {
                 title: formData.title.trim(),
                 description: formData.description.trim() || null,
                 durationMinutes: Number(formData.durationMinutes),
+                questionPlan: formData.questionPlan,
                 classId: Number(selectedClassId),
                 subjectId: Number(selectedSubjectId)
             });
 
-            setSelectedTest(data);
+            setSelectedTest({ ...data, questionPlan: formData.questionPlan });
             setDrafts([data, ...drafts]);
             setShowNewTestForm(false);
-            setFormData({ title: '', description: '', durationMinutes: 60 });
+            setFormData({ title: '', description: '', durationMinutes: 60, questionPlan: { choice: 0, fill: 0, match: 0, rearrange: 0 } });
             setError('');
         } catch (err) {
             setError(err.response?.data?.error || 'Unable to create test.');
@@ -121,6 +123,7 @@ export default function UploadTestSidebar({ t, onClose, classId, subjectId }) {
         return (
             <TestBuilderWizard
                 test={selectedTest}
+                questionPlan={selectedTest.questionPlan}
                 onBack={() => {
                     setSelectedTest(null);
                     loadDrafts();
@@ -129,6 +132,7 @@ export default function UploadTestSidebar({ t, onClose, classId, subjectId }) {
                     setDrafts(drafts.map(d => d.id === updated.id ? updated : d));
                 }}
                 isExpanded={isExpanded}
+                fullPage={fullPage}
                 onToggleSize={() => setIsExpanded((expanded) => !expanded)}
                 t={t}
             />
@@ -136,12 +140,12 @@ export default function UploadTestSidebar({ t, onClose, classId, subjectId }) {
     }
 
     return (
-        <div className={`flex flex-col bg-white transition-all duration-200 ${isExpanded ? 'h-full w-full sm:w-[min(42rem,calc(100vw-2rem))]' : 'h-auto w-[min(22rem,calc(100vw-2rem))]'}`}>
+        <div className={`flex flex-col bg-white transition-all duration-200 ${fullPage ? 'min-h-[70vh] w-full rounded-2xl border border-slate-200 shadow-sm' : isExpanded ? 'h-full w-full sm:w-[min(42rem,calc(100vw-2rem))]' : 'h-auto w-[min(22rem,calc(100vw-2rem))]'}`}>
             {/* Header */}
             <div className="flex items-center justify-between gap-3 border-b border-slate-200 p-5">
                 <div className="flex items-center gap-2">
                     <FileText size={20} className="text-cyan-700" />
-                    <h2 className="font-display text-base font-bold text-slate-800">Upload Test</h2>
+                    <h2 className="font-display text-base font-bold text-slate-800">Upload test</h2>
                 </div>
                 <div className="flex items-center gap-1">
                     <button
@@ -226,6 +230,16 @@ export default function UploadTestSidebar({ t, onClose, classId, subjectId }) {
                                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-cyan-600 outline-none"
                                 disabled={loading}
                             />
+                        </div>
+
+                        <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-3">
+                            <p className="text-xs font-bold text-slate-600">QUESTION TYPES</p>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                {[['choice', 'Multiple choice'], ['fill', 'Fill in gap'], ['match', 'Match'], ['rearrange', 'Re-arrange']].map(([type, label]) => <label key={type} className="text-xs text-slate-600">{label}
+                                    <input type="number" min="0" max="200" value={formData.questionPlan[type]} onChange={(e) => setFormData({ ...formData, questionPlan: { ...formData.questionPlan, [type]: Number(e.target.value) } })} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" disabled={loading} />
+                                </label>)}
+                            </div>
+                            <p className="text-xs font-bold text-cyan-700">Total questions: {Object.values(formData.questionPlan).reduce((total, count) => total + Number(count || 0), 0)}</p>
                         </div>
 
                         <div className="flex gap-2">
@@ -313,7 +327,7 @@ export default function UploadTestSidebar({ t, onClose, classId, subjectId }) {
  * TestBuilderWizard Component
  * Multi-step wizard for building tests with different question types
  */
-function TestBuilderWizard({ test, onBack, onSave, isExpanded, onToggleSize, t }) {
+function TestBuilderWizard({ test, questionPlan, onBack, onSave, isExpanded, onToggleSize, fullPage, t }) {
     const [currentTest, setCurrentTest] = useState(test);
     const [questions, setQuestions] = useState([]);
     const [activeStep, setActiveStep] = useState('overview'); // overview, build, review, publish
@@ -364,6 +378,35 @@ function TestBuilderWizard({ test, onBack, onSave, isExpanded, onToggleSize, t }
             setError(err.response?.data?.error || 'Unable to delete question.');
         }
     };
+    const handleUpdateQuestion = async (questionId, questionData) => {
+        setLoading(true);
+        try {
+            const { data } = await api.put(`/teacher/tests/${test.id}/questions/${questionId}`, questionData);
+            setQuestions(questions.map((question) => question.id === questionId ? { ...question, ...questionData, ...data } : question));
+            setSelectedQuestion(null);
+            setError('');
+        } catch (err) {
+            setError(err.response?.data?.error || 'Unable to update question.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateTest = async (updates) => {
+        setLoading(true);
+        try {
+            await api.put(`/teacher/tests/${test.id}`, updates);
+            const updated = { ...currentTest, ...updates };
+            setCurrentTest(updated);
+            onSave(updated);
+            setError('');
+        } catch (err) {
+            setError(err.response?.data?.error || 'Unable to update test settings.');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handlePublish = async () => {
         if (questions.length === 0) {
@@ -385,16 +428,18 @@ function TestBuilderWizard({ test, onBack, onSave, isExpanded, onToggleSize, t }
 
     const stepContent = {
         overview: (
-            <TestOverviewStep test={currentTest} questionCount={questions.length} onNext={() => setActiveStep('build')} />
+            <TestOverviewStep test={currentTest} questionCount={questions.length} questionPlan={questionPlan} onNext={() => setActiveStep('build')} />
         ),
         build: (
             <TestBuildStep
                 test={currentTest}
                 questions={questions}
+                onUpdateTest={handleUpdateTest}
                 selectedQuestion={selectedQuestion}
                 onSelectQuestion={setSelectedQuestion}
                 onAddQuestion={handleAddQuestion}
                 onDeleteQuestion={handleDeleteQuestion}
+                onUpdateQuestion={handleUpdateQuestion}
                 loading={loading}
             />
         ),
@@ -402,6 +447,7 @@ function TestBuilderWizard({ test, onBack, onSave, isExpanded, onToggleSize, t }
             <TestReviewStep
                 test={currentTest}
                 questions={questions}
+                onUpdateTest={handleUpdateTest}
                 onPublish={handlePublish}
                 loading={loading}
             />
@@ -413,18 +459,26 @@ function TestBuilderWizard({ test, onBack, onSave, isExpanded, onToggleSize, t }
                 <p className="text-sm text-slate-500 mt-2">
                     Students have been notified and can now take the test.
                 </p>
-                <button
-                    onClick={onBack}
-                    className="mt-5 px-4 py-2 text-sm font-bold text-white bg-cyan-700 rounded-lg hover:bg-cyan-800"
-                >
-                    Back to Dashboard
-                </button>
+                <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                    <button
+                        onClick={() => setActiveStep('build')}
+                        className="px-4 py-2 text-sm font-bold text-white bg-cyan-700 rounded-lg hover:bg-cyan-800"
+                    >
+                        Edit test questions
+                    </button>
+                    <button
+                        onClick={onBack}
+                        className="px-4 py-2 text-sm font-bold text-white bg-slate-700 rounded-lg hover:bg-slate-800"
+                    >
+                        Back to Dashboard
+                    </button>
+                </div>
             </div>
         )
     };
 
     return (
-        <div className={`flex flex-col bg-white transition-all duration-200 ${isExpanded ? 'h-full w-full sm:w-[min(42rem,calc(100vw-2rem))]' : 'h-auto w-[min(22rem,calc(100vw-2rem))]'}`}>
+        <div className={`flex flex-col bg-white transition-all duration-200 ${fullPage ? 'min-h-[70vh] w-full' : isExpanded ? 'h-full w-full sm:w-[min(42rem,calc(100vw-2rem))]' : 'h-auto w-[min(22rem,calc(100vw-2rem))]'}`}>
             {/* Header with Navigation */}
             <div className="border-b border-slate-200 p-5 space-y-3">
                 <div className="flex items-center gap-2">
@@ -533,7 +587,8 @@ function TestBuilderWizard({ test, onBack, onSave, isExpanded, onToggleSize, t }
  * TestOverviewStep Component
  * Shows test configuration overview
  */
-function TestOverviewStep({ test, questionCount, onNext }) {
+function TestOverviewStep({ test, questionCount, questionPlan, onNext }) {
+    const plannedCount = questionPlan ? Object.values(questionPlan).reduce((total, count) => total + Number(count || 0), 0) : 0;
     return (
         <div className="space-y-6">
             <div className="bg-slate-50 rounded-lg p-4 space-y-3">
@@ -561,6 +616,10 @@ function TestOverviewStep({ test, questionCount, onNext }) {
                 </p>
             </div>
 
+            {plannedCount > 0 && <div className="grid grid-cols-2 gap-2 text-xs">
+                {Object.entries(questionPlan).map(([type, count]) => <div key={type} className="rounded-lg bg-cyan-50 p-3 text-slate-700"><span className="font-bold capitalize">{type}</span><br />{Number(count || 0)} planned</div>)}
+            </div>}
+
             <button
                 onClick={onNext}
                 className="w-full px-4 py-3 text-sm font-bold text-white bg-cyan-700 rounded-lg hover:bg-cyan-800"
@@ -575,7 +634,7 @@ function TestOverviewStep({ test, questionCount, onNext }) {
  * TestBuildStep Component
  * Main interface for adding and managing questions
  */
-function TestBuildStep({ test, questions, selectedQuestion, onSelectQuestion, onAddQuestion, onDeleteQuestion, loading }) {
+function TestBuildStep({ test, questions, selectedQuestion, onSelectQuestion, onAddQuestion, onUpdateQuestion, onDeleteQuestion, loading }) {
     return (
         <div className="space-y-4">
             {!selectedQuestion ? (
@@ -591,26 +650,31 @@ function TestBuildStep({ test, questions, selectedQuestion, onSelectQuestion, on
                             {questions.map((q, idx) => (
                                 <div
                                     key={q.id}
-                                    className="p-3 border border-slate-200 rounded-lg hover:border-cyan-400 hover:bg-slate-50 transition cursor-pointer"
-                                    onClick={() => onSelectQuestion(q)}
+                                    className="p-3 border border-slate-200 rounded-lg hover:border-cyan-400 hover:bg-slate-50 transition"
                                 >
                                     <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1">
+                                        <div className="flex-1 cursor-pointer" onClick={() => onSelectQuestion(q)}>
                                             <p className="text-xs font-bold text-slate-600">Question {idx + 1}</p>
                                             <p className="text-sm text-slate-900 mt-1 line-clamp-2">{q.prompt}</p>
                                             <p className="text-xs text-slate-500 mt-1">
                                                 {q.questionType.charAt(0).toUpperCase() + q.questionType.slice(1)} • {q.points} pts
                                             </p>
                                         </div>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onDeleteQuestion(q.id);
-                                            }}
-                                            className="p-1 text-rose-600 hover:bg-rose-50 rounded"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => onSelectQuestion(q)}
+                                                className="px-2 py-1 text-[11px] font-bold text-cyan-700 bg-cyan-50 rounded hover:bg-cyan-100"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => onDeleteQuestion(q.id)}
+                                                className="p-1 text-rose-600 hover:bg-rose-50 rounded"
+                                                title="Delete question"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -626,10 +690,8 @@ function TestBuildStep({ test, questions, selectedQuestion, onSelectQuestion, on
                 <QuestionEditor
                     question={selectedQuestion}
                     onBack={() => onSelectQuestion(null)}
-                    onSave={(data) => {
-                        // Handle update
-                        onSelectQuestion(null);
-                    }}
+                    onSave={(data) => onUpdateQuestion(selectedQuestion.id, data)}
+                    disabled={loading}
                 />
             ) : (
                 <QuestionCreator
@@ -649,7 +711,20 @@ function TestBuildStep({ test, questions, selectedQuestion, onSelectQuestion, on
  * TestReviewStep Component
  * Final review before publishing
  */
-function TestReviewStep({ test, questions, onPublish, loading }) {
+function TestReviewStep({ test, questions, onUpdateTest, onPublish, loading }) {
+    const [settings, setSettings] = useState({
+        durationMinutes: test.durationMinutes,
+        startsAt: test.startsAt ? String(test.startsAt).slice(0, 16) : '',
+        endsAt: test.endsAt ? String(test.endsAt).slice(0, 16) : ''
+    });
+
+    const saveSettings = async () => {
+        await onUpdateTest({
+            durationMinutes: Number(settings.durationMinutes),
+            startsAt: settings.startsAt || null,
+            endsAt: settings.endsAt || null
+        });
+    };
     const totalPoints = questions.reduce((sum, q) => sum + Number(q.points), 0);
 
     return (
@@ -687,6 +762,22 @@ function TestReviewStep({ test, questions, onPublish, loading }) {
                         </p>
                     </div>
                 ))}
+            </div>
+
+            <div className="space-y-3 rounded-lg border border-slate-200 p-4">
+                <p className="text-xs font-bold text-slate-600">TEST SETTINGS</p>
+                <label className="block text-xs text-slate-600">Duration (minutes)
+                    <input type="number" min="1" max="480" value={settings.durationMinutes} onChange={(event) => setSettings({ ...settings, durationMinutes: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="block text-xs text-slate-600">Start date and time
+                        <input type="datetime-local" value={settings.startsAt} onChange={(event) => setSettings({ ...settings, startsAt: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                    </label>
+                    <label className="block text-xs text-slate-600">End date and time
+                        <input type="datetime-local" value={settings.endsAt} onChange={(event) => setSettings({ ...settings, endsAt: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                    </label>
+                </div>
+                <button type="button" onClick={saveSettings} disabled={loading} className="rounded-lg border border-cyan-200 px-3 py-2 text-xs font-bold text-cyan-700 hover:bg-cyan-50 disabled:opacity-50">Save settings</button>
             </div>
 
             <button
@@ -778,11 +869,11 @@ function QuestionCreator({ questionType, onCancel, onSave, disabled }) {
     });
 
     const componentMap = {
-        choice: MultipleChoiceEditor,
-        fill: FillInGapEditor,
-        match: MatchingEditor,
-        drag: DragDropEditor,
-        rearrange: RearrangeEditor
+        choice: ChooseQuestion,
+        fill: FillInGapQuestion,
+        match: MatchQuestion,
+        drag: DropAndDragQuestion,
+        rearrange: ArrangeQuestion
     };
 
     const EditorComponent = componentMap[questionType];
@@ -809,21 +900,14 @@ function QuestionCreator({ questionType, onCancel, onSave, disabled }) {
 
 /**
  * QuestionEditor Component
- * Edit existing question (placeholder)
+ * Edit an existing question with the same editors used for creation.
  */
-function QuestionEditor({ question, onBack, onSave }) {
-    return (
-        <div className="space-y-4">
-            <button
-                onClick={onBack}
-                className="flex items-center gap-2 text-sm font-bold text-cyan-700 hover:text-cyan-800"
-            >
-                <ArrowLeft size={16} />
-                Back to Questions
-            </button>
-            <p className="text-sm text-slate-600">Edit question functionality coming soon</p>
-        </div>
-    );
+function QuestionEditor({ question, onBack, onSave, disabled }) {
+    const [formData, setFormData] = useState({ ...question, options: question.options || [], answer: question.answer || [] });
+    const componentMap = { choice: ChooseQuestion, fill: FillInGapQuestion, match: MatchQuestion, drag: DropAndDragQuestion, rearrange: ArrangeQuestion };
+    const EditorComponent = componentMap[question.questionType];
+    if (!EditorComponent) return <p className="text-sm text-slate-600">Question type not recognized.</p>;
+    return <EditorComponent formData={formData} setFormData={setFormData} onCancel={onBack} onSave={onSave} disabled={disabled} />;
 }
 
 // Placeholder question type editors - to be expanded

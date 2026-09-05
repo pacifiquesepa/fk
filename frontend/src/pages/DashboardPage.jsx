@@ -1,12 +1,21 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, ArrowRight, BookOpen, Bus, CheckCircle2, CircleDollarSign, ClipboardList, FileText, GraduationCap, Library, Package, Plus, QrCode, RefreshCw, ShieldAlert, UserCheck, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, BookOpen, Bus, Calendar, CheckCircle2, CircleDollarSign, ClipboardList, FileText, GraduationCap, Library, Package, Plus, QrCode, RefreshCw, ShieldAlert, UserCheck, Users, X } from 'lucide-react';
 import api from '../lib/api';
 
 const fallback = { students: 0, teachers: 0, classes: 0, users: 0, pendingAdmissions: 0, feesCollected: 0, outstandingFees: 0, feedingToday: 0, transportStudents: 0, documents: 0, activeLoans: 0, attendancePercent: 0, attendanceByClass: [], recentActivity: [], alerts: [] };
 const money = (value) => `${(Number(value || 0) / 1000000).toFixed(2)}M RWF`;
 const dateLabel = (value) => value ? new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '-';
+const displayValue = (value) => {
+  if (value === null || value === undefined) return '-';
+  if (typeof value === 'object') {
+    if ('data' in value) return displayValue(value.data);
+    return Object.values(value).map(displayValue).join(' · ');
+  }
+  return String(value);
+};
 
 const controls = [
+  ['Academic Years', Calendar, 'Manage academic years, terms and student promotions.', 'academic-years', 'emerald', ['Create year', 'View terms']],
   ['Student Management', Users, 'Add, edit, transfer and review student profiles.', 'students', 'blue', ['Add new', 'View records']],
   ['User Roles & Permissions', ShieldAlert, 'Manage system access and role privileges.', 'users', 'orange', ['Create user', 'Review access']],
   ['Teacher Management', GraduationCap, 'Assignments, contracts, attendance and payroll.', 'teachers', 'violet', ['Assign classes', 'View profiles']],
@@ -32,7 +41,7 @@ export default function DashboardPage({ t, user, onNavigate }) {
 
 function Metric({ icon: Icon, label, value, note, tone }) { const colors = { blue: 'bg-blue-50 text-blue-700', orange: 'bg-orange-50 text-orange-700', violet: 'bg-violet-50 text-violet-700', green: 'bg-emerald-50 text-emerald-700', rose: 'bg-rose-50 text-rose-700' }; return <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex items-start justify-between"><span className={`grid h-9 w-9 place-items-center rounded-xl ${colors[tone]}`}><Icon size={18} /></span><span className="text-[10px] text-slate-300">Today</span></div><p className="mt-4 text-[10px] font-semibold text-slate-500">{label}</p><strong className="mt-1 block font-display text-2xl font-bold text-slate-800">{value}</strong><span className="mt-1 block text-[9px] text-emerald-600">✓ {note}</span></article>; }
 function ControlCard({ title, icon: Icon, description, tone, actions, onClick }) { const colors = { blue: 'bg-blue-50 text-blue-700', orange: 'bg-orange-50 text-orange-700', violet: 'bg-violet-50 text-violet-700', green: 'bg-emerald-50 text-emerald-700', rose: 'bg-rose-50 text-rose-700', amber: 'bg-amber-50 text-amber-700' }; return <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><span className={`grid h-9 w-9 place-items-center rounded-xl ${colors[tone]}`}><Icon size={18} /></span><h3 className="mt-4 text-xs font-bold text-slate-800">{title}</h3><p className="mt-1 min-h-8 text-[10px] leading-4 text-slate-400">{description}</p><div className="mt-4 flex flex-wrap gap-2">{actions.map((action) => <button key={action} onClick={onClick} className={`rounded-md px-2.5 py-1.5 text-[9px] font-bold ${colors[tone]} hover:opacity-80`}>{action}</button>)}</div></article>; }
-function AlertRow({ type, title, action, quantity, onClick }) { const Icon = type === 'inventory' ? Package : type === 'library' ? Library : type === 'staff' ? UserCheck : CircleDollarSign; return <button onClick={onClick} className="flex w-full items-center gap-3 rounded-xl border border-slate-100 p-3 text-left transition hover:border-cyan-200 hover:bg-slate-50"><span className="grid h-8 w-8 place-items-center rounded-lg bg-rose-50 text-rose-600"><Icon size={15} /></span><span className="min-w-0 flex-1"><b className="block truncate text-[10px] text-slate-700">{title}</b><span className="block text-[9px] text-slate-400">{action}</span></span><strong className="rounded-full bg-rose-50 px-2 py-1 text-[9px] text-rose-700">{quantity}</strong></button>; }
+function AlertRow({ type, title, action, quantity, onClick }) { const safeType = displayValue(type); const Icon = safeType === 'inventory' ? Package : safeType === 'library' ? Library : safeType === 'staff' ? UserCheck : CircleDollarSign; return <button onClick={onClick} className="flex w-full items-center gap-3 rounded-xl border border-slate-100 p-3 text-left transition hover:border-cyan-200 hover:bg-slate-50"><span className="grid h-8 w-8 place-items-center rounded-lg bg-rose-50 text-rose-600"><Icon size={15} /></span><span className="min-w-0 flex-1"><b className="block truncate text-[10px] text-slate-700">{displayValue(title)}</b><span className="block text-[9px] text-slate-400">{displayValue(action)}</span></span><strong className="rounded-full bg-rose-50 px-2 py-1 text-[9px] text-rose-700">{displayValue(quantity)}</strong></button>; }
 function Operation({ icon: Icon, label, value }) { return <div className="rounded-xl border border-white/10 bg-white/5 p-3"><Icon size={15} className="text-teal-300" /><span className="mt-3 block text-[9px] text-slate-400">{label}</span><b className="mt-1 block truncate text-sm text-white">{value}</b></div>; }
 
 function UserRolesModal({ currentUser, onClose, onToast }) {

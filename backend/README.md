@@ -47,6 +47,8 @@ The API listens on `http://localhost:4000` by default.
 
 To deliver OTPs by email, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, and optionally `SMTP_FROM`/`SMTP_SECURE` in `.env`. Without SMTP settings, development OTPs are printed in the backend console.
 
+Admission decisions notify the parent using the submitted phone number or email. Configure the same SMTP settings for email delivery. For SMS delivery, configure `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM`; without a provider, the notification is printed in the backend console. Approved applicants receive their generated admission number as the student login username and a generated temporary password.
+
 ## Main routes
 
 - `GET /api/health` - API/database health

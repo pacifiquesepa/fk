@@ -1,0 +1,70 @@
+{
+    "school": {
+        "name": "FKAMS",
+        "academic_year": "2025-2026"
+    },
+    "subjects": [
+        {
+            "id": 1,
+            "name": "Mathematics",
+            "topics": [
+                "Algebra",
+                "Quadratic equations",
+                "Geometry",
+                "Statistics"
+            ],
+            "materials": [
+                "Textbook chapter 1",
+                "Lesson notes on equations",
+                "Past exercises"
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Biology",
+            "topics": [
+                "Cell structure",
+                "Photosynthesis",
+                "Genetics",
+                "Human anatomy"
+            ],
+            "materials": [
+                "Lab notes",
+                "Biology workbook",
+                "Plant nutrition notes"
+            ]
+        }
+    ],
+    "students": [
+        {
+            "id": 101,
+            "name": "Alice Ndayisenga",
+            "class_name": "Level 3",
+            "performance": {
+                "math": 82,
+                "biology": 74
+            },
+            "needs_support": false
+        },
+        {
+            "id": 102,
+            "name": "Benimana Jean",
+            "class_name": "Level 3",
+            "performance": {
+                "math": 58,
+                "biology": 61
+            },
+            "needs_support": true
+        },
+        {
+            "id": 103,
+            "name": "Chantal Mukamana",
+            "class_name": "Level 3",
+            "performance": {
+                "math": 91,
+                "biology": 88
+            },
+            "needs_support": false
+        }
+    ]
+}

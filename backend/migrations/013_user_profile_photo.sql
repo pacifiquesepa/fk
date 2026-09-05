@@ -1,0 +1,2 @@
+ALTER TABLE users
+  ADD COLUMN photo_key VARCHAR(255) NULL AFTER phone;

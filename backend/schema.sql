@@ -7,6 +7,7 @@ CREATE TABLE users (
   username VARCHAR(60) NOT NULL UNIQUE,
   email VARCHAR(190) NOT NULL UNIQUE,
   phone VARCHAR(30) NULL,
+  photo_key VARCHAR(255) NULL,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('admin','dos','teacher','student','parent','accountant','librarian') NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
@@ -40,7 +41,8 @@ CREATE TABLE subjects (
   code VARCHAR(30) NOT NULL UNIQUE,
   is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
-
+  desired_class VARCHAR(80) NOT NULL,
+  village VARCHAR(80) NULL,
 CREATE TABLE students (
   id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   user_id INT UNSIGNED NULL UNIQUE,
@@ -52,8 +54,11 @@ CREATE TABLE students (
   academic_year VARCHAR(20) NOT NULL,
   class_name VARCHAR(80) NOT NULL,
   date_of_birth DATE NULL,
-  parent_phone VARCHAR(30) NOT NULL,
+    (applicant_name, applicant_photo_key, mother_name, mother_phone, father_name, father_phone, parent_phone, parent_email, province, district, sector, cell, village, desired_class, gender, birthday, previous_school, result_slip_key, report_key, academic_year)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [req.body.applicantName.trim(), fileUrl(files.applicantPhoto?.[0]), req.body.motherName?.trim() || null, req.body.motherPhone?.trim() || null, req.body.fatherName?.trim() || null, req.body.fatherPhone?.trim() || null, parentPhone || '', parentEmail, req.body.province?.trim() || null, req.body.district?.trim() || null, req.body.sector?.trim() || null, req.body.cell?.trim() || null, req.body.village?.trim() || null, req.body.desiredClass.trim(), req.body.gender || null, req.body.birthday || null, req.body.previousSchool?.trim() || null, req.body.resultSlipKey?.trim() || null, fileUrl(files.report?.[0]), currentYear.name]);
   qr_token CHAR(36) NOT NULL UNIQUE,
+  conduct_score TINYINT UNSIGNED NOT NULL DEFAULT 100,
+  conduct_updated_at TIMESTAMP NULL DEFAULT NULL,
   status ENUM('active','inactive','graduated') NOT NULL DEFAULT 'active',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
@@ -90,6 +95,7 @@ CREATE TABLE parent_students (
 CREATE TABLE applications (
   id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   applicant_name VARCHAR(120) NOT NULL,
+  applicant_photo_key VARCHAR(255) NULL,
   mother_name VARCHAR(120) NULL,
   mother_phone VARCHAR(30) NULL,
   father_name VARCHAR(120) NULL,
@@ -104,8 +110,10 @@ CREATE TABLE applications (
   birthday DATE NULL,
   previous_school VARCHAR(160) NULL,
   result_slip_key VARCHAR(255) NULL,
+  report_key VARCHAR(255) NULL,
   academic_year VARCHAR(20) NULL,
   status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  approved_at DATETIME NULL,
   reviewer_comment TEXT NULL,
   approved_student_id INT UNSIGNED NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -116,7 +124,9 @@ CREATE TABLE attendance (
   student_id INT UNSIGNED NOT NULL,
   attendance_date DATE NOT NULL,
   status ENUM('present','absent','late','excused') NOT NULL,
+  comment TEXT NULL,
   marked_by INT UNSIGNED NOT NULL,
+  score_deduction TINYINT UNSIGNED NOT NULL DEFAULT 0,
   UNIQUE KEY student_day (student_id, attendance_date),
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
   FOREIGN KEY (marked_by) REFERENCES users(id)
@@ -283,6 +293,10 @@ CREATE TABLE expenses (
   description VARCHAR(180) NOT NULL,
   amount DECIMAL(12,2) NOT NULL,
   spent_at DATE NOT NULL,
+  photo_url VARCHAR(500) NULL,
+  document_url VARCHAR(500) NULL,
+  video_url VARCHAR(500) NULL,
+  budget_status ENUM('greater','equal','less') NOT NULL DEFAULT 'less',
   recorded_by INT UNSIGNED NOT NULL,
   FOREIGN KEY (recorded_by) REFERENCES users(id)
 );
@@ -292,6 +306,9 @@ CREATE TABLE budgets (
   name VARCHAR(120) NOT NULL,
   fiscal_year VARCHAR(20) NOT NULL,
   amount DECIMAL(12,2) NOT NULL,
+  description TEXT NULL,
+  photo_url VARCHAR(500) NULL,
+  document_url VARCHAR(500) NULL,
   status ENUM('draft','approved','closed') NOT NULL DEFAULT 'draft',
   created_by INT UNSIGNED NOT NULL,
   FOREIGN KEY (created_by) REFERENCES users(id)
@@ -325,6 +342,18 @@ CREATE TABLE inventory_items (
   location VARCHAR(100) NULL,
   updated_by INT UNSIGNED NOT NULL,
   FOREIGN KEY (updated_by) REFERENCES users(id)
+);
+
+CREATE TABLE inventory_transactions (
+  id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  item_id INT UNSIGNED NOT NULL,
+  type ENUM('in','out') NOT NULL,
+  quantity INT UNSIGNED NOT NULL,
+  note VARCHAR(255) NULL,
+  moved_by INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (item_id) REFERENCES inventory_items(id) ON DELETE CASCADE,
+  FOREIGN KEY (moved_by) REFERENCES users(id)
 );
 
 CREATE TABLE assets (
@@ -432,6 +461,10 @@ CREATE TABLE behavior_records (
   category ENUM('excellent','good','needs_improvement','discipline') NOT NULL,
   note TEXT NOT NULL,
   recorded_by INT UNSIGNED NOT NULL,
+  score_deduction TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  score_after TINYINT UNSIGNED NULL,
+  attendance_id BIGINT UNSIGNED NULL,
+  UNIQUE KEY behavior_attendance (attendance_id),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
   FOREIGN KEY (recorded_by) REFERENCES users(id)

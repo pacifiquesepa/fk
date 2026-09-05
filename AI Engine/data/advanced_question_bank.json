@@ -1,0 +1,371 @@
+{
+    "Mathematics": {
+        "Algebra": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Solve 2x + 4 = 10.",
+                        "options": [
+                            "2",
+                            "3",
+                            "4",
+                            "7"
+                        ],
+                        "answer": 1,
+                        "points": 2
+                    },
+                    {
+                        "prompt": "Which expression is equivalent to 4y + 2y?",
+                        "options": [
+                            "6",
+                            "6y",
+                            "8y",
+                            "y^6"
+                        ],
+                        "answer": 1,
+                        "points": 2
+                    }
+                ],
+                "match": [
+                    {
+                        "prompt": "Match each algebra term to its meaning.",
+                        "answer": {
+                            "variable": "an unknown value",
+                            "coefficient": "a number multiplying a variable",
+                            "constant": "a fixed number"
+                        },
+                        "points": 3
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "Complete: 5x means 5 multiplied by ____.",
+                        "answer": "x",
+                        "points": 2
+                    }
+                ],
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the steps for solving 3x + 2 = 11.",
+                        "options": [
+                            "Subtract 2",
+                            "Get 3x = 9",
+                            "Divide by 3",
+                            "Get x = 3"
+                        ],
+                        "answer": [
+                            "Subtract 2",
+                            "Get 3x = 9",
+                            "Divide by 3",
+                            "Get x = 3"
+                        ],
+                        "points": 3
+                    }
+                ],
+                "drag_and_drop": [
+                    {
+                        "prompt": "Place each expression in the correct group.",
+                        "options": [
+                            "3x",
+                            "7",
+                            "x + 2"
+                        ],
+                        "answer": {
+                            "variable_expression": [
+                                "3x",
+                                "x + 2"
+                            ],
+                            "constant": [
+                                "7"
+                            ]
+                        },
+                        "points": 3
+                    }
+                ],
+                "open_question": [
+                    {
+                        "prompt": "Explain what a variable represents in an algebraic expression and give one example.",
+                        "answer": null,
+                        "points": 5
+                    }
+                ]
+            },
+            "medium": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Solve 5( x - 2 ) = 2x + 9.",
+                        "options": [
+                            "5",
+                            "19/3",
+                            "3",
+                            "7"
+                        ],
+                        "answer": 1,
+                        "points": 3
+                    },
+                    {
+                        "prompt": "Which is the factorisation of x² - 9?",
+                        "options": [
+                            "(x-9)(x+1)",
+                            "(x-3)(x+3)",
+                            "(x-3)²",
+                            "x(x-9)"
+                        ],
+                        "answer": 1,
+                        "points": 3
+                    }
+                ],
+                "match": [
+                    {
+                        "prompt": "Match each equation with its solution.",
+                        "answer": {
+                            "2x+4=10": "x=3",
+                            "x²=25": "x=5 or x=-5",
+                            "3x=12": "x=4"
+                        },
+                        "points": 4
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "Complete: The gradient of y = 3x - 7 is ____.",
+                        "answer": "3",
+                        "points": 2
+                    }
+                ],
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the method for factorising x² + 5x + 6.",
+                        "options": [
+                            "Find two numbers",
+                            "Their product is 6",
+                            "Their sum is 5",
+                            "Write (x+2)(x+3)"
+                        ],
+                        "answer": [
+                            "Find two numbers",
+                            "Their product is 6",
+                            "Their sum is 5",
+                            "Write (x+2)(x+3)"
+                        ],
+                        "points": 4
+                    }
+                ],
+                "drag_and_drop": [
+                    {
+                        "prompt": "Drag each graph feature to its meaning for y = 2x + 1.",
+                        "options": [
+                            "2",
+                            "1",
+                            "y-intercept",
+                            "gradient"
+                        ],
+                        "answer": {
+                            "gradient": "2",
+                            "y-intercept": "1"
+                        },
+                        "points": 4
+                    }
+                ],
+                "open_question": [
+                    {
+                        "prompt": "A taxi charges a fixed fee plus a cost per kilometre. Form a linear equation and explain the meaning of each term.",
+                        "answer": null,
+                        "points": 6
+                    }
+                ]
+            },
+            "strong": {
+                "multiple_choice": [
+                    {
+                        "prompt": "For which values of k does x² - 6x + k = 0 have two distinct real roots?",
+                        "options": [
+                            "k < 9",
+                            "k = 9",
+                            "k > 9",
+                            "k < 0 only"
+                        ],
+                        "answer": 0,
+                        "points": 5
+                    },
+                    {
+                        "prompt": "If f(x)=2x²-3x+1, which is f'(x)?",
+                        "options": [
+                            "2x-3",
+                            "4x-3",
+                            "4x+1",
+                            "2x²-3"
+                        ],
+                        "answer": 1,
+                        "points": 5
+                    }
+                ],
+                "match": [
+                    {
+                        "prompt": "Match each concept with the condition that defines it.",
+                        "answer": {
+                            "discriminant": "b²-4ac",
+                            "turning point": "where gradient is zero",
+                            "asymptote": "a line a curve approaches"
+                        },
+                        "points": 5
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "The discriminant of ax²+bx+c is ____.",
+                        "answer": "b² - 4ac",
+                        "points": 3
+                    }
+                ],
+                "rearrange": [
+                    {
+                        "prompt": "Arrange a proof that the sum of two odd integers is even.",
+                        "options": [
+                            "Let the integers be 2m+1 and 2n+1",
+                            "Add them",
+                            "Factor out 2",
+                            "Conclude the result is even"
+                        ],
+                        "answer": [
+                            "Let the integers be 2m+1 and 2n+1",
+                            "Add them",
+                            "Factor out 2",
+                            "Conclude the result is even"
+                        ],
+                        "points": 5
+                    }
+                ],
+                "drag_and_drop": [
+                    {
+                        "prompt": "Place each condition in the correct quadratic category.",
+                        "options": [
+                            "D > 0",
+                            "D = 0",
+                            "D < 0"
+                        ],
+                        "answer": {
+                            "two_roots": "D > 0",
+                            "one_root": "D = 0",
+                            "no_real_roots": "D < 0"
+                        },
+                        "points": 5
+                    }
+                ],
+                "open_question": [
+                    {
+                        "prompt": "Solve a quadratic equation using two different methods, compare the methods, and justify which is more efficient for the given equation.",
+                        "answer": null,
+                        "points": 8
+                    }
+                ]
+            }
+        }
+    },
+    "Biology": {
+        "Cell structure": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Which structure contains genetic material in a typical animal cell?",
+                        "options": [
+                            "Nucleus",
+                            "Cell wall",
+                            "Chloroplast",
+                            "Vacuole"
+                        ],
+                        "answer": 0,
+                        "points": 2
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "The cell membrane controls what enters and leaves the ____.",
+                        "answer": "cell",
+                        "points": 2
+                    }
+                ],
+                "open_question": [
+                    {
+                        "prompt": "Name two cell organelles and state one function of each.",
+                        "answer": null,
+                        "points": 4
+                    }
+                ]
+            },
+            "medium": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Why are mitochondria numerous in active muscle cells?",
+                        "options": [
+                            "They release energy by aerobic respiration",
+                            "They store DNA only",
+                            "They make cell walls",
+                            "They absorb light"
+                        ],
+                        "answer": 0,
+                        "points": 3
+                    }
+                ],
+                "match": [
+                    {
+                        "prompt": "Match the organelle to its main function.",
+                        "answer": {
+                            "ribosome": "protein synthesis",
+                            "mitochondrion": "aerobic respiration",
+                            "nucleus": "genetic control"
+                        },
+                        "points": 4
+                    }
+                ],
+                "open_question": [
+                    {
+                        "prompt": "Explain how a root hair cell is adapted for absorbing water and mineral ions.",
+                        "answer": null,
+                        "points": 6
+                    }
+                ]
+            },
+            "strong": {
+                "multiple_choice": [
+                    {
+                        "prompt": "A plant cell is placed in a concentrated salt solution. What happens first?",
+                        "options": [
+                            "Water leaves by osmosis",
+                            "Salt leaves by active transport",
+                            "The nucleus divides",
+                            "Chlorophyll is produced"
+                        ],
+                        "answer": 0,
+                        "points": 4
+                    }
+                ],
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the stages of an investigation of osmosis.",
+                        "options": [
+                            "Measure initial mass",
+                            "Place samples in solutions",
+                            "Remove and blot samples",
+                            "Measure final mass and calculate change"
+                        ],
+                        "answer": [
+                            "Measure initial mass",
+                            "Place samples in solutions",
+                            "Remove and blot samples",
+                            "Measure final mass and calculate change"
+                        ],
+                        "points": 5
+                    }
+                ],
+                "open_question": [
+                    {
+                        "prompt": "Evaluate how surface-area-to-volume ratio limits the size of an organism and explain how exchange surfaces solve the problem.",
+                        "answer": null,
+                        "points": 8
+                    }
+                ]
+            }
+        }
+    }
+}

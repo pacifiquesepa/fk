@@ -2,14 +2,12 @@ import { useEffect, useState } from 'react';
 import { BookOpen, CalendarDays, CheckCircle2, ClipboardCheck, FileText, MessageSquare, ShieldCheck, Upload, Users } from 'lucide-react';
 import ActionCard from '../components/ActionCard';
 import StatCard from '../components/StatCard';
-import UploadTestSidebar from '../components/UploadTestSidebar';
 import api from '../lib/api';
 
 export default function TeacherDashboardPage({ t, onNavigate }) {
     const [data, setData] = useState({ students: [], attendance: { total: 0, present: 0, percent: 0 }, activeAssessments: 0, notices: [], timetable: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [showUploadTest, setShowUploadTest] = useState(false);
 
     useEffect(() => {
         let active = true;
@@ -20,7 +18,7 @@ export default function TeacherDashboardPage({ t, onNavigate }) {
     const actions = [
         ['My students', Users, 'View students assigned to your classes.', 'students', 'cyan'],
         ['Take attendance', ClipboardCheck, 'Mark attendance for your assigned students.', 'attendance', 'emerald'],
-        ['Upload Test', Upload, 'Create and manage tests for your students.', 'upload_test', 'emerald'],
+        ['Our Programs', BookOpen, 'Explore the school’s learning programs and pathways.', 'our-programs', 'emerald'],
         ['Active assessments', BookOpen, 'Review your published assessments.', 'academics', 'violet'],
         ['My timetable', CalendarDays, 'See your assigned classes and rooms.', 'timetable', 'amber'],
         ['School notices', MessageSquare, 'Read the latest notices for teachers.', 'notices', 'rose'],
@@ -38,10 +36,9 @@ export default function TeacherDashboardPage({ t, onNavigate }) {
                 </section>
                 {error && <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{error}</div>}
                 <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><StatCard kind="students" title="My students" value={loading ? '...' : data.students.length} note="Database" detail="assigned students" tone="blue" /><StatCard kind="attendance" title="Attendance today" value={loading ? '...' : `${data.attendance.percent}%`} note="Database" detail={`${data.attendance.present} of ${data.attendance.total} marked present`} tone="mint" /><StatCard kind="academics" title="Active assessments" value={loading ? '...' : data.activeAssessments} note="Database" detail="published and in progress" tone="violet" /></section>
-                <section><div className="mb-4"><h2 className="font-display text-base font-bold text-slate-800">Teacher tools</h2><p className="mt-1 text-sm text-slate-500">Open a live workspace for each part of your role.</p></div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{actions.map(([title, Icon, description, target, tone]) => <ActionCard key={title} icon={Icon} title={title} description={description} tone={tone} onClick={() => target === 'upload_test' ? setShowUploadTest(true) : onNavigate(target)} />)}</div></section>
+                <section><div className="mb-4"><h2 className="font-display text-base font-bold text-slate-800">Teacher tools</h2><p className="mt-1 text-sm text-slate-500">Open a live workspace for each part of your role.</p></div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{actions.map(([title, Icon, description, target, tone]) => <ActionCard key={title} icon={Icon} title={title} description={description} tone={tone} onClick={() => onNavigate(target)} />)}</div></section>
                 <section className="grid gap-5 xl:grid-cols-2"><LiveList title="School notices" icon={MessageSquare} empty="No teacher notices yet." rows={data.notices} render={(item) => <><p className="text-sm font-medium text-slate-700">{item.title}</p><p className="mt-1 text-xs text-slate-600">{item.message}</p></>} /><LiveList title="Timetable" icon={CalendarDays} empty="No timetable entries yet." rows={data.timetable} render={(item) => <div className="flex items-start justify-between"><div><p className="text-sm font-medium text-slate-700">{item.class}</p><p className="mt-1 text-xs text-slate-600">{item.time} · Room {item.room}</p></div><p className="text-xs font-medium text-cyan-600">{item.subject}</p></div>} /></section>
             </div>
-            {showUploadTest && <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/20 p-4 backdrop-blur-sm"><UploadTestSidebar t={t} onClose={() => setShowUploadTest(false)} /></div>}
         </>
     );
 }

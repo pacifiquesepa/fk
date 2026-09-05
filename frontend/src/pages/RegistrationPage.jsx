@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2, GraduationCap, UserPlus } from 'lucide-react';
 import api from '../lib/api';
 
-const initial = { fullName: '', username: '', email: '', admissionNumber: '', className: '', classId: '', parentPhone: '', gender: 'female', birthday: '', academicYear: '2025/2026', password: '', repassword: '', subjectOrModule: '', diplomaKey: '', resultSlipKey: '' };
+const initial = { fullName: '', username: '', email: '', className: '', classId: '', parentEmail: '', gender: 'female', birthday: '', academicYear: '', password: '', repassword: '', subjectOrModule: '', diplomaKey: '', resultSlipKey: '' };
 
 export default function RegistrationPage({ onBack }) {
     const [type, setType] = useState('student');
@@ -10,20 +10,25 @@ export default function RegistrationPage({ onBack }) {
     const [classes, setClasses] = useState([]);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [currentYear, setCurrentYear] = useState(null);
 
     useEffect(() => {
-        api.get('/classes').then(({ data }) => setClasses(data.classes || [])).catch(() => setError('Unable to load classes.'));
+        Promise.all([api.get('/classes'), api.get('/academic-years/current')]).then(([classResponse, yearResponse]) => {
+            setCurrentYear(yearResponse.data);
+            setClasses((classResponse.data.classes || []).filter((item) => item.academicYear === yearResponse.data?.name));
+            setForm((current) => ({ ...current, academicYear: yearResponse.data?.name || '' }));
+        }).catch(() => setError('Unable to load the active academic year and classes.'));
     }, []);
 
     const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
     const submit = async (event) => {
         event.preventDefault(); setError(''); setMessage('');
         if (form.password !== form.repassword) return setError('Passwords do not match.');
-        if (type === 'student' && !form.classId) return setError('Select a class for this student.');
+        if (type === 'student' && (!form.classId || !currentYear?.name)) return setError('Select a class and configure an active academic year first.');
         try {
             const endpoint = type === 'student' ? '/students' : '/teachers/register';
             const { data } = await api.post(endpoint, form);
-            setMessage(`${data.message} ${data.username ? `Username: ${data.username}` : ''}`); setForm(initial);
+            setMessage(`${data.message} ${data.admissionNumber ? `Admission number: ${data.admissionNumber}` : ''} ${data.username ? `Username: ${data.username}` : ''}`); setForm({ ...initial, academicYear: currentYear?.name || '' });
         } catch (requestError) { setError(requestError.response?.data?.error || 'Unable to register record.'); }
     };
 
@@ -35,13 +40,13 @@ export default function RegistrationPage({ onBack }) {
         {error && <div className="rounded-xl bg-rose-50 px-4 py-3 text-xs text-rose-700">{error}</div>}
         <form onSubmit={submit} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 sm:p-7">
             <Field label="Full name" name="fullName" value={form.fullName} onChange={update('fullName')} required />
-            {type === 'teacher' ? <Field label="Email" name="email" type="email" value={form.email} onChange={update('email')} required /> : <Field label="Admission number" name="admissionNumber" value={form.admissionNumber} onChange={update('admissionNumber')} required />}
+            {type === 'teacher' ? <Field label="Email" name="email" type="email" value={form.email} onChange={update('email')} required /> : <span />}
             {type === 'student' && <label className="block"><span className="mb-2 block text-xs font-semibold text-slate-600">Class</span><select required value={form.classId} onChange={(event) => { const selected = classes.find((item) => String(item.id) === event.target.value); setForm((current) => ({ ...current, classId: event.target.value, className: selected?.name || '' })); }} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-xs"><option value="">Select class</option>{classes.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.academicYear}</option>)}</select></label>}
             <Field label="Username (optional)" name="username" value={form.username} onChange={update('username')} />
             <Field label="Birthday" name="birthday" type="date" value={form.birthday} onChange={update('birthday')} required />
             <label className="block"><span className="mb-2 block text-xs font-semibold text-slate-600">Gender</span><select value={form.gender} onChange={update('gender')} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-xs"><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select></label>
-            {type === 'student' ? <Field label="Parent phone" name="parentPhone" value={form.parentPhone} onChange={update('parentPhone')} required /> : <Field label="Subject or module" name="subjectOrModule" value={form.subjectOrModule} onChange={update('subjectOrModule')} required />}
-            <Field label="Academic year" name="academicYear" value={form.academicYear} onChange={update('academicYear')} required />
+            {type === 'student' ? <Field label="Parent email" name="parentEmail" type="email" value={form.parentEmail} onChange={update('parentEmail')} required /> : <Field label="Subject or module" name="subjectOrModule" value={form.subjectOrModule} onChange={update('subjectOrModule')} required />}
+            <Field label="Active academic year" name="academicYear" value={form.academicYear || currentYear?.name || ''} readOnly required />
             <Field label="Password" name="password" type="password" value={form.password} onChange={update('password')} required />
             <Field label="Repeat password" name="repassword" type="password" value={form.repassword} onChange={update('repassword')} required />
             <button className="rounded-xl bg-cyan-700 px-4 py-3 text-xs font-bold text-white sm:col-span-2">{type === 'student' ? 'Register student' : 'Register teacher'}</button>
@@ -49,4 +54,4 @@ export default function RegistrationPage({ onBack }) {
     </div>;
 }
 
-function Field({ label, name, value, onChange, type = 'text', required = false }) { return <label className="block"><span className="mb-2 block text-xs font-semibold text-slate-600">{label}</span><input name={name} type={type} value={value} onChange={onChange} required={required} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-xs outline-none focus:border-cyan-600" /></label>; }
+function Field({ label, name, value, onChange, type = 'text', required = false, readOnly = false }) { return <label className="block"><span className="mb-2 block text-xs font-semibold text-slate-600">{label}</span><input name={name} type={type} value={value} onChange={onChange} required={required} readOnly={readOnly} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-xs outline-none focus:border-cyan-600 read-only:bg-slate-50 read-only:text-slate-500" /></label>; }
