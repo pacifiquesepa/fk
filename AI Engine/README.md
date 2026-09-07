@@ -19,6 +19,8 @@ This folder contains a Python-based AI assessment and analytics engine for the F
 - `data/curriculum_dataset.json` - initial curriculum-grounded question bank and learning outcomes
 - `data/advanced_question_bank.json` - type-specific questions by subject, topic, and difficulty
 - `data/knowledge_base.json` - approved imported reference material (created after ingestion)
+- `data/books/` - archived uploaded books (kept out of Git)
+- `data/books_index.json` - uploaded-book metadata and page counts
 - `requirements.txt` - Python dependencies
 
 ## Quick start (Windows)
@@ -33,6 +35,8 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
 ```
+
+When the log shows `Application startup complete` followed by `KeyboardInterrupt` and `asyncio.exceptions.CancelledError`, the server did start successfully and was then stopped (usually with `CTRL+C` or by closing the terminal). This is a normal Uvicorn shutdown trace. Start it again and leave that terminal open while using the frontend or running book uploads.
 
 If you are using PowerShell, the activation line can also be:
 
@@ -190,6 +194,64 @@ You can import approved documents through the API:
 powershell -Command "$body = @{ source_type = 'teacher'; documents = @(@{ id = 'algebra-notes-01'; subject = 'Mathematics'; topic = 'Algebra'; title = 'Teacher approved algebra notes'; text = 'Add the verified lesson content here.'; verified = $true }) } | ConvertTo-Json -Depth 10; Invoke-RestMethod -Method Post -Uri http://localhost:8001/api/knowledge/ingest -ContentType 'application/json' -Body $body"
 ```
 
+### Upload a complete book
+
+The book uploader archives the original PDF/DOCX/TXT/MD file, extracts readable text page by page, and indexes each page with class, subject, topic, source book, and image metadata. This lets retrieval use the relevant pages instead of treating the whole book as one undifferentiated paragraph.
+
+From PowerShell 7:
+
+```cmd
+powershell -Command "$form = @{ subject = 'English'; topic = 'Greetings'; class_name = 'P1'; verified = 'true'; file = Get-Item 'C:\path\to\english-p1.pdf' }; Invoke-RestMethod -Method Post -Uri http://localhost:8001/api/books/upload -Form $form | ConvertTo-Json -Depth 10"
+```
+
+If your prompt starts with `C:\...>` you are in Command Prompt. In that terminal, use the one-line command above exactly as written. Do not type `Invoke-RestMethod`, `-Method`, or PowerShell backticks as separate CMD commands.
+
+The `-Form` option is not available in the older Windows PowerShell 5.1. For your Windows CMD, use the Python uploader instead. First find the real file path:
+
+```cmd
+dir "%USERPROFILE%\Downloads\*.pdf" /s /b
+dir "%USERPROFILE%\Desktop\*.pdf" /s /b
+```
+
+Then upload using the path returned by `dir`:
+
+```cmd
+cd /d "C:\Users\SCOVIA\Desktop\FKAMS\AI Engine"
+.venv\Scripts\activate
+python upload_book.py "C:\Users\SCOVIA\Downloads\English-P1.pdf" English Greetings P1
+```
+
+Replace the PDF path with the real path. Do not type the path by itself as a command; it must be inside `python upload_book.py "..."`.
+
+### Upload all school books automatically
+
+The folder also includes `upload_school_books.cmd`. Keep Uvicorn running, then double-click that `.cmd` file. It uploads the educational books found in Downloads, assigns class and subject metadata, skips unrelated files, and skips filenames already indexed. No repeated CMD commands are required.
+
+You can also run it from Command Prompt:
+
+```cmd
+cd /d "C:\Users\SCOVIA\Desktop\FKAMS\AI Engine"
+upload_school_books.cmd
+```
+
+The script intentionally does not upload legal documents, IDs, CVs, contracts, or unrelated PDFs from Downloads.
+
+List uploaded books:
+
+```cmd
+powershell -Command "Invoke-RestMethod http://localhost:8001/api/books | ConvertTo-Json -Depth 10"
+```
+
+PowerShell users may run the commands directly. Command Prompt users must prefix them with `powershell -Command` as shown above.
+
+PDF text is indexed automatically. Pages containing images are marked with `has_images`; understanding diagrams and pictures requires a vision-capable provider and teacher review, so the engine does not invent descriptions for images it cannot read.
+
+PDF image extraction requires Pillow. Install all upload dependencies before starting the server:
+
+```cmd
+python -m pip install -r requirements.txt
+```
+
 Search imported sources before generating or reviewing a question:
 
 ```cmd
@@ -211,7 +273,11 @@ OPENAI_API_KEY=put-your-new-key-here
 OPENAI_MODEL=gpt-4o-mini
 GEMINI_API_KEY=put-your-new-key-here
 GEMINI_MODEL=gemini-3.6-flash
+AI_PROVIDER_TIMEOUT_SECONDS=45
+AI_CONTEXT_MAX_CHARS=24000
 ```
+
+External question generation stops waiting after 45 seconds by default, and uploaded-book context is capped at 24,000 characters. If a provider is still slow, generate fewer questions at once or use the approved local dataset, then restart Uvicorn after changing these settings.
 
 The engine retrieves matching approved local sources before calling Gemini. If no approved source matches, it will not claim a high-confidence answer. Gemini responses remain marked `requires_teacher_review`; external AI output must be reviewed before becoming curriculum training data.
 

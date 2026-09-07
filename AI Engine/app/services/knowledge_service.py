@@ -41,18 +41,23 @@ class KnowledgeService:
                 "text": text,
                 "source_type": source_type,
                 "verified": bool(record.get("verified", False)),
+                **{key: value for key, value in record.items() if key not in {"id", "subject", "topic", "title", "text", "verified"}},
             })
             added += 1
         self._save()
         return added
 
-    def search(self, query: str, subject: str | None = None, topic: str | None = None, limit: int = 5) -> List[Dict[str, Any]]:
+    def search(self, query: str, subject: str | None = None, topic: str | None = None, limit: int = 5, unit: str | None = None, class_name: str | None = None) -> List[Dict[str, Any]]:
         terms = set(re.findall(r"[a-z0-9]+", query.lower()))
         scored = []
         for document in self.documents:
             if subject and str(document.get("subject", "")).lower() != subject.lower():
                 continue
             if topic and str(document.get("topic", "")).lower() != topic.lower():
+                continue
+            if unit and str(document.get("unit", "")).lower() != unit.lower():
+                continue
+            if class_name and str(document.get("class_name", "")).lower() != class_name.lower():
                 continue
             haystack = " ".join(str(document.get(key, "")) for key in ("title", "subject", "topic", "text")).lower()
             score = sum(1 for term in terms if term in haystack)

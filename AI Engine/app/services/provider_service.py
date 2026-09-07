@@ -5,6 +5,8 @@ import urllib.error
 import urllib.request
 from typing import Any, Dict, List
 
+from app.config import AI_CONTEXT_MAX_CHARS, AI_PROVIDER_TIMEOUT_SECONDS
+
 
 class ProviderService:
     """Optional external AI references; local curriculum remains the fallback."""
@@ -97,7 +99,7 @@ class ProviderService:
     def _question_prompt(request: Dict[str, Any], context: List[Dict[str, Any]]) -> str:
         counts = json.dumps(request.get("counts", {}), ensure_ascii=True)
         types = ", ".join(request.get("question_types", []))
-        return (f"Create a {request.get('difficulty', 'medium')} assessment for {request.get('subject_name')} topic {request.get('topic')} "
+        return (f"Create a {request.get('difficulty', 'medium')} assessment for {request.get('subject_name')} unit {request.get('unit')} topic {request.get('topic')} "
                 f"class {request.get('class_name')}. Required types: {types}. Required counts: {counts}. "
                 "Return JSON with a questions array. Each item must have id, type, prompt, options when needed, answer, points, difficulty, "
                 "and metadata containing learning_outcome. Make every prompt materially different, age-appropriate, curriculum-grounded, "
@@ -105,14 +107,22 @@ class ProviderService:
 
     @staticmethod
     def _compose(prompt: str, context: List[Dict[str, Any]]) -> str:
-        sources = "\n\n".join(f"SOURCE: {item.get('title')}\n{item.get('text')}" for item in context)
+        remaining = AI_CONTEXT_MAX_CHARS
+        source_parts = []
+        for item in context:
+            if remaining <= 0:
+                break
+            text = str(item.get("text", ""))[:remaining]
+            source_parts.append(f"SOURCE: {item.get('title')}\n{text}")
+            remaining -= len(text)
+        sources = "\n\n".join(source_parts)
         return f"Question: {prompt}\n\nApproved context:\n{sources}\n\nRules: use only the approved context; cite source titles; distinguish facts from inference; say 'insufficient evidence' when the context does not answer the question; never invent curriculum facts; provide a concise answer followed by a short evidence explanation."
 
     @staticmethod
     def _post(url: str, body: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
         request = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers={"Content-Type": "application/json", **headers}, method="POST")
         try:
-            with urllib.request.urlopen(request, timeout=60) as response:
+            with urllib.request.urlopen(request, timeout=AI_PROVIDER_TIMEOUT_SECONDS) as response:
                 return json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as error:
             try:
@@ -122,6 +132,8 @@ class ProviderService:
                 provider_message = "Provider rejected the request."
             raise RuntimeError(f"External AI provider returned HTTP {error.code}: {provider_message}") from error
         except urllib.error.URLError as error:
+            if isinstance(error.reason, TimeoutError):
+                raise RuntimeError(f"The external AI provider timed out after {AI_PROVIDER_TIMEOUT_SECONDS} seconds. Reduce the number of questions or use the local dataset.") from error
             raise RuntimeError(f"Could not connect to the external AI provider: {error.reason}") from error
         except TimeoutError as error:
-            raise RuntimeError("The external AI provider timed out after 30 seconds.") from error
+            raise RuntimeError(f"The external AI provider timed out after {AI_PROVIDER_TIMEOUT_SECONDS} seconds. Reduce the number of questions or use the local dataset.") from error

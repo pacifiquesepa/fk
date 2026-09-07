@@ -6,6 +6,7 @@ class AssessmentRequest(BaseModel):
     teacher_id: Optional[int] = None
     subject_id: Optional[int] = None
     subject_name: Optional[str] = None
+    unit: Optional[str] = None
     topic: Optional[str] = None
     class_name: Optional[str] = None
     materials: List[str] = Field(default_factory=list)
@@ -43,9 +44,11 @@ class QuestionModel(BaseModel):
 
 class AssessmentGenerationResult(BaseModel):
     subject: str
+    unit: Optional[str] = None
     topic: Optional[str] = None
     class_name: Optional[str] = None
     difficulty: str = "medium"
+    book_evaluated: bool = False
     total_questions: int
     total_points: int
     questions: List[QuestionModel]

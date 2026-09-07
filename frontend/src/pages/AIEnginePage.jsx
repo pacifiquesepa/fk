@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ArrowLeft, CheckCircle2, Cpu, Eye, EyeOff, Loader2, Sparkles } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Brain, CheckCircle2, Cpu, Eye, EyeOff, Loader2, Sparkles } from 'lucide-react';
 
 const AI_ENGINE_URL = import.meta.env.VITE_AI_ENGINE_URL || 'http://localhost:8001';
 const REQUEST_TIMEOUT_MS = 4000;
-const GENERATION_TIMEOUT_MS = 75000;
+const GENERATION_TIMEOUT_MS = 120000;
 const questionTypes = [
     ['multiple_choice', 'Multiple choice', 6],
     ['match', 'Match', 5],
@@ -19,7 +19,9 @@ export default function AIEnginePage({ user, onBack }) {
     const [assessment, setAssessment] = useState(null);
     const [showAnswers, setShowAnswers] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({ subject: 'Mathematics', topic: 'Algebra', className: 'Level 3', difficulty: 'medium', provider: 'local' });
+    const [training, setTraining] = useState(false);
+    const [trainingMessage, setTrainingMessage] = useState('');
+    const [form, setForm] = useState({ subject: 'Mathematics', unit: 'Unit 1', className: 'Level 3', difficulty: 'medium', provider: 'local' });
     const [counts, setCounts] = useState(Object.fromEntries(questionTypes.map(([type, , count]) => [type, count])));
 
     const checkHealth = async () => {
@@ -59,7 +61,7 @@ export default function AIEnginePage({ user, onBack }) {
                 signal: controller.signal,
                 body: JSON.stringify({
                     subject_name: form.subject,
-                    topic: form.topic,
+                    unit: form.unit,
                     class_name: form.className,
                     difficulty: form.difficulty,
                     provider: form.provider,
@@ -77,11 +79,23 @@ export default function AIEnginePage({ user, onBack }) {
             if (!data.assessment) throw new Error('AI Engine returned no assessment. Check the Python server log.');
             setAssessment(data.assessment);
         } catch (requestError) {
-            setError(requestError.name === 'AbortError' ? 'Question generation took longer than 75 seconds. Check the provider response or use the local dataset, then retry.' : requestError.message || 'Unable to generate assessment.');
+            setError(requestError.name === 'AbortError' ? 'Question generation took too long. Reduce the number of questions, check the provider API key, or use the local dataset.' : requestError.message || 'Unable to generate assessment.');
         } finally {
             window.clearTimeout(timeout);
             setLoading(false);
         }
+    };
+
+    const trainModel = async () => {
+        if (!assessment?.questions?.length) return;
+        setTraining(true); setTrainingMessage(''); setError('');
+        try {
+            const response = await fetch(`${AI_ENGINE_URL}/api/assessments/train`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ questions: assessment.questions }) });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || data.error || 'Training failed.');
+            setTrainingMessage(`${data.added || 0} reviewed questions saved to the local model.`);
+        } catch (requestError) { setError(requestError.message || 'Training failed.'); }
+        finally { setTraining(false); }
     };
 
     return <div className="space-y-7">
@@ -96,12 +110,12 @@ export default function AIEnginePage({ user, onBack }) {
         <section className="grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
             <form onSubmit={generate} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="mb-5 flex items-center gap-2 text-cyan-700"><Cpu size={18} /><h2 className="font-display text-base font-bold text-slate-800">Build assessment</h2></div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1"><Field label="Subject"><input value={form.subject} onChange={(event) => updateForm('subject', event.target.value)} required /></Field><Field label="Topic"><input value={form.topic} onChange={(event) => updateForm('topic', event.target.value)} required /></Field><Field label="Class"><input value={form.className} onChange={(event) => updateForm('className', event.target.value)} required /></Field><Field label="Difficulty"><select value={form.difficulty} onChange={(event) => updateForm('difficulty', event.target.value)}><option value="easy">Easy</option><option value="medium">Medium</option><option value="strong">Strong</option></select></Field><Field label="Question source"><select value={form.provider} onChange={(event) => updateForm('provider', event.target.value)}><option value="local">Approved local dataset</option><option value="openai">OpenAI + approved sources</option><option value="gemini">Gemini + approved sources</option></select></Field></div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1"><Field label="Subject"><input value={form.subject} onChange={(event) => updateForm('subject', event.target.value)} required /></Field><Field label="Unit"><input value={form.unit} onChange={(event) => updateForm('unit', event.target.value)} placeholder="e.g. Unit 1" required /></Field><Field label="Class"><input value={form.className} onChange={(event) => updateForm('className', event.target.value)} required /></Field><Field label="Difficulty"><select value={form.difficulty} onChange={(event) => updateForm('difficulty', event.target.value)}><option value="easy">Easy</option><option value="medium">Medium</option><option value="strong">Strong</option></select></Field><Field label="Question source"><select value={form.provider} onChange={(event) => updateForm('provider', event.target.value)}><option value="local">Approved local dataset</option><option value="openai">OpenAI + approved sources</option><option value="gemini">Gemini + approved sources</option></select></Field></div>
                 <div className="mt-5 border-t border-slate-100 pt-4"><div className="mb-3 flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Question mix</p><span className="text-xs font-bold text-cyan-700">{totalRequested} total</span></div><div className="grid gap-2">{questionTypes.map(([type, label]) => <label key={type} className="flex items-center justify-between gap-3 text-xs text-slate-600"><span>{label}</span><input type="number" min="0" max="50" value={counts[type]} onChange={(event) => updateCount(type, event.target.value)} className="w-20 rounded-lg border border-slate-200 px-2 py-2 text-right text-xs" /></label>)}</div></div>
                 <button disabled={loading || totalRequested < 1} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-700 px-4 py-3 text-xs font-bold text-white transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:bg-slate-300">{loading && <Loader2 className="animate-spin" size={15} />}{loading ? 'Generating...' : 'Generate questions'}</button>
                 <p className="mt-3 text-[10px] leading-5 text-slate-400">Requested by {user?.name || 'teacher'}. External questions require teacher review before publishing.</p>
             </form>
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-display text-base font-bold text-slate-800">Generated questions</h2>{assessment && <p className="mt-1 text-[10px] text-slate-400">{assessment.subject} · {assessment.topic} · {assessment.difficulty || form.difficulty}</p>}</div>{assessment && <button onClick={() => setShowAnswers((value) => !value)} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600">{showAnswers ? <EyeOff size={14} /> : <Eye size={14} />}{showAnswers ? 'Hide answers' : 'Show answers'}</button>}</div>{!assessment ? <div className="grid min-h-80 place-items-center rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-400"><div><Sparkles className="mx-auto mb-3 text-cyan-500" size={28} /><p>Choose a topic and generate an assessment.</p></div></div> : <div className="space-y-3">{assessment.questions.map((question, index) => <QuestionCard key={question.id || index} question={question} index={index} showAnswers={showAnswers} />)}</div>}</section>
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-display text-base font-bold text-slate-800">Generated questions</h2>{assessment && <p className="mt-1 text-[10px] text-slate-400">{assessment.subject} · {assessment.unit || form.unit} · {assessment.topic || 'Book activities'} · {assessment.difficulty || form.difficulty}</p>}{trainingMessage && <p className="mt-2 text-[10px] text-emerald-700">{trainingMessage}</p>}</div>{assessment && <div className="flex gap-2"><button onClick={() => setShowAnswers((value) => !value)} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600">{showAnswers ? <EyeOff size={14} /> : <Eye size={14} />}{showAnswers ? 'Hide answers' : 'Show answers'}</button><button onClick={trainModel} disabled={training} className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[10px] font-bold text-white disabled:bg-slate-300"><Brain size={14} />{training ? 'Training...' : 'Train model'}</button></div>}</div>{!assessment ? <div className="grid min-h-80 place-items-center rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-400"><div><Sparkles className="mx-auto mb-3 text-cyan-500" size={28} /><p>Enter subject, unit and class to evaluate the uploaded book.</p></div></div> : <div className="space-y-3">{assessment.questions.map((question, index) => <QuestionCard key={question.id || index} question={question} index={index} showAnswers={showAnswers} />)}</div>}</section>
         </section>
     </div>;
 }

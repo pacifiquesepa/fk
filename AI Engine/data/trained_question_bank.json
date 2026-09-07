@@ -1,0 +1,868 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple_choice",
+    "prompt": "According to the Table of Contents in Primary 1 Mathematics, what is the exact title and number range of Unit 1? (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 6)",
+    "options": [
+      "UNIT\u00c9 1 : Nombres de 1 \u00e0 5",
+      "UNIT\u00c9 1 : Nombres de 1 \u00e0 9",
+      "UNIT\u00c9 1 : Nombres de 0 \u00e0 10",
+      "UNIT\u00c9 1 : Nombres de 0 \u00e0 20"
+    ],
+    "answer": "UNIT\u00c9 1 : Nombres de 1 \u00e0 5",
+    "points": 1,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Identify the title and scope of Unit 1 in the Primary 1 Mathematics curriculum.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q2",
+    "type": "multiple_choice",
+    "prompt": "In Section 1.1 ('Compter, lire et \u00e9crire le nombre 1'), which of the following animals is depicted for counting 1? (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7)",
+    "options": [
+      "une vache (a cow)",
+      "un cheval (a horse)",
+      "un chien (a dog)",
+      "un chat (a cat)"
+    ],
+    "answer": "une vache (a cow)",
+    "points": 1,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Recognize concrete animal visual examples used to represent the quantity 1.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q3",
+    "type": "multiple_choice",
+    "prompt": "Which fruit is featured under Section 1.1 for counting and reading the number 1? (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7)",
+    "options": [
+      "un ananas (a pineapple)",
+      "une mangue (a mango)",
+      "une pomme (an apple)",
+      "une banane (a banana)"
+    ],
+    "answer": "un ananas (a pineapple)",
+    "points": 1,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Identify fruit representations used to teach the number 1.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q4",
+    "type": "multiple_choice",
+    "prompt": "What two primary skill tasks are evaluated in Question 2 of the End of Unit 1 Assessment ('\u00c9valuation de fin d'unit\u00e9')? (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28)",
+    "options": [
+      "Addition and subtraction of numbers",
+      "Multiplication and division of numbers",
+      "Measuring lengths in meters",
+      "Identifying shapes and right angles"
+    ],
+    "answer": "Addition and subtraction of numbers",
+    "points": 1,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Identify arithmetic operations required in the Unit 1 final assessment.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q5",
+    "type": "match",
+    "prompt": "Match each French object label from Section 1.1 to its English translation. (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7)",
+    "options": [
+      "une vache",
+      "un ananas",
+      "une balle",
+      "une fleur"
+    ],
+    "answer": {
+      "une vache": "a cow",
+      "un ananas": "a pineapple",
+      "une balle": "a ball",
+      "une fleur": "a flower"
+    },
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Associate French vocabulary for single items in Unit 1.1 with their English meanings.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q6",
+    "type": "match",
+    "prompt": "Match each Unit from the Primary 1 Mathematics Table of Contents to its corresponding content title. (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 6)",
+    "options": [
+      "UNIT\u00c9 1",
+      "UNIT\u00c9 2",
+      "UNIT\u00c9 9",
+      "UNIT\u00c9 10"
+    ],
+    "answer": {
+      "UNIT\u00c9 1": "Nombres de 1 \u00e0 5",
+      "UNIT\u00c9 2": "Nombres de 1 \u00e0 9",
+      "UNIT\u00c9 9": "Les suites de nombres",
+      "UNIT\u00c9 10": "Mesurer des longueurs inf\u00e9rieures ou \u00e9gales \u00e0 10 m"
+    },
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Relate unit numbers to their correct curriculum unit titles.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q7",
+    "type": "rearrange",
+    "prompt": "Rearrange the given numbers into ascending numerical order from 1 to 5 as taught in Unit 1 writing exercises. (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28)",
+    "options": [
+      "3",
+      "1",
+      "5",
+      "2",
+      "4"
+    ],
+    "answer": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Order numbers from 1 to 5 sequentially.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q8",
+    "type": "rearrange",
+    "prompt": "Order the main evaluation steps as listed in the End of Unit 1 Assessment ('\u00c9valuation de fin d'unit\u00e9'). (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28)",
+    "options": [
+      "Additionner et soustraire les nombres (Addition and subtraction)",
+      "Compter et \u00e9crire les nombres de 1 \u00e0 5 (Count and write numbers from 1 to 5)"
+    ],
+    "answer": [
+      "Compter et \u00e9crire les nombres de 1 \u00e0 5 (Count and write numbers from 1 to 5)",
+      "Additionner et soustraire les nombres (Addition and subtraction)"
+    ],
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Recall the sequence of assessment tasks in Unit 1.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q9",
+    "type": "fill_in_gap",
+    "prompt": "Fill in the missing number in the counting sequence from 1 to 5: 1, 2, __, 4, 5. (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28)",
+    "options": [
+      "3"
+    ],
+    "answer": "3",
+    "points": 1,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Complete missing elements in simple counting sequences within 1 to 5.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q10",
+    "type": "drag_and_drop",
+    "prompt": "Drag each item shown in Section 1.1 into its correct category (Animals vs. Objects/Food). (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7)",
+    "options": [
+      "une vache",
+      "une poule",
+      "un ananas",
+      "une tasse"
+    ],
+    "answer": {
+      "Animals": [
+        "une vache",
+        "une poule"
+      ],
+      "Objects/Food": [
+        "un ananas",
+        "une tasse"
+      ]
+    },
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Categorize concrete objects used in Unit 1.1 counting activities.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q11",
+    "type": "open_question",
+    "prompt": "Describe how concrete everyday objects (e.g., animals, fruit, household items) are used in Section 1.1 of Unit 1 to teach learners to count, read, and write the number 1. (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7)",
+    "options": null,
+    "answer": null,
+    "points": 3,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Explain the pedagogical method of using single concrete objects to introduce number concepts.",
+      "marking_rubric": "3 points: Explicitly names at least two concrete objects from Section 1.1 (e.g., une vache, un ananas, une balle, une fleur, une tasse, une poule) and explains how showing single instances of these items helps learners count, read, and write the numeral 1. 2 points: Mentions that single objects are used to demonstrate '1' but names only one or no specific examples. 1 point: Gives a general answer about numbers without mentioning concrete objects from the textbook.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q12",
+    "type": "open_question",
+    "prompt": "State the two main assessment components tested in the End of Unit 1 Assessment ('\u00c9valuation de fin d'unit\u00e9') and explain what mathematical skills they verify. (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28)",
+    "options": null,
+    "answer": null,
+    "points": 3,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Summarize the skills evaluated in the Unit 1 final assessment.",
+      "marking_rubric": "3 points: Identifies both components: (1) counting and writing numbers from 1 to 5, and (2) performing basic addition and subtraction with numbers 1 to 5. 2 points: Identifies only one of the two components accurately. 1 point: Provides a vague response with no direct mention of counting/writing 1 to 5 or addition/subtraction.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q1",
+    "type": "multiple_choice",
+    "prompt": "According to the table of contents and Unit 1 title in Primary 1 Mathematics, what range of numbers is covered in Unit 1?",
+    "options": [
+      "Nombres de 1 \u00e0 5",
+      "Nombres de 1 \u00e0 9",
+      "Nombres de 0 \u00e0 10",
+      "Nombres de 0 \u00e0 20"
+    ],
+    "answer": "Nombres de 1 \u00e0 5",
+    "points": 1,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Identify the number range taught in Unit 1 of Primary 1 Mathematics (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 6).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q2",
+    "type": "multiple_choice",
+    "prompt": "In Section 1.1 ('Compter, lire et \u00e9crire le nombre 1'), which of the following objects is listed as an example of counting one item?",
+    "options": [
+      "une vache",
+      "un mouton",
+      "une ch\u00e8vre",
+      "un chien"
+    ],
+    "answer": "une vache",
+    "points": 1,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Recognize examples used to represent the quantity 'one' in Section 1.1 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q3",
+    "type": "multiple_choice",
+    "prompt": "Which fruit is featured in Section 1.1 as an example object for the number 1?",
+    "options": [
+      "un ananas",
+      "une pomme",
+      "une banane",
+      "une orange"
+    ],
+    "answer": "un ananas",
+    "points": 1,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Identify visual objects representing the number 1 in Unit 1 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q4",
+    "type": "multiple_choice",
+    "prompt": "Which of these questions is asked in Section 1.0 (Activit\u00e9 d'introduction) to introduce counting?",
+    "options": [
+      "Combien de poules?",
+      "Combien de vaches?",
+      "Combien de voitures?",
+      "Combien d'avions?"
+    ],
+    "answer": "Combien de poules?",
+    "points": 1,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Recall introductory activity questions from Unit 1.0 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q5",
+    "type": "multiple_choice",
+    "prompt": "According to the End of Unit Assessment on page 28, which two basic mathematical operations are evaluated for Unit 1?",
+    "options": [
+      "Addition and subtraction",
+      "Multiplication and division",
+      "Fractions and decimals",
+      "Measurement and geometry"
+    ],
+    "answer": "Addition and subtraction",
+    "points": 1,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Identify evaluation tasks for Unit 1 numbers 1 to 5 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q6",
+    "type": "multiple_choice",
+    "prompt": "In Section 1.1, which container item is listed among the example objects for counting 'one'?",
+    "options": [
+      "une tasse",
+      "une bouteille",
+      "un verre",
+      "une assiette"
+    ],
+    "answer": "une tasse",
+    "points": 1,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Identify specific vocabulary items used to count the number 1 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q7",
+    "type": "match",
+    "prompt": "Match each French object name from Section 1.1 with its English translation.",
+    "options": [
+      "une vache",
+      "un ananas",
+      "une balle",
+      "une fleur"
+    ],
+    "answer": {
+      "une vache": "a cow",
+      "un ananas": "a pineapple",
+      "une balle": "a ball",
+      "une fleur": "a flower"
+    },
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Associate Unit 1 object vocabulary with correct terms (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q8",
+    "type": "match",
+    "prompt": "Match each number from 1 to 4 with its written word in English.",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "answer": {
+      "1": "One",
+      "2": "Two",
+      "3": "Three",
+      "4": "Four"
+    },
+    "points": 2,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Match digits 1 to 4 with their corresponding word names (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q9",
+    "type": "match",
+    "prompt": "Match each simple addition problem within Unit 1 numbers to its sum.",
+    "options": [
+      "1 + 1",
+      "2 + 1",
+      "3 + 1",
+      "4 + 1"
+    ],
+    "answer": {
+      "1 + 1": "2",
+      "2 + 1": "3",
+      "3 + 1": "4",
+      "4 + 1": "5"
+    },
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Perform simple addition using numbers from 1 to 5 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q10",
+    "type": "match",
+    "prompt": "Match each subtraction expression within 1 to 5 to its correct result.",
+    "options": [
+      "5 - 1",
+      "4 - 1",
+      "3 - 1",
+      "2 - 1"
+    ],
+    "answer": {
+      "5 - 1": "4",
+      "4 - 1": "3",
+      "3 - 1": "2",
+      "2 - 1": "1"
+    },
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Perform simple subtraction within numbers 1 to 5 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q11",
+    "type": "match",
+    "prompt": "Match the introductory activity question number from Section 1.0 to the target item mentioned in the text.",
+    "options": [
+      "Question 3",
+      "Question 4",
+      "Question 5"
+    ],
+    "answer": {
+      "Question 3": "poules (hens)",
+      "Question 4": "stylos (pens)",
+      "Question 5": "cahiers (notebooks)"
+    },
+    "points": 2,
+    "difficulty": "hard",
+    "metadata": {
+      "learning_outcome": "Relate specific questions from Section 1.0 to their corresponding objects (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q12",
+    "type": "rearrange",
+    "prompt": "Arrange the numbers in ascending counting order from 1 to 5.",
+    "options": [
+      "3",
+      "1",
+      "5",
+      "2",
+      "4"
+    ],
+    "answer": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "points": 2,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Order numbers from 1 to 5 in ascending order (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q13",
+    "type": "rearrange",
+    "prompt": "Arrange the numbers in descending order from 5 down to 1.",
+    "options": [
+      "2",
+      "5",
+      "1",
+      "4",
+      "3"
+    ],
+    "answer": [
+      "5",
+      "4",
+      "3",
+      "2",
+      "1"
+    ],
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Order numbers from 5 down to 1 in descending order (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q14",
+    "type": "rearrange",
+    "prompt": "Rearrange the three action steps in Section 1.1 heading in the order they appear: 'Compter, lire et \u00e9crire le nombre 1'.",
+    "options": [
+      "\u00e9crire",
+      "Compter",
+      "lire"
+    ],
+    "answer": [
+      "Compter",
+      "lire",
+      "\u00e9crire"
+    ],
+    "points": 2,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Identify the sequence of learning actions stated in Section 1.1 title (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q15",
+    "type": "rearrange",
+    "prompt": "Order the first three numbers listed in Question 1 of the Unit 1 Evaluation.",
+    "options": [
+      "3",
+      "1",
+      "2"
+    ],
+    "answer": [
+      "1",
+      "2",
+      "3"
+    ],
+    "points": 1,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Sequence initial counting numbers 1, 2, and 3 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q16",
+    "type": "rearrange",
+    "prompt": "Rearrange the sequence of numbers that complete counting up to 5.",
+    "options": [
+      "5",
+      "3",
+      "4"
+    ],
+    "answer": [
+      "3",
+      "4",
+      "5"
+    ],
+    "points": 1,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Sequence numbers 3, 4, and 5 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q17",
+    "type": "fill_in_gap",
+    "prompt": "Unit 1 in the Primary 1 Mathematics manual is titled 'CHIFFRES DE 1 \u00c0 ___'.",
+    "options": null,
+    "answer": "5",
+    "points": 1,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Complete the title of Unit 1 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q18",
+    "type": "fill_in_gap",
+    "prompt": "In Section 1.1, 'une ___' (flower) is given as an example of counting 1 object.",
+    "options": null,
+    "answer": "fleur",
+    "points": 1,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Recall French object words used for quantity 1 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q19",
+    "type": "fill_in_gap",
+    "prompt": "If you have 2 apples and receive 3 more apples, you have a total of ___ apples.",
+    "options": null,
+    "answer": "5",
+    "points": 1,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Solve simple addition problems up to 5 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q20",
+    "type": "fill_in_gap",
+    "prompt": "When subtracting 1 from 3, the remaining amount is ___.",
+    "options": null,
+    "answer": "2",
+    "points": 1,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Solve simple subtraction problems within 1 to 5 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q21",
+    "type": "fill_in_gap",
+    "prompt": "In Section 1.1, 'une ___' (hen) is listed as an example of counting one object.",
+    "options": null,
+    "answer": "poule",
+    "points": 1,
+    "difficulty": "easy",
+    "metadata": {
+      "learning_outcome": "Identify vocabulary for single object counting (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q22",
+    "type": "drag_and_drop",
+    "prompt": "Group the numbers from 1 to 5 into Odd numbers and Even numbers.",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "answer": {
+      "Odd": [
+        "1",
+        "3",
+        "5"
+      ],
+      "Even": [
+        "2",
+        "4"
+      ]
+    },
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Categorize numbers 1 to 5 into odd and even numbers.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q23",
+    "type": "drag_and_drop",
+    "prompt": "Classify the following French words from Section 1.1 into 'Animals' or 'Objects/Plants'.",
+    "options": [
+      "une vache",
+      "une poule",
+      "un ananas",
+      "une fleur"
+    ],
+    "answer": {
+      "Animals": [
+        "une vache",
+        "une poule"
+      ],
+      "Objects/Plants": [
+        "un ananas",
+        "une fleur"
+      ]
+    },
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Classify Unit 1 objects by category (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q24",
+    "type": "drag_and_drop",
+    "prompt": "Classify these math expressions from Unit 1 assessment as 'Addition' or 'Subtraction'.",
+    "options": [
+      "2 + 3",
+      "1 + 1",
+      "5 - 2",
+      "4 - 1"
+    ],
+    "answer": {
+      "Addition": [
+        "2 + 3",
+        "1 + 1"
+      ],
+      "Subtraction": [
+        "5 - 2",
+        "4 - 1"
+      ]
+    },
+    "points": 2,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Distinguish between addition and subtraction expressions in Unit 1 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q25",
+    "type": "open_question",
+    "prompt": "Name three objects mentioned in Section 1.1 of Unit 1 that are used to teach counting the number 1.",
+    "options": null,
+    "answer": null,
+    "points": 3,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Recall objects associated with counting the number 1 in Unit 1 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "marking_rubric": "Give 1 point for each correct object named from Section 1.1 (e.g., une vache, un ananas, une balle, une fleur, une tasse, une poule) up to a total of 3 points.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q26",
+    "type": "open_question",
+    "prompt": "Describe how a Primary 1 student uses concrete objects to count from 1 to 5 according to the competence-based learning approach outlined in the foreword.",
+    "options": null,
+    "answer": null,
+    "points": 3,
+    "difficulty": "hard",
+    "metadata": {
+      "learning_outcome": "Explain active learning and counting of objects in Unit 1 (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 3, 7).",
+      "marking_rubric": "Award 3 points for mentioning active participation, handling concrete objects individually/in pairs, and counting sequentially from 1 to 5. Partial credit given for partial explanations.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q27",
+    "type": "open_question",
+    "prompt": "Explain step-by-step how to solve the addition 2 + 3 using physical counting objects like pens or flowers.",
+    "options": null,
+    "answer": null,
+    "points": 3,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Demonstrate understanding of addition within 1 to 5 using physical counting (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "marking_rubric": "Full marks (3 pts) for stating: start with 2 objects, add 3 more objects, count all objects together to get 5. Partial marks if steps are incomplete.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q28",
+    "type": "open_question",
+    "prompt": "Why is it important for learners to 'Compter, lire et \u00e9crire' (Count, read, and write) a number when learning mathematics in Unit 1?",
+    "options": null,
+    "answer": null,
+    "points": 3,
+    "difficulty": "hard",
+    "metadata": {
+      "learning_outcome": "Understand the triad of counting, reading, and writing numbers (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 7).",
+      "marking_rubric": "Award marks for referencing: 1) counting connects quantities to objects, 2) reading recognizes the symbol/word, 3) writing develops representation skills.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  },
+  {
+    "id": "q29",
+    "type": "open_question",
+    "prompt": "Solve the subtraction 5 - 1 and explain what happens to the count of objects when 1 item is removed.",
+    "options": null,
+    "answer": null,
+    "points": 3,
+    "difficulty": "medium",
+    "metadata": {
+      "learning_outcome": "Explain subtraction as taking away items within the 1-5 range (SOURCE: TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf - page 28).",
+      "marking_rubric": "Award 1 point for state the correct answer (4), and 2 points for explaining that taking away 1 object from 5 leaves 4 objects behind.",
+      "source": "gemini",
+      "requires_teacher_review": true
+    },
+    "trained": true
+  }
+]
