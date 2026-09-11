@@ -124,11 +124,33 @@ function hashOtp(code) {
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
 }
+function explainSmtpError(error) {
+  const message = error && (error.message || String(error));
+  if (!message) return 'SMTP delivery failed.';
+  if (/535|5\.7\.9|WebLoginRequired|web login required|Invalid login/i.test(message)) {
+    return 'Gmail rejected the SMTP login. Generate a 16-character Google App Password for the Gmail account and set it as SMTP_PASSWORD in backend/.env. Do not use your normal Gmail password.';
+  }
+  return message;
+}
+function createSmtpTransport() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: { user: process.env.SMTP_USER, pass: smtpPassword },
+  });
+}
 async function deliverOtp({ code, destination, channel }) {
   if (channel === 'email' && process.env.SMTP_HOST && process.env.SMTP_USER && smtpPassword && !smtpPassword.includes('PUT_YOUR_')) {
-    const transporter = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 587), secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: smtpPassword } });
-    await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: destination, subject: 'FKAMS password verification code', text: `Your FKAMS verification code is ${code}. It expires in two minutes.`, html: `<p>Your FKAMS verification code is:</p><p style="font-size:24px;font-weight:700;letter-spacing:6px">${code}</p><p>This code expires in two minutes. If you did not request it, you can ignore this email.</p>` });
-    return;
+    const transporter = createSmtpTransport();
+    try {
+      await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: destination, subject: 'FKAMS password verification code', text: `Your FKAMS verification code is ${code}. It expires in two minutes.`, html: `<p>Your FKAMS verification code is:</p><p style="font-size:24px;font-weight:700;letter-spacing:6px">${code}</p><p>This code expires in two minutes. If you did not request it, you can ignore this email.</p>` });
+      return;
+    } catch (error) {
+      const friendlyError = explainSmtpError(error);
+      console.error(`[FKAMS SMTP] ${friendlyError}`);
+      throw new Error(friendlyError);
+    }
   }
   if (process.env.OTP_PROVIDER === 'console' || !process.env.OTP_PROVIDER) {
     console.log(`[FKAMS OTP] ${channel} to ${maskDestination(destination, channel)}: ${code}`);
@@ -144,28 +166,40 @@ async function deliverAdmissionNotice({ destination, name, status, admissionNumb
     ? `Dear parent, ${name}'s application has been approved. Admission number: ${admissionNumber}. Login username: ${username}. Default password: ${temporaryPassword}. Please change the password after your first login.`
     : `Dear parent, ${name}'s application was not approved at this time. Please contact Forever King Academy admissions for more information.`;
   if (destination.includes('@') && process.env.SMTP_HOST && process.env.SMTP_USER && smtpPassword && !smtpPassword.includes('PUT_YOUR_')) {
-    const transporter = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 587), secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: smtpPassword } });
+    const transporter = createSmtpTransport();
     const logoPath = path.join(__dirname, '..', 'frontend', 'public', 'forever.jpg');
     const logoUrl = fs.existsSync(logoPath) ? 'cid:fkams-logo' : (process.env.PUBLIC_LOGO_URL || `${allowedOrigin}/forever.jpg`);
     const html = approved
       ? `<div style="font-family:Arial,sans-serif;max-width:600px;color:#17333d"><img src="${escapeHtml(logoUrl)}" alt="Forever King Academy" style="max-width:220px;max-height:80px;object-fit:contain"><h2 style="color:#1d7b91">Application approved</h2><p>Dear parent,</p><p><strong>${escapeHtml(name)}</strong>'s application has been approved.</p><div style="background:#eef8f6;border-radius:10px;padding:16px"><p><strong>Admission number:</strong> ${escapeHtml(admissionNumber)}</p><p><strong>Login username:</strong> ${escapeHtml(username)}</p><p><strong>Default password:</strong> ${escapeHtml(temporaryPassword)}</p></div><p>Use the admission number as the username to access FKAMS. Please change the password after your first login.</p><p><a href="${escapeHtml(allowedOrigin)}" style="display:inline-block;background:#1d7b91;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:bold">Login now</a></p><p>Welcome to Forever King Academy.</p></div>`
       : `<div style="font-family:Arial,sans-serif;max-width:600px;color:#17333d"><img src="${escapeHtml(logoUrl)}" alt="Forever King Academy" style="max-width:220px;max-height:80px;object-fit:contain"><h2 style="color:#1d7b91">Application update</h2><p>Dear parent,</p><p>We are sorry to inform you that <strong>${escapeHtml(name)}</strong>'s application was not approved at this time.</p><p><a href="tel:+250788390989" style="display:inline-block;background:#1d7b91;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:bold">Contact admissions: +250 788 390 989</a></p></div>`;
-    await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: destination, subject, text, html, ...(fs.existsSync(logoPath) ? { attachments: [{ filename: 'forever.jpg', path: logoPath, cid: 'fkams-logo' }] } : {}) });
-    return 'email';
+    try {
+      await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: destination, subject, text, html, ...(fs.existsSync(logoPath) ? { attachments: [{ filename: 'forever.jpg', path: logoPath, cid: 'fkams-logo' }] } : {}) });
+      return 'email';
+    } catch (error) {
+      const friendlyError = explainSmtpError(error);
+      console.error(`[FKAMS SMTP] ${friendlyError}`);
+      throw new Error(friendlyError);
+    }
   }
   throw Object.assign(new Error('Gmail SMTP is not configured. The application status was not changed.'), { statusCode: 503 });
 }
 async function deliverApplicationReceived({ destination, name }) {
   if (!destination || !destination.includes('@')) throw Object.assign(new Error('A valid parent email is required.'), { statusCode: 422 });
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !smtpPassword || smtpPassword.includes('PUT_YOUR_')) throw Object.assign(new Error('Gmail SMTP is not configured. The application was not submitted.'), { statusCode: 503 });
-  const transporter = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 587), secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: smtpPassword } });
+  const transporter = createSmtpTransport();
   const logoPath = path.join(__dirname, '..', 'frontend', 'public', 'forever.jpg');
   const logoUrl = fs.existsSync(logoPath) ? 'cid:fkams-logo' : (process.env.PUBLIC_LOGO_URL || `${allowedOrigin}/forever.jpg`);
   const safeName = escapeHtml(name);
   const text = `Congratulations. Dear parent, ${name}'s application was submitted successfully. Our admissions team will review it and contact you by email. Please wait for the approval decision.`;
   const html = `<div style="font-family:Arial,sans-serif;max-width:600px;color:#17333d"><img src="${escapeHtml(logoUrl)}" alt="Forever King Academy" style="max-width:220px;max-height:80px;object-fit:contain"><h2 style="color:#1d7b91">Congratulations, application submitted</h2><p>Dear parent,</p><p><strong>${safeName}</strong>'s application was submitted successfully.</p><div style="background:#eef8f6;border-radius:10px;padding:16px"><p>Our admissions team will review the application and contact you by email.</p><p style="margin-bottom:0"><strong>Status:</strong> Waiting for approval</p></div><p>Please wait for the approval decision. You will receive another email when the application is approved or rejected.</p></div>`;
-  await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: destination, subject: 'Congratulations, FKAMS application submitted', text, html, ...(fs.existsSync(logoPath) ? { attachments: [{ filename: 'forever.jpg', path: logoPath, cid: 'fkams-logo' }] } : {}) });
-  return 'email';
+  try {
+    await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: destination, subject: 'Congratulations, FKAMS application submitted', text, html, ...(fs.existsSync(logoPath) ? { attachments: [{ filename: 'forever.jpg', path: logoPath, cid: 'fkams-logo' }] } : {}) });
+    return 'email';
+  } catch (error) {
+    const friendlyError = explainSmtpError(error);
+    console.error(`[FKAMS SMTP] ${friendlyError}`);
+    throw new Error(friendlyError);
+  }
 }
 async function notifyAdmission({ application, status, admissionNumber, username, temporaryPassword }) {
   const destination = application.parent_email || application.parent_phone;

@@ -58,6 +58,8 @@ class StudentAnswer(BaseModel):
     student_id: int
     question_id: str
     answer: Any
+    score: Optional[float] = None
+    feedback: Optional[str] = None
 
 
 class GradeRequest(BaseModel):

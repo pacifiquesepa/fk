@@ -7,6 +7,7 @@ Run from the AI Engine folder while Uvicorn is running:
 
 import json
 import sys
+import uuid
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -37,12 +38,48 @@ BOOKS = [
     ("TRANSLATED BOOK OF P1 MATHEMATICS-1.pdf", "Mathematics", "General", "P1"),
 ]
 
+QUESTION_DOCUMENTS = [
+    ("IBIBAZO BYISUZUMA P1.docx", "Kinyarwanda", "P1"),
+    ("IBIBAZO BYISUZUMA P3.docx", "Kinyarwanda", "P3"),
+    ("IBIBAZO BYISUZUMA P4.docx", "Kinyarwanda", "P4"),
+    ("P1 Maths  Model Questions.doc", "Mathematics", "P1"),
+    ("P2 Maths Model Questions.doc", "Mathematics", "P2"),
+    ("P3 Maths Model  Questions.doc 18_04_2018.doc", "Mathematics", "P3"),
+    ("P5 Maths MODEL QUESTIONS.doc 19_04_2018.doc", "Mathematics", "P5"),
+    ("P1 SET MODEL QUESTIONS.docx", "General Studies", "P1"),
+    ("P3 SET MODEL QUESTIONS.docx", "General Studies", "P3"),
+    ("P4 SET MODEL QUESTIONS.docx", "General Studies", "P4"),
+    ("P5 SET MODEL QUESTIONS.docx", "General Studies", "P5"),
+    ("PRIMARY 4.1 SOCIAL STUDIES MDEL QUESTIONS.docx", "Social Studies", "P4"),
+    ("PRIMARY 5.1 SOCIAL STUDIESMODEL QUESTIONS.docx", "Social Studies", "P5"),
+]
+
 
 def existing_books():
     request = Request(f"{upload_book.BASE_URL}/api/books", method="GET")
     with urlopen(request, timeout=20) as response:
         data = json.loads(response.read().decode("utf-8"))
     return {book.get("filename") for book in data.get("books", [])}
+
+
+def train_question_document(path, subject, class_name):
+    boundary = f"----FKAMSTrain{uuid.uuid4().hex}"
+    content_type = "application/msword" if path.suffix.lower() == ".doc" else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    body = b"".join([
+        upload_book.field(boundary, "subject", subject),
+        upload_book.field(boundary, "unit", "All units"),
+        upload_book.field(boundary, "class_name", class_name),
+        upload_book.file_field(boundary, "file", path.name, content_type, path.read_bytes()),
+        f"--{boundary}--\r\n".encode("utf-8"),
+    ])
+    request = Request(
+        f"{upload_book.BASE_URL}/api/assessments/train-document",
+        data=body,
+        method="POST",
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+    )
+    with urlopen(request, timeout=120) as response:
+        return json.loads(response.read().decode("utf-8"))
 
 
 def main():
@@ -69,6 +106,21 @@ def main():
         upload_book.main()
         uploaded_names.add(filename)
         uploaded += 1
+
+    for filename, subject, class_name in QUESTION_DOCUMENTS:
+        path = DOWNLOADS / filename
+        if not path.is_file():
+            print(f"MISSING QUESTION DOCUMENT: {path}")
+            missing += 1
+            continue
+        try:
+            result = train_question_document(path, subject, class_name)
+            print(f"TRAINED QUESTIONS: {filename} -> added={result.get('added', 0)}, skipped={result.get('skipped', 0)}")
+        except HTTPError as error:
+            message = error.read().decode("utf-8", errors="replace")
+            print(f"QUESTION TRAINING FAILED: {filename}: HTTP {error.code}: {message}")
+        except (URLError, TimeoutError) as error:
+            print(f"QUESTION TRAINING FAILED: {filename}: {error}")
 
     print(f"DONE: uploaded={uploaded}, skipped={skipped}, missing={missing}")
 

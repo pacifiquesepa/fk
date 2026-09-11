@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import tempfile
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, List
@@ -22,8 +24,8 @@ class BookService:
 
     def ingest_file(self, filename: str, content: bytes, subject: str, topic: str, class_name: str, verified: bool) -> Dict[str, Any]:
         extension = Path(filename).suffix.lower()
-        if extension not in {".pdf", ".txt", ".md", ".docx"}:
-            raise ValueError("Supported book formats are PDF, DOCX, TXT, and MD.")
+        if extension not in {".doc", ".pdf", ".txt", ".md", ".docx"}:
+            raise ValueError("Supported book formats are DOC, DOCX, PDF, TXT, and MD.")
         book_id = uuid4().hex
         safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", Path(filename).name)
         book_path = self.books_dir / f"{book_id}_{safe_name}"
@@ -73,6 +75,34 @@ class BookService:
 
     @staticmethod
     def _extract_pages(extension: str, content: bytes, book_id: str) -> List[Dict[str, Any]]:
+        if extension == ".doc":
+            temporary_path = None
+            word = None
+            document = None
+            try:
+                import win32com.client
+                with tempfile.NamedTemporaryFile(suffix=".doc", delete=False) as temporary_file:
+                    temporary_file.write(content)
+                    temporary_path = temporary_file.name
+                word = win32com.client.Dispatch("Word.Application")
+                word.Visible = False
+                document = word.Documents.Open(os.path.abspath(temporary_path), ReadOnly=True)
+                text = "\n".join(paragraph.Range.Text for paragraph in document.Paragraphs)
+                return [{"text": text, "has_images": False, "image_refs": []}]
+            except ImportError as error:
+                raise ValueError("Legacy DOC files require Microsoft Word and pywin32. Save the file as DOCX if Word is unavailable.") from error
+            except Exception as error:
+                raise ValueError("Legacy DOC extraction failed. Make sure Microsoft Word is installed, closed, and pywin32 is installed; otherwise save the file as DOCX.") from error
+            finally:
+                if document is not None:
+                    document.Close(False)
+                if word is not None:
+                    word.Quit()
+                if temporary_path:
+                    try:
+                        os.unlink(temporary_path)
+                    except OSError:
+                        pass
         if extension == ".pdf":
             reader = PdfReader(__import__("io").BytesIO(content))
             if reader.is_encrypted:
@@ -101,6 +131,16 @@ class BookService:
                 pages.append({"text": text, "has_images": bool(image_refs), "image_refs": image_refs})
             return pages
         if extension == ".docx":
+            try:
+                from docx import Document
+                import io
+                document = Document(io.BytesIO(content))
+                paragraphs = [paragraph.text for paragraph in document.paragraphs if paragraph.text.strip()]
+                table_rows = [" | ".join(cell.text.strip() for cell in row.cells) for table in document.tables for row in table.rows if any(cell.text.strip() for cell in row.cells)]
+                text = "\n".join(paragraphs + table_rows)
+                return [{"text": text, "has_images": bool(document.inline_shapes), "image_refs": []}]
+            except ImportError:
+                pass
             with zipfile.ZipFile(__import__("io").BytesIO(content)) as archive:
                 xml = archive.read("word/document.xml").decode("utf-8", errors="ignore")
                 image_dir = Path(__file__).resolve().parents[2] / "data" / "books" / book_id

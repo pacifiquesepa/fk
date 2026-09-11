@@ -1,4 +1,6 @@
 import json
+import re
+from uuid import uuid4
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -94,11 +96,67 @@ def external_reference(payload: Dict[str, Any]):
     prompt = str(payload.get("prompt", "")).strip()
     if not prompt:
         raise HTTPException(status_code=400, detail="prompt is required")
+
+    trained_match = assessment_service.find_trained_answer(prompt, payload.get("subject"), payload.get("class_name"))
+    if trained_match:
+        return trained_match
+
     context = knowledge_service.search(prompt, payload.get("subject"), payload.get("topic"), int(payload.get("limit", 5)))
     try:
         return provider_service.reference(str(payload.get("provider", "local")), prompt, context)
     except RuntimeError as error:
         raise HTTPException(status_code=502, detail=str(error)) from error
+
+
+def parse_assessment_request(text: str) -> Dict[str, Any]:
+    request = str(text or "").strip()
+    lowered = request.lower()
+    count_match = re.search(r"\b(\d+)\s+(?:questions?|ibibazo)\b", lowered)
+    class_match = re.search(r"\b(?:primary\s*|p\s*)([1-6])\b", lowered)
+    unit_match = re.search(r"\bunit\s*([0-9]+)\b", request, re.I)
+    difficulty = next((value for value in ("easy", "medium", "strong") if value in lowered), "medium")
+    type_aliases = {
+        "multiple_choice": ("multiple choice", "multiple-choice", "mcq"),
+        "match": ("match", "matching"),
+        "fill_in_gap": ("fill in the gap", "fill-in-the-gap", "fill gap"),
+        "rearrange": ("rearrange", "arrange the words"),
+        "drag_and_drop": ("drag and drop", "drag-and-drop"),
+        "open_question": ("open question", "open-ended", "open question"),
+    }
+    question_type = next((key for key, aliases in type_aliases.items() if any(alias in lowered for alias in aliases)), "multiple_choice")
+    subjects = ("English", "Mathematics", "Science", "History", "General Knowledge")
+    subject = next((value for value in subjects if value.lower() in lowered), "English")
+    topic_match = re.search(r"\b(?:about|on|kuri|topic(?: is)?)\s+([^,.;]+)", request, re.I)
+    topic = topic_match.group(1).strip() if topic_match else "General"
+    count = int(count_match.group(1)) if count_match else 1
+    class_name = f"P{class_match.group(1)}" if class_match else None
+    output_language = "Kinyarwanda" if re.search(r"(?:mu|in)\s+kinyarwanda|kinyarwanda", lowered) else "English"
+    unit = f"Unit {unit_match.group(1)}" if unit_match else "Unit 1" if class_name == "P1" and subject == "English" else topic
+    return {
+        "subject_name": subject,
+        "unit": unit,
+        "topic": topic,
+        "class_name": class_name,
+        "output_language": output_language,
+        "difficulty": difficulty,
+        "provider": "local",
+        "question_types": [question_type],
+        "counts": {question_type: max(1, min(count, 50))},
+    }
+
+
+@app.post("/api/assessments/request")
+def generate_from_teacher_request(payload: Dict[str, Any]):
+    text = str(payload.get("request", "")).strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="request is required")
+    request = parse_assessment_request(text)
+    approved_topics = assessment_service.curriculum_topics(request.get("class_name"), request.get("subject_name"), request.get("unit"))
+    if approved_topics and not any(request["topic"].lower() == topic.lower() for topic in approved_topics):
+        raise HTTPException(status_code=400, detail={"message": "The requested topic is not in the approved curriculum map.", "requested_topic": request["topic"], "approved_topics": approved_topics})
+    context = assessment_context(AssessmentRequest(**request))
+    result = assessment_service.generate_assessment({**request, "book_context": context})
+    return {"request": request, "assessment": result.model_dump()}
 
 
 @app.post("/api/assessments/generate")
@@ -123,7 +181,34 @@ def train_assessment(payload: Dict[str, Any]):
     questions = payload.get("questions", [])
     if not isinstance(questions, list) or not questions:
         raise HTTPException(status_code=400, detail="At least one reviewed question is required")
-    return {"added": assessment_service.train(questions), "message": "Reviewed questions added to the local question bank."}
+    result = assessment_service.train(questions)
+    return {**result, "message": "Only questions with validated answers were added to the local question bank."}
+
+
+@app.post("/api/assessments/train-document")
+async def train_question_document(
+    file: UploadFile = File(...),
+    subject: str = Form(...),
+    unit: str = Form(...),
+    class_name: str = Form(...),
+):
+    filename = file.filename or "questions"
+    extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else "txt"
+    if extension not in {"doc", "docx", "pdf", "txt", "md"}:
+        raise HTTPException(status_code=400, detail="Use DOC, DOCX, PDF, TXT, or MD.")
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="The question document is empty.")
+    try:
+        pages = BookService._extract_pages(f".{extension}", content, f"training-{uuid4().hex}")
+        text = "\n".join(page.get("text", "") for page in pages)
+        result = assessment_service.train_document(text, subject.strip(), unit.strip(), class_name.strip())
+    except (ValueError, OSError, KeyError, json.JSONDecodeError) as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    message = "Question-and-answer document evaluated and approved items saved to the local model."
+    if not result["questions"] or not result["added"]:
+        message = "Document was read, but no validated answer key was found. Questions were skipped to protect accuracy."
+    return {**result, "message": message}
 
 
 @app.post("/api/assessments/grade")

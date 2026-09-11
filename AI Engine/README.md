@@ -225,7 +225,9 @@ Replace the PDF path with the real path. Do not type the path by itself as a com
 
 ### Upload all school books automatically
 
-The folder also includes `upload_school_books.cmd`. Keep Uvicorn running, then double-click that `.cmd` file. It uploads the educational books found in Downloads, assigns class and subject metadata, skips unrelated files, and skips filenames already indexed. No repeated CMD commands are required.
+The folder also includes `upload_school_books.cmd`. Double-click that `.cmd` file; it starts the AI Engine automatically if it is not already running, waits for the health check, uploads the educational books found in Downloads, and trains the question documents. It assigns class and subject metadata, skips unrelated files, and skips filenames already indexed. No repeated CMD commands are required.
+
+The same script also trains the local model from these Kinyarwanda question documents when they are in Downloads: `IBIBAZO BYISUZUMA P1.docx`, `IBIBAZO BYISUZUMA P3.docx`, and `IBIBAZO BYISUZUMA P4.docx`. It also trains Mathematics from `P1 Maths  Model Questions.doc`, `P2 Maths Model Questions.doc`, `P3 Maths Model  Questions.doc 18_04_2018.doc`, and `P5 Maths MODEL QUESTIONS.doc 19_04_2018.doc`, General Studies from the P1-P5 SET model-question documents, and Social Studies from `PRIMARY 4.1 SOCIAL STUDIES MDEL QUESTIONS.docx` and `PRIMARY 5.1 SOCIAL STUDIESMODEL QUESTIONS.docx`. They are stored for their class and `All units`, so approved answers can be reused when generating questions for a selected unit. A document without an answer key is reported as `skipped`, not as a failed upload, because the system will not invent an answer.
 
 You can also run it from Command Prompt:
 
@@ -290,6 +292,22 @@ powershell -Command "$body = @{ provider = 'local'; prompt = 'Explain the discri
 Use `provider = 'openai'` or `provider = 'gemini'` only after configuring the corresponding key. External responses are labelled unverified and must be reviewed by a teacher before entering the curriculum dataset.
 
 ### Provider-backed question generation
+
+### Train from a question-and-answer document
+
+In the AI Engine page, enter `Subject`, `Unit`, and `Class`, choose a `.docx`, `.pdf`, `.txt`, or `.md` question document, then click `Evaluate and train document`. The parser accepts formats such as:
+
+```text
+Question 1: What is a noun?
+A. A naming word
+B. An action word
+Answer: A
+
+Question 2: Explain a sentence.
+Answer: A group of words that expresses a complete idea.
+```
+
+The parsed questions and answers are shown in the generated-question panel. DOCX paragraphs and Word table cells are both supported, including answer-key sections such as `Answers: 1. A, 2. C` and `Ibisubizo`. Only questions with a non-empty, valid answer are saved to `data/trained_question_bank.json`; question-only documents are reported as skipped instead of receiving invented answers. Legacy `.doc` files are supported on Windows when Microsoft Word and `pywin32` are installed; extraction failures now return a clear upload error; otherwise save the file as `.docx` first.
 
 The assessment generation endpoint accepts `provider`:
 

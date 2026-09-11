@@ -1,4 +1,2396 @@
 {
+    "English": {
+        "Greetings": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "What do we say in the morning?",
+                        "options": [
+                            "Good morning",
+                            "Good night",
+                            "Goodbye",
+                            "Good afternoon"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P1",
+                            "unit": "Unit 1",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One",
+                            "source_book": "P1 English Pupil's Book One",
+                            "source_topic": "Greeting children in the classroom",
+                            "explanation": "We say 'Good morning' when greeting someone in the morning.",
+                            "explanation_rw": "Tuvuga 'Good morning' iyo dusuhuza umuntu mu gitondo."
+                        }
+                    }
+                ],
+                "match": [
+                    {
+                        "prompt": "Match the greeting with the correct response.",
+                        "options": [
+                            "Good morning",
+                            "How are you?"
+                        ],
+                        "answer": {
+                            "Good morning": "Good morning, Teacher.",
+                            "How are you?": "We are fine, thank you."
+                        },
+                        "points": 2,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P1",
+                            "unit": "Unit 1",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One",
+                            "left": [
+                                "Good morning",
+                                "How are you?"
+                            ],
+                            "right": [
+                                "We are fine, thank you.",
+                                "Good morning, Teacher."
+                            ],
+                            "instruction": "Match the greeting with the correct response.",
+                            "instruction_rw": "Huza indamutso n'igisubizo cyayo gikwiye.",
+                            "explanation_rw": "'Good morning' ihuzwa na 'Good morning, Teacher.', naho 'How are you?' igahuzwa na 'We are fine, thank you.'"
+                        }
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "Good ______, Teacher.",
+                        "answer": "morning",
+                        "points": 1,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P1",
+                            "unit": "Unit 1",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One",
+                            "accepted_answers": [
+                                "morning"
+                            ],
+                            "explanation": "The missing word is 'morning'.",
+                            "explanation_rw": "Ijambo ribura ni 'morning'."
+                        }
+                    }
+                ]
+            },
+            "medium": {
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the words to make a correct greeting.",
+                        "options": [
+                            "morning",
+                            "Good",
+                            "Teacher"
+                        ],
+                        "answer": [
+                            "Good",
+                            "morning",
+                            "Teacher"
+                        ],
+                        "points": 2,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P1",
+                            "unit": "Unit 1",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One",
+                            "items": [
+                                "morning",
+                                "Good",
+                                "Teacher"
+                            ],
+                            "correct_order": [
+                                "Good",
+                                "morning",
+                                "Teacher"
+                            ],
+                            "explanation": "The correct greeting starts with 'Good' and forms 'Good morning Teacher'.",
+                            "explanation_rw": "Indangamutso itangira kuri 'Good' maze igakora interuro 'Good morning Teacher'."
+                        }
+                    }
+                ]
+            }
+        },
+        "Introducing myself": {
+            "medium": {
+                "rearrange": [
+                    {
+                        "prompt": "Put the words in the correct order to introduce yourself.",
+                        "options": [
+                            "is",
+                            "My",
+                            "Kamanzi",
+                            "name"
+                        ],
+                        "answer": [
+                            "My",
+                            "name",
+                            "is",
+                            "Kamanzi"
+                        ],
+                        "points": 2,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P1",
+                            "unit": "Unit 1",
+                            "subtopic": "Stating my name",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One",
+                            "items": [
+                                "is",
+                                "My",
+                                "Kamanzi",
+                                "name"
+                            ],
+                            "correct_order": [
+                                "My",
+                                "name",
+                                "is",
+                                "Kamanzi"
+                            ],
+                            "explanation": "The correct sequence for introducing oneself is 'My name is [Name]'."
+                        }
+                    }
+                ]
+            }
+        },
+        "Introducing others": {
+            "easy": {
+                "match": [
+                    {
+                        "prompt": "Match the sentence to the person it refers to.",
+                        "options": [
+                            "This is Mutoni.",
+                            "This is Mugisha."
+                        ],
+                        "answer": {
+                            "This is Mutoni.": "Introducing a girl",
+                            "This is Mugisha.": "Introducing a boy"
+                        },
+                        "points": 2,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P1",
+                            "unit": "Unit 1",
+                            "subtopic": "Introducing friends",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One",
+                            "left": [
+                                "This is Mutoni.",
+                                "This is Mugisha."
+                            ],
+                            "right": [
+                                "Introducing a girl",
+                                "Introducing a boy"
+                            ],
+                            "instruction": "Match the sentence to the person it refers to.",
+                            "explanation": "Mutoni is matched with introducing a girl, and Mugisha with introducing a boy."
+                        }
+                    }
+                ]
+            }
+        },
+        "Instructions": {
+            "medium": {
+                "drag_and_drop": [
+                    {
+                        "prompt": "Sort the actions under the correct command category.",
+                        "options": [
+                            "Stand up",
+                            "Sit down",
+                            "Open your book",
+                            "Close your book"
+                        ],
+                        "answer": {
+                            "Postural Commands": [
+                                "Stand up",
+                                "Sit down"
+                            ],
+                            "Object Commands": [
+                                "Open your book",
+                                "Close your book"
+                            ]
+                        },
+                        "points": 4,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P1",
+                            "unit": "Unit 1",
+                            "subtopic": "Classroom actions",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One",
+                            "instruction": "Sort the actions under the correct command category.",
+                            "items": [
+                                "Stand up",
+                                "Sit down",
+                                "Open your book",
+                                "Close your book"
+                            ],
+                            "groups": [
+                                "Postural Commands",
+                                "Object Commands"
+                            ],
+                            "explanation": "Standing and sitting are postural commands; opening and closing a book are object commands."
+                        }
+                    }
+                ]
+            }
+        },
+        "Sounds and spellings": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Which letter does the word 'Book' start with?",
+                        "options": [
+                            "A",
+                            "B",
+                            "C",
+                            "D"
+                        ],
+                        "answer": 1,
+                        "points": 1,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P1",
+                            "unit": "Unit 1",
+                            "subtopic": "Letter-sound association",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One",
+                            "explanation": "The word 'Book' starts with the letter B."
+                        }
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "Complete the word from our sounds list: I have a red p__n.",
+                        "answer": "e",
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Vowel Sounds",
+                            "language": "English",
+                            "accepted_answers": [
+                                "e",
+                                "E"
+                            ],
+                            "source": "REB Competence-Based Curriculum, page 49",
+                            "marking_scheme": {
+                                "exact_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Case-insensitive match with accepted answers.",
+                                "partial_marking": false
+                            },
+                            "explanation": "Pen belongs to the short e sound family, so the missing letter is e."
+                        }
+                    }
+                ]
+            }
+        },
+        "Introducing family members": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Who is the mother in a family?",
+                        "options": [
+                            "A woman",
+                            "A boy",
+                            "A brother",
+                            "A father"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 3: People at home",
+                            "subtopic": "Family Vocabulary",
+                            "language": "English",
+                            "learning_outcome": "Learners should be able to identify a female parent from options.",
+                            "source": "P1 English Pupil's Book One, pages 26 and 34",
+                            "accepted_answers": [
+                                "A woman"
+                            ],
+                            "grading_method": "exact_match",
+                            "marking_scheme": {
+                                "correct_option": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Match exact string from options.",
+                                "partial_marking": false
+                            },
+                            "explanation": "Mother is introduced as a woman, for example Mrs. Rukundo."
+                        }
+                    }
+                ],
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the words to introduce a family member.",
+                        "options": [
+                            "mother",
+                            "This",
+                            "my",
+                            "is"
+                        ],
+                        "answer": [
+                            "This",
+                            "is",
+                            "my",
+                            "mother"
+                        ],
+                        "points": 2,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 3: People at home",
+                            "subtopic": "Possessive Sentence Structure",
+                            "language": "English",
+                            "learning_outcome": "Learners should be able to order words correctly to introduce a family member.",
+                            "source": "REB Competence-Based Curriculum",
+                            "grading_method": "exact_sequence",
+                            "marking_scheme": {
+                                "perfect_order": 2,
+                                "incorrect_order": 0
+                            },
+                            "correction_engine": {
+                                "rules": "The student order must match correct_order index by index.",
+                                "partial_marking": false
+                            }
+                        }
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "This is my brother. His name is Eg__de.",
+                        "answer": "i",
+                        "points": 1,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 3: People at home",
+                            "subtopic": "Family Names",
+                            "language": "English",
+                            "accepted_answers": [
+                                "i",
+                                "I"
+                            ],
+                            "source": "P1 English Pupil's Book One, page 27",
+                            "marking_scheme": {
+                                "exact_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Case-insensitive match with accepted answers.",
+                                "partial_marking": false
+                            },
+                            "explanation": "The boy character's name is spelled Egide, so the missing letter is i."
+                        }
+                    }
+                ]
+            }
+        },
+        "Telling your age. Listen and repeat": {
+            "easy": {
+                "match": [
+                    {
+                        "prompt": "Match the person with their age from the story.",
+                        "options": [
+                            "My sister",
+                            "My brother",
+                            "Simbi"
+                        ],
+                        "answer": {
+                            "My sister": "is three years old.",
+                            "My brother": "is nine years old.",
+                            "Simbi": "is ten years old."
+                        },
+                        "points": 3,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 3: People at home",
+                            "subtopic": "Age Identification",
+                            "language": "English",
+                            "left": [
+                                "My sister",
+                                "My brother",
+                                "Simbi"
+                            ],
+                            "right": [
+                                "is three years old.",
+                                "is nine years old.",
+                                "is ten years old."
+                            ],
+                            "learning_outcome": "Learners should be able to match the character name with their age based on the story.",
+                            "source": "P1 English Pupil's Book One, pages 28 and 29",
+                            "grading_method": "partial_match",
+                            "marking_scheme": {
+                                "each_correct_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point for every correct pair matched by the student.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            },
+            "medium": {
+                "multiple_choice": [
+                    {
+                        "prompt": "What text do you use to ask a friend their age?",
+                        "options": [
+                            "What is your name?",
+                            "How old are you?",
+                            "Who is this?",
+                            "How are you?"
+                        ],
+                        "answer": 1,
+                        "points": 1,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 3: People at home",
+                            "subtopic": "Dialogue Questions",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One, page 28",
+                            "accepted_answers": [
+                                "How old are you?"
+                            ],
+                            "marking_scheme": {
+                                "correct_option": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Match exact string from options.",
+                                "partial_marking": false
+                            },
+                            "explanation": "How old are you? is the standard question used to ask about age."
+                        }
+                    }
+                ]
+            },
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Imagine you are six years old like Teta on page 29. Write a full sentence to tell someone your age.",
+                        "answer": null,
+                        "points": 5,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 3: People at home",
+                            "subtopic": "Sentence Construction",
+                            "language": "English",
+                            "grading": {
+                                "method": "rubric",
+                                "criteria": [
+                                    {
+                                        "criterion": "starts_with_i_am",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "includes_a_number_word_or_digit",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "ends_with_years_old",
+                                        "points": 1
+                                    }
+                                ]
+                            },
+                            "correction_engine": {
+                                "rules": "Evaluate the structure I am [number] years old.",
+                                "partial_marking": true
+                            },
+                            "explanation": "Award marks for the sentence frame, an age number, and the words years old."
+                        }
+                    }
+                ]
+            }
+        },
+        "People at school: Who is he? Who is she?": {
+            "medium": {
+                "fill_in_gap": [
+                    {
+                        "prompt": "Mr. Karambizi is my h__ad teacher.",
+                        "answer": "e",
+                        "points": 1,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 3: People at home",
+                            "subtopic": "School Roles",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One, page 30",
+                            "accepted_answers": [
+                                "e",
+                                "E"
+                            ],
+                            "learning_outcome": "Learners should be able to spell the title of the head of school.",
+                            "grading_method": "accepted_answers",
+                            "marking_scheme": {
+                                "exact_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Case-insensitive match with accepted answers.",
+                                "partial_marking": false
+                            },
+                            "explanation": "The correct spelling is 'head teacher', so the missing letter is 'e'."
+                        }
+                    }
+                ]
+            },
+            "easy": {
+                "match": [
+                    {
+                        "prompt": "Match the school worker with their proper name.",
+                        "options": [
+                            "Mr. Karambizi",
+                            "Mrs. Kalima"
+                        ],
+                        "answer": {
+                            "Mr. Karambizi": "is my head teacher.",
+                            "Mrs. Kalima": "is my English teacher."
+                        },
+                        "points": 2,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 3: People at home",
+                            "subtopic": "Staff Identification",
+                            "language": "English",
+                            "left": [
+                                "Mr. Karambizi",
+                                "Mrs. Kalima"
+                            ],
+                            "right": [
+                                "is my English teacher.",
+                                "is my head teacher."
+                            ],
+                            "source": "P1 English Pupil's Book One, page 30",
+                            "marking_scheme": {
+                                "each_correct_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point for every correct pair matched.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Clothes that we wear / Parts of my body": {
+            "medium": {
+                "drag_and_drop": [
+                    {
+                        "prompt": "Drag each word into the correct group.",
+                        "options": [
+                            "shirt",
+                            "nose",
+                            "dress",
+                            "hand"
+                        ],
+                        "answer": {
+                            "Clothes": [
+                                "shirt",
+                                "dress"
+                            ],
+                            "Parts of my body": [
+                                "nose",
+                                "hand"
+                            ]
+                        },
+                        "points": 4,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 4: Clothes and parts of my body",
+                            "subtopic": "Vocabulary Categorization",
+                            "language": "English",
+                            "instruction": "Drag each word into the correct group.",
+                            "items": [
+                                "shirt",
+                                "nose",
+                                "dress",
+                                "hand"
+                            ],
+                            "groups": [
+                                "Clothes",
+                                "Parts of my body"
+                            ],
+                            "learning_outcome": "Learners should be able to sort items into body parts and clothes.",
+                            "source": "REB Competence-Based Curriculum",
+                            "grading_method": "category_match",
+                            "marking_scheme": {
+                                "each_correct_placement": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Check if item exists in the correct group array. Award 1 point per correct item.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            },
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Look at page 37. Write one full sentence describing what the boy is wearing (Use the format: He is wearing a...).",
+                        "answer": null,
+                        "points": 5,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 4: Clothes and parts of my body",
+                            "subtopic": "Sentence Construction",
+                            "language": "English",
+                            "learning_outcome": "Learners should be able to write a simple sentence about what someone is wearing.",
+                            "source": "REB Competence-Based Curriculum, page 37",
+                            "grading": {
+                                "method": "rubric",
+                                "criteria": [
+                                    {
+                                        "criterion": "starts_with_he_is_wearing",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "includes_correct_clothing_item",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "includes_correct_colour",
+                                        "points": 1
+                                    }
+                                ]
+                            },
+                            "correction_engine": {
+                                "rules": "Check for the sentence frame 'He is wearing' and textbook clothing vocabulary such as 'yellow shirt' or 'green shorts'.",
+                                "partial_marking": true
+                            },
+                            "explanation": "Award partial marks for the sentence frame, clothing item, and correct colour."
+                        }
+                    }
+                ]
+            }
+        },
+        "Parts of my body": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Look at page 34. Which body part is the child pointing to when saying 'This is my...'?",
+                        "options": [
+                            "Nose",
+                            "Leg",
+                            "Arm",
+                            "Shirt"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 4: Clothes and parts of my body",
+                            "subtopic": "Face Vocabulary",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One, page 34",
+                            "accepted_answers": [
+                                "Nose"
+                            ],
+                            "marking_scheme": {
+                                "correct_option": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Match exact string from options.",
+                                "partial_marking": false
+                            },
+                            "explanation": "The child points to the nose and says, 'This is my nose.'"
+                        }
+                    }
+                ],
+                "match": [
+                    {
+                        "prompt": "Match the beginning of the sentence with the correct body part wording.",
+                        "options": [
+                            "This is my",
+                            "These are my"
+                        ],
+                        "answer": {
+                            "This is my": "mouth.",
+                            "These are my": "ears."
+                        },
+                        "points": 2,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 4: Clothes and parts of my body",
+                            "subtopic": "Singular vs Plural Grammar",
+                            "language": "English",
+                            "left": [
+                                "This is my",
+                                "These are my"
+                            ],
+                            "right": [
+                                "ears.",
+                                "mouth."
+                            ],
+                            "source": "P1 English Pupil's Book One, pages 34 and 35",
+                            "marking_scheme": {
+                                "each_correct_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point for every correct pair matched.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "The boy points to his middle body segment: This is my ch__st.",
+                        "answer": "e",
+                        "points": 1,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 4: Clothes and parts of my body",
+                            "subtopic": "Spelling",
+                            "language": "English",
+                            "accepted_answers": [
+                                "e",
+                                "E"
+                            ],
+                            "source": "P1 English Pupil's Book One, page 35",
+                            "marking_scheme": {
+                                "exact_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Case-insensitive match with accepted answers.",
+                                "partial_marking": false
+                            },
+                            "explanation": "The correct spelling is chest, requiring the letter e."
+                        }
+                    }
+                ]
+            }
+        },
+        "Listen and do the actions. What are they doing?": {
+            "medium": {
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the words to describe an ongoing action.",
+                        "options": [
+                            "stamping",
+                            "feet.",
+                            "They",
+                            "their",
+                            "are"
+                        ],
+                        "answer": [
+                            "They",
+                            "are",
+                            "stamping",
+                            "their",
+                            "feet."
+                        ],
+                        "points": 2,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 4: Clothes and parts of my body",
+                            "subtopic": "Present Continuous Sentences",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One, page 37",
+                            "marking_scheme": {
+                                "perfect_order": 2,
+                                "incorrect_order": 0
+                            },
+                            "correction_engine": {
+                                "rules": "The student order must match correct_order index by index.",
+                                "partial_marking": false
+                            }
+                        }
+                    }
+                ]
+            },
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Look at the classroom action game on page 36. Write down the full action command word used for hands (Example: Clap your...).",
+                        "answer": null,
+                        "points": 5,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 4: Clothes and parts of my body",
+                            "subtopic": "Action Description",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One, page 36",
+                            "grading": {
+                                "method": "rubric",
+                                "criteria": [
+                                    {
+                                        "criterion": "contains_word_clap",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "contains_word_your",
+                                        "points": 1
+                                    },
+                                    {
+                                        "criterion": "contains_word_hands",
+                                        "points": 2
+                                    }
+                                ]
+                            },
+                            "correction_engine": {
+                                "rules": "Match the command Clap your hands.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Clothes that we wear": {
+            "medium": {
+                "drag_and_drop": [
+                    {
+                        "prompt": "Group the clothing items according to how they are worn.",
+                        "options": [
+                            "jacket",
+                            "shoes",
+                            "shirt",
+                            "socks"
+                        ],
+                        "answer": {
+                            "Worn on Upper Body": [
+                                "jacket",
+                                "shirt"
+                            ],
+                            "Worn on Feet": [
+                                "shoes",
+                                "socks"
+                            ]
+                        },
+                        "points": 4,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 4: Clothes and parts of my body",
+                            "subtopic": "Clothing Categories",
+                            "language": "English",
+                            "instruction": "Group the clothing items according to how they are worn.",
+                            "items": [
+                                "jacket",
+                                "shoes",
+                                "shirt",
+                                "socks"
+                            ],
+                            "groups": [
+                                "Worn on Upper Body",
+                                "Worn on Feet"
+                            ],
+                            "source": "P1 English Pupil's Book One, pages 33 and 37",
+                            "marking_scheme": {
+                                "each_correct_placement": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point per correct item.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            },
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Look at page 37. Write one full sentence describing what the boy is wearing (Use the format: He is wearing a...).",
+                        "answer": null,
+                        "points": 5,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 4: Clothes and parts of my body",
+                            "subtopic": "Sentence Construction",
+                            "language": "English",
+                            "grading": {
+                                "method": "rubric",
+                                "criteria": [
+                                    {
+                                        "criterion": "starts_with_he_is_wearing",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "includes_correct_clothing_item",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "includes_correct_colour",
+                                        "points": 1
+                                    }
+                                ]
+                            },
+                            "correction_engine": {
+                                "rules": "Check the sentence frame, clothing item, and colour.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Expressing Likes": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "When you are happy with something or love it, you say: I _______ it.",
+                        "options": [
+                            "like",
+                            "dislike",
+                            "hate",
+                            "no"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Basic Vocabulary",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum",
+                            "accepted_answers": [
+                                "like"
+                            ],
+                            "marking_scheme": {
+                                "correct_option": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Match exact string from options.",
+                                "partial_marking": false
+                            },
+                            "explanation": "The word like expresses a positive preference."
+                        }
+                    }
+                ],
+                "match": [
+                    {
+                        "prompt": "Match the starting phrase with the correct object ending.",
+                        "options": [
+                            "I like to play with my",
+                            "I like to read my",
+                            "I like to write with my"
+                        ],
+                        "answer": {
+                            "I like to play with my": "ball.",
+                            "I like to read my": "book.",
+                            "I like to write with my": "pencil."
+                        },
+                        "points": 3,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Sentence Pairing",
+                            "language": "English",
+                            "left": [
+                                "I like to play with my",
+                                "I like to read my",
+                                "I like to write with my"
+                            ],
+                            "right": [
+                                "book.",
+                                "ball.",
+                                "pencil."
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "each_correct_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point for every correct pair matched.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            },
+            "medium": {
+                "fill_in_gap": [
+                    {
+                        "prompt": "Fill the missing question word: Do you _______ apples?",
+                        "answer": "like",
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Verbal Questioning",
+                            "language": "English",
+                            "accepted_answers": [
+                                "like",
+                                "Like"
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "exact_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Case-insensitive match with accepted answers.",
+                                "partial_marking": false
+                            },
+                            "explanation": "The question structure is Do you like [item]?"
+                        }
+                    }
+                ],
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the words to express liking a colour.",
+                        "options": [
+                            "yellow",
+                            "I",
+                            "colour.",
+                            "like",
+                            "the"
+                        ],
+                        "answer": [
+                            "I",
+                            "like",
+                            "the",
+                            "yellow",
+                            "colour."
+                        ],
+                        "points": 2,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Syntax",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "perfect_order": 2,
+                                "incorrect_order": 0
+                            },
+                            "correction_engine": {
+                                "rules": "The student order must match correct_order index by index.",
+                                "partial_marking": false
+                            }
+                        }
+                    }
+                ],
+                "drag_and_drop": [
+                    {
+                        "prompt": "Sort the statements into the correct target columns.",
+                        "options": [
+                            "I love it",
+                            "I do not like",
+                            "It is nice",
+                            "I dislike"
+                        ],
+                        "answer": {
+                            "Show Likes": [
+                                "I love it",
+                                "It is nice"
+                            ],
+                            "Show Dislikes": [
+                                "I do not like",
+                                "I dislike"
+                            ]
+                        },
+                        "points": 4,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Emotional Valence Sorting",
+                            "language": "English",
+                            "instruction": "Sort the statements into the correct target columns.",
+                            "items": [
+                                "I love it",
+                                "I do not like",
+                                "It is nice",
+                                "I dislike"
+                            ],
+                            "groups": [
+                                "Show Likes",
+                                "Show Dislikes"
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "each_correct_placement": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point per correct item.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            },
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Think about school or home. Write one complete sentence to tell your teacher one thing you like very much.",
+                        "answer": null,
+                        "points": 5,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Sentence Construction",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum",
+                            "grading": {
+                                "method": "rubric",
+                                "criteria": [
+                                    {
+                                        "criterion": "starts_with_i_like",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "includes_a_valid_action_or_noun_from_text",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "correct_spacing_and_basic_lettering",
+                                        "points": 1
+                                    }
+                                ]
+                            },
+                            "correction_engine": {
+                                "rules": "Check I like plus a valid school/home noun or action.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Expressing Dislikes": {
+            "medium": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Which sentence shows that a child does not like an item?",
+                        "options": [
+                            "I like mangoes.",
+                            "I do not like mangoes.",
+                            "This is my mango.",
+                            "Yes, I have mangoes."
+                        ],
+                        "answer": 1,
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Sentence Structure",
+                            "language": "English",
+                            "accepted_answers": [
+                                "I do not like mangoes."
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "correct_option": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Match exact string from options.",
+                                "partial_marking": false
+                            },
+                            "explanation": "I do not like expresses a negative preference."
+                        }
+                    }
+                ]
+            }
+        },
+        "Expressing Preferences": {
+            "easy": {
+                "match": [
+                    {
+                        "prompt": "Match the starting phrase with the correct object ending.",
+                        "options": [
+                            "I like to play with my",
+                            "I like to read my",
+                            "I like to write with my"
+                        ],
+                        "answer": {
+                            "I like to play with my": "ball.",
+                            "I like to read my": "book.",
+                            "I like to write with my": "pencil."
+                        },
+                        "points": 3,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Sentence Pairing",
+                            "language": "English",
+                            "left": [
+                                "I like to play with my",
+                                "I like to read my",
+                                "I like to write with my"
+                            ],
+                            "right": [
+                                "book.",
+                                "ball.",
+                                "pencil."
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "each_correct_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point for every correct pair matched.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Expressing Likes and Dislikes": {
+            "medium": {
+                "drag_and_drop": [
+                    {
+                        "prompt": "Sort the statements into the correct target columns.",
+                        "options": [
+                            "I love it",
+                            "I do not like",
+                            "It is nice",
+                            "I dislike"
+                        ],
+                        "answer": {
+                            "Show Likes": [
+                                "I love it",
+                                "It is nice"
+                            ],
+                            "Show Dislikes": [
+                                "I do not like",
+                                "I dislike"
+                            ]
+                        },
+                        "points": 4,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 5: Likes and dislikes",
+                            "subtopic": "Emotional Valence Sorting",
+                            "language": "English",
+                            "instruction": "Sort the statements into the correct target columns.",
+                            "items": [
+                                "I love it",
+                                "I do not like",
+                                "It is nice",
+                                "I dislike"
+                            ],
+                            "groups": [
+                                "Show Likes",
+                                "Show Dislikes"
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "each_correct_placement": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point per correct item.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Yes or NO:": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "If a friend asks 'Is this your bag?' and it belongs to you, what do you say?",
+                        "options": [
+                            "Yes, this is my bag.",
+                            "No, thank you.",
+                            "Goodbye, friend.",
+                            "I do not like bags."
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 6: Classroom objects and personal belongings",
+                            "subtopic": "Ownership Confirmation",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum, page 55",
+                            "accepted_answers": [
+                                "Yes, this is my bag."
+                            ],
+                            "marking_scheme": {
+                                "correct_option": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Match exact string from options.",
+                                "partial_marking": false
+                            },
+                            "explanation": "Use Yes, this is my... to confirm ownership."
+                        }
+                    }
+                ]
+            },
+            "medium": {
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the words to confirm ownership.",
+                        "options": [
+                            "is",
+                            "ruler.",
+                            "This",
+                            "my"
+                        ],
+                        "answer": [
+                            "This",
+                            "is",
+                            "my",
+                            "ruler."
+                        ],
+                        "points": 2,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 6: Classroom objects and personal belongings",
+                            "subtopic": "Sentence Realignment",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "perfect_order": 2,
+                                "incorrect_order": 0
+                            },
+                            "correction_engine": {
+                                "rules": "The student order must match correct_order index by index.",
+                                "partial_marking": false
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "How many…?": {
+            "medium": {
+                "multiple_choice": [
+                    {
+                        "prompt": "When your teacher asks you to count classroom items, which question phrase is correct?",
+                        "options": [
+                            "How many pens have you got?",
+                            "What colour is many?",
+                            "Where is many pencil?",
+                            "Who is many book?"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 6: Classroom objects and personal belongings",
+                            "subtopic": "Quantifying Items",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum",
+                            "accepted_answers": [
+                                "How many pens have you got?"
+                            ],
+                            "marking_scheme": {
+                                "correct_option": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Match exact string from options.",
+                                "partial_marking": false
+                            },
+                            "explanation": "How many is used with plural nouns to ask about quantity."
+                        }
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "How ________ rulers do you have in your school bag?",
+                        "answer": "many",
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 6: Classroom objects and personal belongings",
+                            "subtopic": "Plurality Mechanics",
+                            "language": "English",
+                            "accepted_answers": [
+                                "many",
+                                "Many"
+                            ],
+                            "source": "REB Competence-Based Curriculum, page 54",
+                            "marking_scheme": {
+                                "exact_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Case-insensitive match with accepted answers.",
+                                "partial_marking": false
+                            },
+                            "explanation": "The question word for quantity is many."
+                        }
+                    }
+                ]
+            }
+        },
+        "Children play a game in class by asking questions": {
+            "easy": {
+                "match": [
+                    {
+                        "prompt": "Match the classroom question with the correct answer from the game.",
+                        "options": [
+                            "Where is the classroom?",
+                            "How many books do you see?",
+                            "Is that your ruler?"
+                        ],
+                        "answer": {
+                            "Where is the classroom?": "It is over there.",
+                            "How many books do you see?": "I see three books.",
+                            "Is that your ruler?": "No, it is her ruler."
+                        },
+                        "points": 3,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 6: Classroom objects and personal belongings",
+                            "subtopic": "Conversational Matching",
+                            "language": "English",
+                            "left": [
+                                "Where is the classroom?",
+                                "How many books do you see?",
+                                "Is that your ruler?"
+                            ],
+                            "right": [
+                                "I see three books.",
+                                "No, it is her ruler.",
+                                "It is over there."
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "each_correct_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point for every correct pair matched.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Identifying places / Classroom objects": {
+            "medium": {
+                "drag_and_drop": [
+                    {
+                        "prompt": "Sort the following words under the correct group header.",
+                        "options": [
+                            "classroom",
+                            "pencil",
+                            "playground",
+                            "rubber"
+                        ],
+                        "answer": {
+                            "Places": [
+                                "classroom",
+                                "playground"
+                            ],
+                            "Objects": [
+                                "pencil",
+                                "rubber"
+                            ]
+                        },
+                        "points": 4,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 6: Classroom objects and personal belongings",
+                            "subtopic": "Semantic Categorization",
+                            "language": "English",
+                            "instruction": "Sort the following words under the correct group header.",
+                            "items": [
+                                "classroom",
+                                "pencil",
+                                "playground",
+                                "rubber"
+                            ],
+                            "groups": [
+                                "Places",
+                                "Objects"
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "each_correct_placement": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point per correct item.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Identifying places": {
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Where is your school bag right now? Write a single sentence to tell your teacher where it is (Example: My bag is on the desk).",
+                        "answer": null,
+                        "points": 5,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 6: Classroom objects and personal belongings",
+                            "subtopic": "Sentence Construction",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum",
+                            "grading": {
+                                "method": "rubric",
+                                "criteria": [
+                                    {
+                                        "criterion": "starts_with_my_bag_is",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "includes_a_valid_classroom_location_preposition",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "proper_word_spacing",
+                                        "points": 1
+                                    }
+                                ]
+                            },
+                            "correction_engine": {
+                                "rules": "Check My bag is or It is followed by a classroom location such as on the desk or in class.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Our house has different rooms": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Which room do we use to sleep at night?",
+                        "options": ["Bedroom", "Kitchen", "Sitting room", "Toilet"],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 7: Home",
+                            "subtopic": "Vocabulary Identification",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum, page 63",
+                            "accepted_answers": ["Bedroom"],
+                            "marking_scheme": {"correct_option": 1},
+                            "correction_engine": {"rules": "Match exact string from options.", "partial_marking": false},
+                            "explanation": "The bedroom is the room used for sleeping."
+                        }
+                    }
+                ]
+            },
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Look at the house descriptions on page 63. Write one short sentence to tell your teacher about one room in your house (Example: This is our kitchen).",
+                        "answer": null,
+                        "points": 5,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 7: Home",
+                            "subtopic": "Productive Expression",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum, page 63",
+                            "grading": {"method": "rubric", "criteria": [{"criterion": "starts_with_this_is_or_my_house_has", "points": 2}, {"criterion": "includes_a_valid_room_noun_from_text", "points": 2}, {"criterion": "correct_end_punctuation", "points": 1}]},
+                            "correction_engine": {"rules": "Check This is or We have with a valid room such as kitchen, bedroom, sitting room, or dining room.", "partial_marking": true}
+                        }
+                    }
+                ]
+            }
+        },
+        "Our home: Activities at home": {
+            "medium": {
+                "multiple_choice": [
+                    {
+                        "prompt": "What is mother doing in the kitchen?",
+                        "options": ["She is cooking food.", "She is sleeping in bed.", "She is washing clothes.", "She is playing football."],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 7: Home",
+                            "subtopic": "Action Matching",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum, pages 60 and 63",
+                            "accepted_answers": ["She is cooking food."],
+                            "marking_scheme": {"correct_option": 1},
+                            "correction_engine": {"rules": "Match exact string from options.", "partial_marking": false},
+                            "explanation": "Cooking food is an activity done in the kitchen."
+                        }
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "My family is eating dinner _______ the dining room.",
+                        "answer": "in",
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 7: Home",
+                            "subtopic": "Sentence Mechanics",
+                            "language": "English",
+                            "accepted_answers": ["in", "In"],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {"exact_match": 1},
+                            "correction_engine": {"rules": "Case-insensitive match with accepted answers.", "partial_marking": false},
+                            "explanation": "Use in for activities inside a room."
+                        }
+                    }
+                ],
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the words to show where a family member is located.",
+                        "options": ["is", "Father", "the", "house.", "in"],
+                        "answer": ["Father", "is", "in", "the", "house."],
+                        "points": 2,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 7: Home",
+                            "subtopic": "Syntax Layout",
+                            "language": "English",
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {"perfect_order": 2, "incorrect_order": 0},
+                            "correction_engine": {"rules": "The student order must match correct_order index by index.", "partial_marking": false}
+                        }
+                    }
+                ],
+                "drag_and_drop": [
+                    {
+                        "prompt": "Group the actions into where they happen around the home.",
+                        "options": ["cooking food", "playing football", "sleeping in bed", "sweeping the yard"],
+                        "answer": {"Inside the Rooms": ["cooking food", "sleeping in bed"], "Outside in the Compound": ["playing football", "sweeping the yard"]},
+                        "points": 4,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 7: Home",
+                            "subtopic": "Activity Categorization",
+                            "language": "English",
+                            "instruction": "Group the actions into where they happen around the home.",
+                            "items": ["cooking food", "playing football", "sleeping in bed", "sweeping the yard"],
+                            "groups": ["Inside the Rooms", "Outside in the Compound"],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {"each_correct_placement": 1},
+                            "correction_engine": {"rules": "Award 1 point per correct item.", "partial_marking": true}
+                        }
+                    }
+                ]
+            }
+        },
+        "Naming objects": {
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Look at your classroom. Write down the names of two objects you see.",
+                        "answer": null,
+                        "points": 2,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P1",
+                            "unit": "Unit 1",
+                            "subtopic": "Writing object names",
+                            "language": "English",
+                            "source": "P1 English Pupil's Book One",
+                            "expected_answers_examples": [
+                                "Pencil",
+                                "Desk",
+                                "Book",
+                                "Chair",
+                                "Table"
+                            ],
+                            "grading": {
+                                "method": "rubric",
+                                "criteria": [
+                                    {
+                                        "criterion": "Provides one valid classroom object",
+                                        "points": 1
+                                    },
+                                    {
+                                        "criterion": "Provides a second valid classroom object",
+                                        "points": 1
+                                    }
+                                ]
+                            },
+                            "explanation": "Award one mark for each valid classroom object named."
+                        }
+                    }
+                ]
+            }
+        },
+        "What is this? What is that?": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "What do we use to write in a notebook?",
+                        "options": [
+                            "A pen",
+                            "A chair",
+                            "A duster",
+                            "A cupboard"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 2: Classroom objects",
+                            "subtopic": "Object Identification",
+                            "language": "English",
+                            "learning_outcome": "Learners should be able to identify a classroom object used for writing from options.",
+                            "source": "P1 English Pupil's Book One, page 15",
+                            "accepted_answers": [
+                                "A pen"
+                            ],
+                            "grading_method": "exact_match",
+                            "marking_scheme": {
+                                "correct_option": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Match exact string from options.",
+                                "partial_marking": false
+                            },
+                            "explanation": "According to the textbook vocabulary on page 15, a pen is a classroom object used for writing."
+                        }
+                    }
+                ]
+            },
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Look around your room. Write one short sentence describing one object and its colour (Example: This is a red pen).",
+                        "answer": null,
+                        "points": 5,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 2: Classroom objects",
+                            "subtopic": "Expressive Description",
+                            "language": "English",
+                            "learning_outcome": "Learners should be able to write a simple sentence identifying an object and its colour.",
+                            "source": "REB Competence-Based Curriculum",
+                            "grading": {
+                                "method": "rubric",
+                                "criteria": [
+                                    {
+                                        "criterion": "uses_correct_sentence_opener",
+                                        "points": 1
+                                    },
+                                    {
+                                        "criterion": "includes_a_classroom_object_word",
+                                        "points": 2
+                                    },
+                                    {
+                                        "criterion": "includes_a_valid_colour_word",
+                                        "points": 2
+                                    }
+                                ]
+                            },
+                            "correction_engine": {
+                                "rules": "Check target vocabulary and sentence framing against the rubric.",
+                                "partial_marking": true
+                            },
+                            "explanation": "Award marks for a correct sentence opener, a classroom object, and a valid colour word."
+                        }
+                    }
+                ]
+            }
+        },
+        "Introducing colours. What colour is this?": {
+            "easy": {
+                "match": [
+                    {
+                        "prompt": "Match the classroom object with its description from page 19.",
+                        "options": [
+                            "This is a blue",
+                            "This is a yellow",
+                            "These are white"
+                        ],
+                        "answer": {
+                            "This is a blue": "pen.",
+                            "This is a yellow": "ruler.",
+                            "These are white": "books."
+                        },
+                        "points": 3,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 2: Classroom objects",
+                            "subtopic": "Object and Colour Association",
+                            "language": "English",
+                            "left": [
+                                "This is a blue",
+                                "This is a yellow",
+                                "These are white"
+                            ],
+                            "right": [
+                                "ruler.",
+                                "pen.",
+                                "books."
+                            ],
+                            "learning_outcome": "Learners should be able to match classroom objects with their descriptions from the text.",
+                            "source": "P1 English Pupil's Book One, page 19",
+                            "grading_method": "partial_match",
+                            "marking_scheme": {
+                                "each_correct_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Award 1 point for every correct pair matched by the student.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            },
+            "medium": {
+                "rearrange": [
+                    {
+                        "prompt": "Order the words correctly to describe multiple objects.",
+                        "options": [
+                            "blue",
+                            "my",
+                            "These",
+                            "are",
+                            "books"
+                        ],
+                        "answer": [
+                            "These",
+                            "are",
+                            "my",
+                            "blue",
+                            "books"
+                        ],
+                        "points": 2,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 2: Classroom objects",
+                            "subtopic": "Sentence Structure (Plurals)",
+                            "language": "English",
+                            "learning_outcome": "Learners should be able to order words correctly to describe multiple objects.",
+                            "source": "REB Competence-Based Curriculum",
+                            "grading_method": "exact_sequence",
+                            "marking_scheme": {
+                                "perfect_order": 2,
+                                "incorrect_order": 0
+                            },
+                            "correction_engine": {
+                                "rules": "The student order must match correct_order index by index.",
+                                "partial_marking": false
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Letters of the alphabet": {
+            "medium": {
+                "fill_in_gap": [
+                    {
+                        "prompt": "Complete the word for the object we sit on: ch__ir.",
+                        "answer": "a",
+                        "points": 1,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 2: Classroom objects",
+                            "subtopic": "Spelling and Letter Names",
+                            "language": "English",
+                            "learning_outcome": "Learners should be able to fill in missing letters for unit vocabulary.",
+                            "source": "P1 English Pupil's Book One, page 14",
+                            "accepted_answers": [
+                                "a",
+                                "A"
+                            ],
+                            "grading_method": "accepted_answers",
+                            "marking_scheme": {
+                                "exact_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Case-insensitive match with accepted answers.",
+                                "partial_marking": false
+                            },
+                            "explanation": "The correct spelling is 'chair', so the missing letter is 'a'."
+                        }
+                    }
+                ]
+            }
+        },
+        "Sounds and spellings": {
+            "easy": {
+                "fill_in_gap": [
+                    {
+                        "prompt": "Complete the word for an object used to keep your things: b__g.",
+                        "answer": "a",
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 6: Classroom objects and personal belongings",
+                            "subtopic": "Letter Completion",
+                            "language": "English",
+                            "accepted_answers": [
+                                "a",
+                                "A"
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {
+                                "exact_match": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Case-insensitive match with accepted answers.",
+                                "partial_marking": false
+                            },
+                            "explanation": "The correct spelling is bag, so the missing vowel is a."
+                        }
+                    },
+                    {
+                        "prompt": "We sleep on a b__d.",
+                        "answer": "e",
+                        "points": 1,
+                        "metadata": {
+                            "class_name": "P1",
+                            "unit": "Unit 7: Home",
+                            "subtopic": "Letter Completion",
+                            "language": "English",
+                            "accepted_answers": ["e", "E"],
+                            "source": "REB Competence-Based Curriculum",
+                            "marking_scheme": {"exact_match": 1},
+                            "correction_engine": {"rules": "Case-insensitive match with accepted answers.", "partial_marking": false},
+                            "explanation": "The correct spelling is bed, so the missing letter is e."
+                        }
+                    }
+                    }
+                ]
+            },
+            "medium": {
+                "drag_and_drop": [
+                    {
+                        "prompt": "Sort the words into the correct vowel sound groups based on Unit 1 and Unit 2.",
+                        "options": [
+                            "cat",
+                            "pen",
+                            "bag",
+                            "bed"
+                        ],
+                        "answer": {
+                            "Short 'a' sound": [
+                                "cat",
+                                "bag"
+                            ],
+                            "Short 'e' sound": [
+                                "pen",
+                                "bed"
+                            ]
+                        },
+                        "points": 4,
+                        "metadata": {
+                            "country": "Rwanda",
+                            "curriculum": "REB Competence-Based Curriculum",
+                            "level": "Primary",
+                            "class_name": "P1",
+                            "unit": "Unit 2: Classroom objects",
+                            "subtopic": "Phonics classification ('e' sound)",
+                            "language": "English",
+                            "instruction": "Sort the words into the correct vowel sound groups based on Unit 1 and Unit 2.",
+                            "items": [
+                                "cat",
+                                "pen",
+                                "bag",
+                                "bed"
+                            ],
+                            "groups": [
+                                "Short 'a' sound",
+                                "Short 'e' sound"
+                            ],
+                            "source": "REB Competence-Based Curriculum",
+                            "learning_outcome": "Learners should be able to group words based on their vowel sound family.",
+                            "grading_method": "category_match",
+                            "marking_scheme": {
+                                "each_correct_placement": 1
+                            },
+                            "correction_engine": {
+                                "rules": "Check if item exists in the correct group array. Award 1 point per correct item.",
+                                "partial_marking": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "Colours": {
+            "easy": {
+                "multiple_choice": [
+                    {
+                        "prompt": "What colour is the sun?",
+                        "options": [
+                            "Yellow",
+                            "Blue",
+                            "Black",
+                            "Green"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "explanation": "The sun is commonly represented as yellow."
+                        }
+                    },
+                    {
+                        "prompt": "Which colour is a ripe banana?",
+                        "options": [
+                            "Purple",
+                            "Yellow",
+                            "Black",
+                            "Blue"
+                        ],
+                        "answer": 1,
+                        "points": 1,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "explanation": "A ripe banana is usually yellow."
+                        }
+                    },
+                    {
+                        "prompt": "What colour is the sky on a clear day?",
+                        "options": [
+                            "Blue",
+                            "Red",
+                            "Orange",
+                            "Brown"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "explanation": "The sky is commonly blue on a clear day."
+                        }
+                    },
+                    {
+                        "prompt": "Which colour is a leaf usually?",
+                        "options": [
+                            "Green",
+                            "Pink",
+                            "White",
+                            "Purple"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "explanation": "A healthy leaf is usually green."
+                        }
+                    },
+                    {
+                        "prompt": "What colour are many school buses?",
+                        "options": [
+                            "Yellow",
+                            "Blue",
+                            "Purple",
+                            "Grey"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "explanation": "Many school buses are commonly painted yellow."
+                        }
+                    }
+                ],
+                "match": [
+                    {
+                        "prompt": "Match each colour with its name.",
+                        "options": [
+                            "Red",
+                            "Blue",
+                            "Green"
+                        ],
+                        "answer": {
+                            "Red": "The colour of an apple",
+                            "Blue": "The colour of the sky",
+                            "Green": "The colour of grass"
+                        },
+                        "points": 3,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "left": [
+                                "Red",
+                                "Blue",
+                                "Green"
+                            ],
+                            "right": [
+                                "The colour of grass",
+                                "The colour of the sky",
+                                "The colour of an apple"
+                            ],
+                            "explanation": "Red matches an apple, blue matches the sky, and green matches grass."
+                        }
+                    }
+                ],
+                "fill_in_gap": [
+                    {
+                        "prompt": "Grass is usually ______.",
+                        "answer": "green",
+                        "points": 1,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "accepted_answers": [
+                                "green",
+                                "Green"
+                            ],
+                            "explanation": "Grass is usually green."
+                        }
+                    }
+                ]
+            }
+        },
+        "Simple sentences": {
+            "medium": {
+                "rearrange": [
+                    {
+                        "prompt": "Arrange the words to make a correct sentence.",
+                        "options": [
+                            "is",
+                            "My",
+                            "red",
+                            "bag"
+                        ],
+                        "answer": [
+                            "My",
+                            "bag",
+                            "is",
+                            "red"
+                        ],
+                        "points": 2,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "items": [
+                                "is",
+                                "My",
+                                "red",
+                                "bag"
+                            ],
+                            "correct_order": [
+                                "My",
+                                "bag",
+                                "is",
+                                "red"
+                            ],
+                            "explanation": "A correct English sentence starts with a capital letter and follows subject, verb, and description order."
+                        }
+                    }
+                ],
+                "drag_and_drop": [
+                    {
+                        "prompt": "Put each word in the correct group.",
+                        "options": [
+                            "apple",
+                            "dog",
+                            "banana",
+                            "cat"
+                        ],
+                        "answer": {
+                            "Animals": [
+                                "dog",
+                                "cat"
+                            ],
+                            "Fruits": [
+                                "apple",
+                                "banana"
+                            ]
+                        },
+                        "points": 4,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "instruction": "Put each word in the correct group.",
+                            "items": [
+                                "apple",
+                                "dog",
+                                "banana",
+                                "cat"
+                            ],
+                            "groups": [
+                                "Animals",
+                                "Fruits"
+                            ],
+                            "explanation": "Dogs and cats are animals; apples and bananas are fruits."
+                        }
+                    }
+                ]
+            }
+        },
+        "Vocabulary": {
+            "strong": {
+                "open_question": [
+                    {
+                        "prompt": "Write two sentences about your school.",
+                        "answer": "Example: My school is clean. I learn English at my school.",
+                        "points": 6,
+                        "metadata": {
+                            "level": "primary",
+                            "class_name": "P2",
+                            "language": "English",
+                            "source": "teacher_training_seed",
+                            "marking_scheme": {
+                                "sentence_1": 2,
+                                "sentence_2": 2,
+                                "correct_grammar": 2
+                            },
+                            "explanation": "Award two marks for each relevant sentence and two marks for correct basic grammar. Accept other correct sentences about school."
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "General Knowledge": {
+        "General Knowledge": {
+            "medium": {
+                "multiple_choice": [
+                    {
+                        "prompt": "Niba x + 5 = 12, agaciro ka x ni akahe?",
+                        "options": [
+                            "5",
+                            "7",
+                            "12",
+                            "17"
+                        ],
+                        "answer": 1,
+                        "points": 1,
+                        "metadata": {
+                            "source": "teacher_reviewed_general_knowledge",
+                            "explanation": "Nyabyo! Ukura 5 kuri buri ruhande: x = 12 - 5 = 7."
+                        }
+                    },
+                    {
+                        "prompt": "Ni uruhe rugingo rw'umubiri w'umuntu rufite uruhare rwa mbere mu guhanahana umwuka wa ogisijeni na karubone dioseyide mu gihe cy'ubuhumekero?",
+                        "options": [
+                            "Umutima",
+                            "Umwijima",
+                            "Ibihaha",
+                            "Impyiko"
+                        ],
+                        "answer": 2,
+                        "points": 1,
+                        "metadata": {
+                            "source": "teacher_reviewed_general_knowledge",
+                            "explanation": "Nibyo! Ibihaha byakira ogisijeni ikinjira mu maraso kandi bigasohora karubone dioseyide."
+                        }
+                    },
+                    {
+                        "prompt": "Ni iyihe tariki yizihizwaho Umunsi wo Kwibohora mu Rwanda buri mwaka?",
+                        "options": [
+                            "4 Nyakanga",
+                            "1 Nyakanga",
+                            "7 Mata",
+                            "25 Ukuboza"
+                        ],
+                        "answer": 0,
+                        "points": 1,
+                        "metadata": {
+                            "source": "teacher_reviewed_general_knowledge",
+                            "explanation": "Ni byo! Umunsi wo Kwibohora wizihizwa ku wa 4 Nyakanga buri mwaka."
+                        }
+                    },
+                    {
+                        "prompt": "Niba urukiramende rufite uburebure bwa santimetero 6 n'ubugari bwa santimetero 4, ubuso bwaryo bungana na hangahe?",
+                        "options": [
+                            "10 cm²",
+                            "20 cm²",
+                            "12 cm²",
+                            "24 cm²"
+                        ],
+                        "answer": 3,
+                        "points": 1,
+                        "metadata": {
+                            "source": "teacher_reviewed_general_knowledge",
+                            "explanation": "Nyabyo! Ubuso bw'urukiramende buboneka mu gukuba uburebure n'ubugari: 6 x 4 = 24 cm²."
+                        }
+                    },
+                    {
+                        "prompt": "Ni izihe mbaraga zituma ibintu byose biri ku isi cyangwa hafi yayo bigwa hasi iyo bitagira icyabifata?",
+                        "options": [
+                            "Imbaraga z'amashanyarazi",
+                            "Imbaraga zikurura (Gravity)",
+                            "Imbaraga ziterwa n'umuyaga",
+                            "Imbaraga z'ubushyuhe"
+                        ],
+                        "answer": 1,
+                        "points": 1,
+                        "metadata": {
+                            "source": "teacher_reviewed_general_knowledge",
+                            "explanation": "Nibyo rwose! Imbaraga zikurura zituruka ku isi zikururira ibintu byose ku butaka."
+                        }
+                    }
+                ]
+            }
+        }
+    },
     "Mathematics": {
         "Algebra": {
             "easy": {

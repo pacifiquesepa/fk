@@ -1,0 +1,207 @@
+{
+    "primary": {
+        "P1": {
+            "English": {
+                "Unit 1": {
+                    "topics": [
+                        "Greetings",
+                        "Introducing myself",
+                        "Introducing others",
+                        "Instructions",
+                        "Naming objects",
+                        "Sounds and spellings"
+                    ],
+                    "subtopics": {
+                        "Greetings": [
+                            "Morning greetings"
+                        ],
+                        "Introducing myself": [
+                            "Stating my name"
+                        ],
+                        "Introducing others": [
+                            "Introducing friends"
+                        ],
+                        "Instructions": [
+                            "Classroom actions"
+                        ],
+                        "Naming objects": [
+                            "Writing object names"
+                        ],
+                        "Sounds and spellings": [
+                            "Letter-sound association"
+                        ]
+                    },
+                    "source": "P1 English Pupil's Book One",
+                    "status": "teacher_seeded_curriculum_map"
+                },
+                "Unit 2: Classroom objects": {
+                    "topics": [
+                        "What is this? What is that?",
+                        "Introducing colours. What colour is this?",
+                        "Letters of the alphabet",
+                        "Sounds and spellings",
+                        "Describing Objects"
+                    ],
+                    "subtopics": {
+                        "What is this? What is that?": [
+                            "Object Identification",
+                            "Expressive Description"
+                        ],
+                        "Introducing colours. What colour is this?": [
+                            "Object and Colour Association",
+                            "Sentence Structure (Plurals)"
+                        ],
+                        "Letters of the alphabet": [
+                            "Spelling and Letter Names"
+                        ],
+                        "Sounds and spellings": [
+                            "Phonics classification ('e' sound)"
+                        ]
+                    },
+                    "source": "REB Competence-Based Curriculum",
+                    "status": "teacher_ground_truth_seeded"
+                },
+                "Unit 3: People at home": {
+                    "topics": [
+                        "Introducing family members",
+                        "Telling your age. Listen and repeat",
+                        "People at school: Who is he? Who is she?"
+                    ],
+                    "subtopics": {
+                        "Introducing family members": [
+                            "Family Vocabulary",
+                            "Possessive Sentence Structure"
+                        ],
+                        "Telling your age. Listen and repeat": [
+                            "Age Identification"
+                        ],
+                        "People at school: Who is he? Who is she?": [
+                            "School Roles"
+                        ]
+                    },
+                    "source": "REB Competence-Based Curriculum",
+                    "status": "teacher_ground_truth_seeded"
+                },
+                "Unit 4: Clothes and parts of my body": {
+                    "topics": [
+                        "Clothes that we wear / Parts of my body",
+                        "Parts of my body",
+                        "Clothes that we wear",
+                        "Listen and do the actions. What are they doing?"
+                    ],
+                    "subtopics": {
+                        "Clothes that we wear / Parts of my body": [
+                            "Vocabulary Categorization",
+                            "Sentence Construction"
+                        ],
+                        "Parts of my body": [
+                            "Face Vocabulary",
+                            "Singular vs Plural Grammar",
+                            "Spelling"
+                        ],
+                        "Clothes that we wear": [
+                            "Clothing Categories"
+                        ],
+                        "Listen and do the actions. What are they doing?": [
+                            "Present Continuous Sentences",
+                            "Action Description"
+                        ]
+                    },
+                    "source": "REB Competence-Based Curriculum",
+                    "status": "teacher_ground_truth_seeded"
+                },
+                "Unit 5: Likes and dislikes": {
+                    "topics": [
+                        "Expressing Likes",
+                        "Expressing Dislikes",
+                        "Expressing Preferences",
+                        "Sounds and spellings",
+                        "Expressing Likes and Dislikes"
+                    ],
+                    "subtopics": {
+                        "Expressing Likes": [
+                            "Basic Vocabulary",
+                            "Verbal Questioning",
+                            "Syntax",
+                            "Sentence Construction"
+                        ],
+                        "Expressing Dislikes": [
+                            "Sentence Structure"
+                        ],
+                        "Expressing Preferences": [
+                            "Sentence Pairing"
+                        ],
+                        "Sounds and spellings": [
+                            "Vowel Sounds"
+                        ],
+                        "Expressing Likes and Dislikes": [
+                            "Emotional Valence Sorting"
+                        ]
+                    },
+                    "source": "REB Competence-Based Curriculum",
+                    "status": "teacher_ground_truth_seeded"
+                },
+                "Unit 6: Classroom objects and personal belongings": {
+                    "topics": [
+                        "Yes or NO:",
+                        "How many…?",
+                        "Children play a game in class by asking questions",
+                        "Sounds and spellings",
+                        "Identifying places / Classroom objects",
+                        "Identifying places"
+                    ],
+                    "subtopics": {
+                        "Yes or NO:": [
+                            "Ownership Confirmation",
+                            "Sentence Realignment"
+                        ],
+                        "How many…?": [
+                            "Quantifying Items",
+                            "Plurality Mechanics"
+                        ],
+                        "Children play a game in class by asking questions": [
+                            "Conversational Matching"
+                        ],
+                        "Sounds and spellings": [
+                            "Letter Completion"
+                        ],
+                        "Identifying places / Classroom objects": [
+                            "Semantic Categorization"
+                        ],
+                        "Identifying places": [
+                            "Sentence Construction"
+                        ]
+                    },
+                    "source": "REB Competence-Based Curriculum",
+                    "status": "teacher_ground_truth_seeded"
+                },
+                "Unit 7: Home": {
+                    "topics": [
+                        "Our house has different rooms",
+                        "Our home: Activities at home",
+                        "Sounds and spellings",
+                        "Identifying places"
+                    ],
+                    "subtopics": {
+                        "Our house has different rooms": ["Vocabulary Identification", "Functional Rooms", "Productive Expression"],
+                        "Our home: Activities at home": ["Action Matching", "Sentence Mechanics", "Syntax Layout", "Activity Categorization"],
+                        "Sounds and spellings": ["Letter Completion"],
+                        "Identifying places": ["Sentence Construction"]
+                    },
+                    "source": "REB Competence-Based Curriculum",
+                    "status": "teacher_ground_truth_seeded"
+                }
+            }
+        },
+        "P2": {
+            "English": {
+                "topics": [
+                    "Colours",
+                    "Simple sentences",
+                    "Vocabulary"
+                ],
+                "status": "teacher_seeded_curriculum_map"
+            }
+        }
+    }
+}
