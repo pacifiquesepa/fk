@@ -253,9 +253,11 @@ async function issueOtp(user, purpose = 'login') {
   otpRequests.set(String(user.id), { availableAt: Date.now() + 30 * 1000 });
   return { challengeId, purpose, channel: otpChannel, destination: maskDestination(destination, otpChannel), expiresInSeconds: purpose === 'password_reset' ? 120 : otpExpiresMinutes * 60 };
 }
-function signUser(user) {
-  const token = jwt.sign({ sub: user.id, role: user.role, name: user.full_name }, jwtSecret, { expiresIn: '8h' });
-  return { token, user: { id: user.id, name: user.full_name, email: user.email, phone: user.phone || null, photoKey: user.photo_key || user.photoKey || null, role: user.role } };
+async function signUser(user) {
+  const auditSessionId = crypto.randomUUID();
+  await pool.query('INSERT INTO audit_sessions (id, user_id, login_at, last_seen_at) VALUES (?, ?, NOW(), NOW())', [auditSessionId, user.id]);
+  const token = jwt.sign({ sub: user.id, role: user.role, name: user.full_name, auditSessionId }, jwtSecret, { expiresIn: '8h' });
+  return { token, auditSessionId, user: { id: user.id, name: user.full_name, email: user.email, phone: user.phone || null, photoKey: user.photo_key || user.photoKey || null, role: user.role } };
 }
 function requireAuth(req, res, next) {
   if (!jwtSecret) return res.status(503).json({ error: 'Authentication is not configured.' });
@@ -303,6 +305,36 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
+app.post('/api/audit/heartbeat', requireAuth, async (req, res) => {
+  const sessionId = req.user.auditSessionId;
+  if (!sessionId) return res.status(400).json({ error: 'Audit session is not available.' });
+  await pool.query('UPDATE audit_sessions SET last_seen_at = NOW() WHERE id = ? AND user_id = ? AND logout_at IS NULL', [sessionId, req.user.sub]);
+  res.json({ ok: true });
+});
+
+app.post('/api/audit/logout', requireAuth, async (req, res) => {
+  if (req.user.auditSessionId) await pool.query('UPDATE audit_sessions SET last_seen_at = NOW(), logout_at = NOW() WHERE id = ? AND user_id = ?', [req.user.auditSessionId, req.user.sub]);
+  res.json({ ok: true });
+});
+
+app.get('/api/audit', requireAuth, authorize('teacher', 'dos', 'admin'), async (req, res) => {
+  const role = req.user.role;
+  const where = role === 'teacher'
+    ? `u.role = 'student' AND EXISTS (SELECT 1 FROM students st JOIN student_classes sc ON sc.student_id = st.id JOIN teacher_assignments ta ON ta.class_id = sc.class_id WHERE st.user_id = u.id AND ta.teacher_id = ?)`
+    : role === 'dos'
+      ? `u.role = 'teacher'`
+      : '1 = 1';
+  const params = role === 'teacher' ? [req.user.sub] : [];
+  const [people] = await pool.query(`SELECT u.id AS userId, u.full_name AS fullName, u.role,
+    MAX(a.login_at) AS lastLoginAt, MAX(a.last_seen_at) AS lastSeenAt,
+    MAX(CASE WHEN a.logout_at IS NOT NULL THEN a.logout_at END) AS lastLogoutAt,
+    EXISTS (SELECT 1 FROM audit_sessions online_a WHERE online_a.user_id = u.id AND online_a.logout_at IS NULL AND online_a.last_seen_at >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)) AS isOnline
+    FROM users u LEFT JOIN audit_sessions a ON a.user_id = u.id WHERE ${where} GROUP BY u.id, u.full_name, u.role ORDER BY u.role, u.full_name`, params);
+  const [weekly] = await pool.query(`SELECT DATE(a.login_at) AS day, COUNT(*) AS logins, COUNT(DISTINCT a.user_id) AS people
+    FROM audit_sessions a JOIN users u ON u.id = a.user_id WHERE a.login_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND (${role === 'teacher' ? `u.role = 'student' AND EXISTS (SELECT 1 FROM students st JOIN student_classes sc ON sc.student_id = st.id JOIN teacher_assignments ta ON ta.class_id = sc.class_id WHERE st.user_id = u.id AND ta.teacher_id = ?)` : role === 'dos' ? `u.role = 'teacher'` : '1 = 1'}) GROUP BY DATE(a.login_at) ORDER BY day`, params);
+  res.json({ people, weekly, generatedAt: new Date() });
+});
+
 app.post('/api/auth/login', async (req, res) => {
   const error = validateLogin(req.body);
   if (error) return res.status(400).json({ error });
@@ -325,7 +357,7 @@ app.post('/api/auth/login', async (req, res) => {
       const challenge = await issueOtp(user, 'login');
       return res.json({ requiresOtp: true, ...challenge });
     }
-    res.json({ requiresOtp: false, ...signUser(user) });
+    res.json({ requiresOtp: false, ...(await signUser(user)) });
   } catch (dbError) {
     console.error(dbError.message);
     res.status(dbError.statusCode || 503).json({ error: dbError.statusCode ? dbError.message : 'Unable to connect to the database.' });
@@ -384,7 +416,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
       return res.status(401).json({ error: 'Invalid OTP.' });
     }
     await pool.query('UPDATE otp_challenges SET consumed_at = NOW() WHERE id = ?', [challengeId]);
-    res.json({ requiresOtp: false, ...signUser({ id: challenge.userId, full_name: challenge.full_name, email: challenge.email, role: challenge.role }) });
+    res.json({ requiresOtp: false, ...(await signUser({ id: challenge.userId, full_name: challenge.full_name, email: challenge.email, role: challenge.role })) });
   } catch (error) {
     console.error(error.message);
     res.status(503).json({ error: 'Unable to verify OTP.' });
@@ -938,7 +970,7 @@ app.get('/api/subjects/:id/modules', requireAuth, async (req, res) => {
   const [noteRows] = await pool.query(
     `SELECT id, module_id AS moduleId, subject_id AS subjectId, teacher_id AS teacherId, name, header, file_url AS fileUrl, mime_type AS mimeType, file_size AS fileSize, note_type AS noteType
      FROM subject_module_notes
-     WHERE subject_id = ? AND module_id IN (?)
+     WHERE subject_id = ? AND module_id IN(?)
      ORDER BY created_at DESC`,
     [subjectId, moduleIds]
   );
@@ -970,7 +1002,7 @@ app.post('/api/subjects/:id/modules', requireAuth, authorize('admin', 'dos', 'te
   const description = String(req.body?.description || '').trim();
   if (!title || !description) return res.status(400).json({ error: 'Module title and description are required.' });
 
-  const imageUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${req.file.filename}` : null;
+  const imageUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`} / uploads / ${req.file.filename}` : null;
   const [result] = await pool.query(
     'INSERT INTO subject_modules (subject_id, teacher_id, title, description, image_url) VALUES (?, ?, ?, ?, ?)',
     [subjectId, req.user.sub, title, description, imageUrl]
@@ -1015,7 +1047,7 @@ app.post('/api/subjects/:id/modules/:moduleId/notes', requireAuth, authorize('ad
   const header = String(req.body?.header || '').trim();
   if (!name || !header) return res.status(400).json({ error: 'Name and note header are required.' });
   const noteType = inferNoteType(req.file, 'note');
-  const fileUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${req.file.filename}` : null;
+  const fileUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`} / uploads / ${req.file.filename}` : null;
   const fileSize = req.file ? Number(req.file.size || 0) : null;
   const mimeType = req.file ? String(req.file.mimetype || 'application/octet-stream') : null;
   try {
@@ -1043,7 +1075,7 @@ app.patch('/api/subjects/:id/modules/:moduleId/notes/:noteId', requireAuth, auth
   if ((name !== null && !name) || (header !== null && !header)) return res.status(400).json({ error: 'Note name and header cannot be empty.' });
 
   const nextType = inferNoteType(req.file, note.noteType || 'note');
-  const fileUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${req.file.filename}` : null;
+  const fileUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`} / uploads / ${req.file.filename}` : null;
   const [result] = await pool.query('UPDATE subject_module_notes SET name = COALESCE(?, name), header = COALESCE(?, header), file_url = COALESCE(?, file_url), mime_type = COALESCE(?, mime_type), file_size = COALESCE(?, file_size), note_type = COALESCE(?, note_type) WHERE id = ? AND subject_id = ? AND module_id = ?', [name, header, fileUrl, req.file ? String(req.file.mimetype || 'application/octet-stream') : null, req.file ? Number(req.file.size || 0) : null, nextType, noteId, subjectId, moduleId]);
   if (!result.affectedRows) return res.status(404).json({ error: 'Note not found.' });
   res.json({ message: 'Note updated.' });
@@ -1084,7 +1116,7 @@ app.post('/api/subjects/:id/notes', requireAuth, authorize('admin', 'dos', 'teac
   const header = String(req.body?.header || '').trim();
   if (!name || !header) return res.status(400).json({ error: 'Name and note header are required.' });
   const noteType = inferNoteType(req.file, 'note');
-  const fileUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${req.file.filename}` : null;
+  const fileUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`} / uploads / ${req.file.filename}` : null;
   const fileSize = req.file ? Number(req.file.size || 0) : null;
   const mimeType = req.file ? String(req.file.mimetype || 'application/octet-stream') : null;
   try {
@@ -1108,7 +1140,7 @@ app.patch('/api/subjects/:id/notes/:noteId', requireAuth, authorize('admin', 'do
   const header = req.body?.header !== undefined ? String(req.body.header).trim() : null;
   if ((name !== null && !name) || (header !== null && !header)) return res.status(400).json({ error: 'Note name and header cannot be empty.' });
   const nextType = inferNoteType(req.file, note.noteType || 'note');
-  const fileUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${req.file.filename}` : null;
+  const fileUrl = req.file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`} / uploads / ${req.file.filename}` : null;
   if (fileUrl && note.fileUrl) {
     try {
       const relativePath = decodeURIComponent(new URL(note.fileUrl).pathname.replace(/^\/+/, ''));
@@ -1207,13 +1239,146 @@ app.post('/api/tests', requireAuth, authorize('admin', 'dos', 'teacher'), async 
   res.status(201).json({ id: result.insertId, message: 'Test created.' });
 });
 
+app.get('/api/teacher/tests/drafts', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const conditions = req.user.role === 'teacher' ? 'WHERE t.teacher_id = ? AND COALESCE(t.is_draft, TRUE) = TRUE' : 'WHERE COALESCE(t.is_draft, TRUE) = TRUE';
+  const params = req.user.role === 'teacher' ? [req.user.sub] : [];
+  const [drafts] = await pool.query(`SELECT t.id, t.title, t.description, t.class_id AS classId, c.name AS className, t.subject_id AS subjectId, s.name AS subjectName, t.duration_minutes AS durationMinutes, t.starts_at AS startsAt, t.ends_at AS endsAt, t.is_published AS isPublished, t.created_at AS createdAt FROM tests t JOIN classes c ON c.id = t.class_id JOIN subjects s ON s.id = t.subject_id ${conditions} ORDER BY t.created_at DESC`, params);
+  res.json({ drafts });
+});
+
+app.post('/api/teacher/tests/draft', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const title = String(req.body?.title || '').trim();
+  const classId = Number(req.body?.classId); const subjectId = Number(req.body?.subjectId); const duration = Number(req.body?.durationMinutes || 60);
+  if (!title || !Number.isInteger(classId) || !Number.isInteger(subjectId) || !Number.isInteger(duration) || duration < 1 || duration > 480) return res.status(400).json({ error: 'Title, assigned class, subject and valid duration are required.' });
+  if (req.user.role === 'teacher') {
+    const [assignment] = await pool.query('SELECT 1 FROM teacher_assignments WHERE teacher_id = ? AND class_id = ? AND subject_id = ?', [req.user.sub, classId, subjectId]);
+    if (!assignment.length) return res.status(403).json({ error: 'You can only create tests for your assigned class and subject.' });
+  }
+  const [result] = await pool.query('INSERT INTO tests (title, description, class_id, subject_id, teacher_id, duration_minutes, is_published, is_draft) VALUES (?, ?, ?, ?, ?, ?, FALSE, TRUE)', [title, req.body.description?.trim() || null, classId, subjectId, req.user.sub, duration]);
+  res.status(201).json({ id: result.insertId, title, description: req.body.description?.trim() || null, classId, subjectId, durationMinutes: duration, isPublished: false, isDraft: true });
+});
+
+app.get('/api/teacher/tests/:id/draft', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [tests] = await pool.query('SELECT t.id, t.title, t.description, t.class_id AS classId, c.name AS className, t.subject_id AS subjectId, s.name AS subjectName, t.duration_minutes AS durationMinutes, t.starts_at AS startsAt, t.ends_at AS endsAt, t.is_published AS isPublished FROM tests t JOIN classes c ON c.id = t.class_id JOIN subjects s ON s.id = t.subject_id WHERE t.id = ?', [req.params.id]);
+  const test = tests[0];
+  if (!test) return res.status(404).json({ error: 'Test not found.' });
+  if (req.user.role === 'teacher' && Number(test.teacherId || 0) !== Number(req.user.sub)) {
+    const [owned] = await pool.query('SELECT 1 FROM tests WHERE id = ? AND teacher_id = ?', [req.params.id, req.user.sub]);
+    if (!owned.length) return res.status(403).json({ error: 'You can only edit your own tests.' });
+  }
+  const [questions] = await pool.query('SELECT id, question_order AS questionOrder, question_type AS questionType, prompt, options_json AS options, answer_json AS answer, points FROM test_questions WHERE test_id = ? ORDER BY question_order', [req.params.id]);
+  res.json({ test, questions: questions.map((question) => ({ ...question, options: typeof question.options === 'string' ? JSON.parse(question.options) : question.options, answer: typeof question.answer === 'string' ? JSON.parse(question.answer) : question.answer })) });
+});
+
+app.delete('/api/teacher/tests/:id', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [tests] = await pool.query('SELECT teacher_id AS teacherId FROM tests WHERE id = ?', [req.params.id]);
+  if (!tests[0]) return res.status(404).json({ error: 'Test not found.' });
+  if (req.user.role === 'teacher' && Number(tests[0].teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only delete your own tests.' });
+  await pool.query('DELETE FROM tests WHERE id = ?', [req.params.id]);
+  res.json({ message: 'Test deleted.' });
+});
+
+app.put('/api/teacher/tests/:id', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [tests] = await pool.query('SELECT teacher_id AS teacherId FROM tests WHERE id = ?', [req.params.id]);
+  if (!tests[0]) return res.status(404).json({ error: 'Test not found.' });
+  if (req.user.role === 'teacher' && Number(tests[0].teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only update your own tests.' });
+  const fields = []; const values = [];
+  [['title', 'title'], ['description', 'description'], ['durationMinutes', 'duration_minutes'], ['startsAt', 'starts_at'], ['endsAt', 'ends_at']].forEach(([input, column]) => { if (req.body[input] !== undefined) { fields.push(`${column} = ? `); values.push(req.body[input] || null); } });
+  if (!fields.length) return res.status(400).json({ error: 'Provide at least one test field.' });
+  values.push(req.params.id); await pool.query(`UPDATE tests SET ${fields.join(', ')} WHERE id = ? `, values); res.json({ message: 'Test updated.' });
+});
+
+app.post('/api/teacher/tests/:id/questions', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const type = ['choice', 'fill', 'match', 'drag', 'rearrange', 'open'].includes(req.body?.questionType) ? req.body.questionType : null;
+  const prompt = String(req.body?.prompt || '').trim(); const points = Number(req.body?.points || 1);
+  if (!type || !prompt || !Number.isFinite(points) || points <= 0 || req.body.answer === undefined || req.body.answer === null) return res.status(400).json({ error: 'Question type, prompt, answer and positive points are required.' });
+  const [tests] = await pool.query('SELECT teacher_id AS teacherId FROM tests WHERE id = ?', [req.params.id]); if (!tests[0]) return res.status(404).json({ error: 'Test not found.' });
+  if (req.user.role === 'teacher' && Number(tests[0].teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only edit your own tests.' });
+  const [[order]] = await pool.query('SELECT COALESCE(MAX(question_order), 0) + 1 AS nextOrder FROM test_questions WHERE test_id = ?', [req.params.id]);
+  const [result] = await pool.query('INSERT INTO test_questions (test_id, question_order, question_type, prompt, options_json, answer_json, points) VALUES (?, ?, ?, ?, ?, ?, ?)', [req.params.id, order.nextOrder, type, prompt, JSON.stringify(req.body.options || []), JSON.stringify(req.body.answer), points]);
+  res.status(201).json({ id: result.insertId, questionOrder: order.nextOrder, questionType: type, prompt, options: req.body.options || [], answer: req.body.answer, points });
+});
+
+app.put('/api/teacher/tests/:id/questions/:questionId', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [tests] = await pool.query('SELECT teacher_id AS teacherId FROM tests WHERE id = ?', [req.params.id]); if (!tests[0]) return res.status(404).json({ error: 'Test not found.' });
+  if (req.user.role === 'teacher' && Number(tests[0].teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only edit your own tests.' });
+  const type = ['choice', 'fill', 'match', 'drag', 'rearrange', 'open'].includes(req.body?.questionType) ? req.body.questionType : null; const prompt = String(req.body?.prompt || '').trim(); const points = Number(req.body?.points || 1);
+  if (!type || !prompt || !Number.isFinite(points) || points <= 0 || req.body.answer === undefined || req.body.answer === null) return res.status(400).json({ error: 'Question type, prompt, answer and positive points are required.' });
+  const [result] = await pool.query('UPDATE test_questions SET question_type = ?, prompt = ?, options_json = ?, answer_json = ?, points = ? WHERE id = ? AND test_id = ?', [type, prompt, JSON.stringify(req.body.options || []), JSON.stringify(req.body.answer), points, req.params.questionId, req.params.id]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Question not found.' }); res.json({ id: Number(req.params.questionId), questionType: type, prompt, options: req.body.options || [], answer: req.body.answer, points });
+});
+
+app.delete('/api/teacher/tests/:id/questions/:questionId', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [tests] = await pool.query('SELECT teacher_id AS teacherId FROM tests WHERE id = ?', [req.params.id]); if (!tests[0]) return res.status(404).json({ error: 'Test not found.' });
+  if (req.user.role === 'teacher' && Number(tests[0].teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only edit your own tests.' });
+  const [result] = await pool.query('DELETE FROM test_questions WHERE id = ? AND test_id = ?', [req.params.questionId, req.params.id]); if (!result.affectedRows) return res.status(404).json({ error: 'Question not found.' }); res.json({ message: 'Question deleted.' });
+});
+
+app.post('/api/teacher/tests/:id/publish', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [tests] = await pool.query('SELECT teacher_id AS teacherId FROM tests WHERE id = ?', [req.params.id]); if (!tests[0]) return res.status(404).json({ error: 'Test not found.' });
+  if (req.user.role === 'teacher' && Number(tests[0].teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only publish your own tests.' });
+  const [[count]] = await pool.query('SELECT COUNT(*) AS total FROM test_questions WHERE test_id = ?', [req.params.id]); if (!Number(count.total)) return res.status(400).json({ error: 'Add at least one question before publishing.' });
+  await pool.query('UPDATE tests SET is_published = TRUE, is_draft = FALSE WHERE id = ?', [req.params.id]); res.json({ message: 'Test published.' });
+});
+
+app.get('/api/teacher/tests/:id/results', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [tests] = await pool.query('SELECT id, title, subject_id AS subjectId, teacher_id AS teacherId FROM tests WHERE id = ?', [req.params.id]); const test = tests[0];
+  if (!test) return res.status(404).json({ error: 'Test not found.' });
+  if (req.user.role === 'teacher' && Number(test.teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only view your own test results.' });
+  const [[maxRow]] = await pool.query('SELECT COALESCE(SUM(points), 0) AS maxScore FROM test_questions WHERE test_id = ?', [req.params.id]);
+  const [questions] = await pool.query('SELECT id, question_order AS questionOrder, question_type AS questionType, prompt, options_json AS options, answer_json AS answer, points FROM test_questions WHERE test_id = ? ORDER BY question_order', [req.params.id]);
+  const [results] = await pool.query(`SELECT a.id AS attemptId, a.student_id AS studentId, st.full_name AS studentName, st.admission_number AS admissionNumber,
+    a.score, a.status, a.submitted_at AS submittedAt, a.started_at AS startedAt, a.answers_json AS answersJson,
+    g.id AS reportEntryId
+    FROM test_attempts a JOIN students st ON st.id = a.student_id
+    LEFT JOIN grades g ON g.student_id = a.student_id AND g.subject_id = ? AND g.assessment_name = ?
+    WHERE a.test_id = ? ORDER BY a.submitted_at DESC, a.id DESC`, [test.subjectId, test.title, req.params.id]);
+  const maxScore = Number(maxRow.maxScore || 0);
+  const parseJson = (value, fallback) => { if (value === null || value === undefined) return fallback; try { return typeof value === 'string' ? JSON.parse(value) : value; } catch { return fallback; } };
+  const same = (left, right) => String(left ?? '').trim().toLowerCase() === String(right ?? '').trim().toLowerCase();
+  const gradeQuestion = (question, actual) => {
+    const expected = parseJson(question.answer, null); const options = parseJson(question.options, []);
+    if (['fill', 'open'].includes(question.questionType)) return same(Array.isArray(expected) ? expected[0] : expected, actual);
+    if (question.questionType === 'choice') { const answer = Array.isArray(expected) ? expected[0] : expected; const text = Number.isInteger(answer) && Array.isArray(options) ? options[answer] : answer; return same(text, actual) || same(answer, actual); }
+    if (['match', 'rearrange'].includes(question.questionType) && Array.isArray(expected) && Array.isArray(actual)) return expected.length > 0 && expected.every((item, index) => same(item, actual[index]));
+    return JSON.stringify(expected) === JSON.stringify(actual);
+  };
+  const enriched = results.map((row) => {
+    const answers = parseJson(row.answersJson, {});
+    const breakdown = questions.map((question) => ({ questionId: question.id, prompt: question.prompt, expected: parseJson(question.answer, null), actual: answers[String(question.id)] ?? null, correct: gradeQuestion(question, answers[String(question.id)]), points: Number(question.points) }));
+    return { ...row, answers: undefined, breakdown, percentage: maxScore ? Math.round(Number(row.score || 0) / maxScore * 100) : 0, maxScore };
+  });
+  const percentages = enriched.filter((row) => row.status !== 'in_progress').map((row) => row.percentage); const averageScore = percentages.length ? Math.round(percentages.reduce((a, b) => a + b, 0) / percentages.length) : 0;
+  res.json({ results: enriched, statistics: { averageScore, highestScore: percentages.length ? Math.max(...percentages) : 0, lowestScore: percentages.length ? Math.min(...percentages) : 0 } });
+});
+
+app.get('/api/teacher/tests/:id/progress', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [tests] = await pool.query('SELECT teacher_id AS teacherId FROM tests WHERE id = ?', [req.params.id]); if (!tests[0]) return res.status(404).json({ error: 'Test not found.' });
+  if (req.user.role === 'teacher' && Number(tests[0].teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only view your own test progress.' });
+  const [progress] = await pool.query('SELECT a.id AS attemptId, a.student_id AS studentId, st.full_name AS studentName, st.admission_number AS admissionNumber, a.started_at AS startedAt, a.submitted_at AS submittedAt, a.score, a.status FROM test_attempts a JOIN students st ON st.id = a.student_id WHERE a.test_id = ? ORDER BY a.started_at DESC', [req.params.id]);
+  const stats = { total: progress.length, completed: progress.filter((item) => item.status === 'submitted').length, inProgress: progress.filter((item) => item.status === 'in_progress').length, expired: progress.filter((item) => item.status === 'expired').length };
+  res.json({ progress, stats });
+});
+
+app.post('/api/teacher/test-attempts/:id/report', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [rows] = await pool.query('SELECT a.student_id AS studentId, a.score, t.title, t.subject_id AS subjectId, t.teacher_id AS teacherId, COALESCE((SELECT SUM(points) FROM test_questions WHERE test_id = t.id), 0) AS maxScore FROM test_attempts a JOIN tests t ON t.id = a.test_id WHERE a.id = ?', [req.params.id]); const attempt = rows[0];
+  if (!attempt) return res.status(404).json({ error: 'Attempt not found.' }); if (req.user.role === 'teacher' && Number(attempt.teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only report your own test results.' });
+  const [existing] = await pool.query('SELECT id FROM grades WHERE student_id = ? AND subject_id = ? AND assessment_name = ?', [attempt.studentId, attempt.subjectId, attempt.title]); if (existing[0]) return res.json({ id: existing[0].id, message: 'Already added to report.' });
+  const [result] = await pool.query('INSERT INTO grades (student_id, subject_id, assessment_name, score, max_score, recorded_by) VALUES (?, ?, ?, ?, ?, ?)', [attempt.studentId, attempt.subjectId, attempt.title, Number(attempt.score || 0), Number(attempt.maxScore || 0) || 1, req.user.sub]); res.status(201).json({ id: result.insertId, message: 'Result added to report.' });
+});
+
+app.delete('/api/teacher/reports/grade/:id', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const [rows] = await pool.query('SELECT recorded_by AS recordedBy FROM grades WHERE id = ?', [req.params.id]); if (!rows[0]) return res.status(404).json({ error: 'Report entry not found.' }); if (req.user.role === 'teacher' && Number(rows[0].recordedBy) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only remove your own report entries.' });
+  await pool.query('DELETE FROM grades WHERE id = ?', [req.params.id]); res.json({ message: 'Result removed from report.' });
+});
+
 app.get('/api/tests', requireAuth, async (req, res) => {
-  let query = `SELECT t.id, t.title, t.class_id AS classId, c.name AS className, t.subject_id AS subjectId, s.name AS subjectName, t.duration_minutes AS durationMinutes, t.starts_at AS startsAt, t.ends_at AS endsAt, t.is_published AS isPublished FROM tests t JOIN classes c ON c.id = t.class_id JOIN subjects s ON s.id = t.subject_id`;
+  let query = `SELECT t.id, t.title, t.class_id AS classId, c.name AS className, t.subject_id AS subjectId, s.name AS subjectName, t.duration_minutes AS durationMinutes, t.starts_at AS startsAt, t.ends_at AS endsAt, t.created_at AS createdAt, t.is_published AS isPublished FROM tests t JOIN classes c ON c.id = t.class_id JOIN subjects s ON s.id = t.subject_id`;
   const params = [];
   if (req.user.role === 'teacher') { query += ' WHERE t.teacher_id = ?'; params.push(req.user.sub); }
   else if (req.user.role === 'student') { query += ' JOIN student_classes sc ON sc.class_id = t.class_id JOIN students st ON st.id = sc.student_id WHERE st.user_id = ? AND t.is_published = TRUE'; params.push(req.user.sub); }
   else if (req.user.role === 'parent') { query += ' JOIN student_classes sc ON sc.class_id = t.class_id JOIN parent_students ps ON ps.student_id = sc.student_id WHERE ps.parent_id = ? AND t.is_published = TRUE'; params.push(req.user.sub); }
-  query += ' ORDER BY t.starts_at DESC, t.id DESC';
+  query += ' ORDER BY COALESCE(t.starts_at, t.created_at) DESC, t.id DESC';
   const [rows] = await pool.query(query, params);
   res.json({ tests: rows });
 });
@@ -1247,16 +1412,16 @@ app.patch('/api/tests/:id', requireAuth, authorize('admin', 'dos', 'teacher'), a
   const [tests] = await pool.query('SELECT teacher_id AS teacherId FROM tests WHERE id = ?', [req.params.id]); if (!tests[0]) return res.status(404).json({ error: 'Test not found.' });
   if (req.user.role === 'teacher' && Number(tests[0].teacherId) !== Number(req.user.sub)) return res.status(403).json({ error: 'You can only update your own tests.' });
   const allowed = ['title', 'duration_minutes', 'starts_at', 'ends_at', 'is_published']; const updates = []; const values = [];
-  [['title', 'title'], ['durationMinutes', 'duration_minutes'], ['startsAt', 'starts_at'], ['endsAt', 'ends_at'], ['isPublished', 'is_published']].forEach(([input, column]) => { if (req.body[input] !== undefined) { updates.push(`${column} = ?`); values.push(req.body[input]); } });
+  [['title', 'title'], ['durationMinutes', 'duration_minutes'], ['startsAt', 'starts_at'], ['endsAt', 'ends_at'], ['isPublished', 'is_published']].forEach(([input, column]) => { if (req.body[input] !== undefined) { updates.push(`${column} = ? `); values.push(req.body[input]); } });
   if (!updates.length || (req.body.durationMinutes !== undefined && (!Number.isInteger(Number(req.body.durationMinutes)) || Number(req.body.durationMinutes) < 1))) return res.status(400).json({ error: 'Provide valid test fields.' });
-  values.push(req.params.id); await pool.query(`UPDATE tests SET ${updates.join(', ')} WHERE id = ?`, values); res.json({ message: 'Test updated.' });
+  values.push(req.params.id); await pool.query(`UPDATE tests SET ${updates.join(', ')} WHERE id = ? `, values); res.json({ message: 'Test updated.' });
 });
 
 app.post('/api/tests/:id/questions', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => {
   const error = bodyErrors(req.body, [['prompt', 'Question prompt', 5000]]);
   const type = ['choice', 'fill', 'match'].includes(req.body?.questionType) ? req.body.questionType : null;
   const pointsError = positiveNumber(Number(req.body?.points || 1), 'Points');
-  if (error || !type || pointsError || !Array.isArray(req.body.answer)) return res.status(400).json({ error: error || 'Question type, answer array and positive points are required.' });
+  if (error || !type || pointsError || req.body.answer === undefined || req.body.answer === null) return res.status(400).json({ error: error || 'Question type, answer and positive points are required.' });
   const [tests] = await pool.query('SELECT id, teacher_id AS teacherId FROM tests WHERE id = ? LIMIT 1', [req.params.id]);
   if (!tests[0]) return res.status(404).json({ error: 'Test not found.' });
   if (req.user.role === 'teacher' && tests[0].teacherId !== req.user.sub) return res.status(403).json({ error: 'You can only edit your own tests.' });
@@ -1284,29 +1449,39 @@ app.post('/api/test-attempts/:id/submit', requireAuth, authorize('student'), asy
   if (attempt.status !== 'in_progress') return res.json({ score: attempt.score, status: attempt.status, message: 'This test attempt was already submitted.' });
   const expired = Date.now() > new Date(attempt.startedAt).getTime() + attempt.durationMinutes * 60 * 1000;
   const answers = req.body?.answers && typeof req.body.answers === 'object' ? req.body.answers : {};
-  const [questions] = await pool.query('SELECT id, answer_json AS answer, points FROM test_questions WHERE test_id = ?', [attempt.testId]);
+  const [questions] = await pool.query('SELECT id, question_type AS questionType, options_json AS options, answer_json AS answer, points FROM test_questions WHERE test_id = ?', [attempt.testId]);
   let score = 0;
   const same = (left, right) => String(left ?? '').trim().toLowerCase() === String(right ?? '').trim().toLowerCase();
   questions.forEach((question) => {
     const expected = typeof question.answer === 'string' ? JSON.parse(question.answer) : question.answer;
     const actual = answers[String(question.id)];
+    const options = typeof question.options === 'string' ? JSON.parse(question.options) : question.options;
     let fraction = 0;
-    if (question.questionType === 'fill') fraction = same(expected?.[0], actual) ? 1 : 0;
+    if (['fill', 'open'].includes(question.questionType)) fraction = same(Array.isArray(expected) ? expected[0] : expected, actual) ? 1 : 0;
+    else if (question.questionType === 'choice') {
+      const expectedAnswer = Array.isArray(expected) ? expected[0] : expected;
+      const expectedText = Number.isInteger(expectedAnswer) && Array.isArray(options) ? options[expectedAnswer] : expectedAnswer;
+      fraction = same(expectedText, actual) || same(expectedAnswer, actual) ? 1 : 0;
+    }
     else if (['match', 'rearrange'].includes(question.questionType) && Array.isArray(expected) && Array.isArray(actual)) {
       fraction = expected.length ? expected.reduce((total, item, index) => total + (same(item, actual[index]) ? 1 : 0), 0) / expected.length : 0;
-    } else fraction = JSON.stringify(expected) === JSON.stringify(actual) ? 1 : 0;
+    } else if (question.questionType === 'match' || question.questionType === 'drag') fraction = JSON.stringify(expected) === JSON.stringify(actual) ? 1 : 0;
+    else fraction = JSON.stringify(expected) === JSON.stringify(actual) ? 1 : 0;
     score += Number(question.points) * fraction;
   });
   const status = expired ? 'expired' : 'submitted';
-  await pool.query('UPDATE test_attempts SET submitted_at = NOW(), score = ?, status = ? WHERE id = ?', [score, status, attempt.id]);
+  await pool.query('UPDATE test_attempts SET submitted_at = NOW(), score = ?, answers_json = ?, status = ? WHERE id = ?', [score, JSON.stringify(answers), status, attempt.id]);
   const breakdown = questions.map((question) => {
     const expected = typeof question.answer === 'string' ? JSON.parse(question.answer) : question.answer;
     const actual = answers[String(question.id)] ?? null;
-    const correct = question.questionType === 'fill'
-      ? same(expected?.[0], actual)
-      : (['match', 'rearrange'].includes(question.questionType) && Array.isArray(expected) && Array.isArray(actual)
-        ? expected.length > 0 && expected.every((item, index) => same(item, actual[index]))
-        : JSON.stringify(expected) === JSON.stringify(actual));
+    const options = typeof question.options === 'string' ? JSON.parse(question.options) : question.options;
+    const correct = ['fill', 'open'].includes(question.questionType)
+      ? same(Array.isArray(expected) ? expected[0] : expected, actual)
+      : question.questionType === 'choice'
+        ? (same(Array.isArray(expected) && Number.isInteger(expected[0]) && Array.isArray(options) ? options[expected[0]] : expected?.[0] ?? expected, actual) || same(expected?.[0] ?? expected, actual))
+        : (['match', 'rearrange'].includes(question.questionType) && Array.isArray(expected) && Array.isArray(actual)
+          ? expected.length > 0 && expected.every((item, index) => same(item, actual[index]))
+          : JSON.stringify(expected) === JSON.stringify(actual));
     return { questionId: question.id, expected, actual, correct, points: Number(question.points) };
   });
   const maxScore = questions.reduce((total, question) => total + Number(question.points), 0);
@@ -1318,7 +1493,8 @@ app.post('/api/test-attempts/:id/cheating', requireAuth, authorize('student'), a
   const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 160) : 'Suspicious test activity';
   const [[attempt]] = await pool.query('SELECT a.id, t.title, t.teacher_id AS teacherId FROM test_attempts a JOIN tests t ON t.id = a.test_id WHERE a.id = ? AND a.student_id = ? LIMIT 1', [req.params.id, studentId]);
   if (!attempt) return res.status(404).json({ error: 'Test attempt not found.' });
-  const [announcement] = await pool.query(`INSERT INTO announcements (title, message, type, related_test_id, created_by) SELECT ?, ?, 'general', t.id, ? FROM tests t WHERE t.id = (SELECT test_id FROM test_attempts WHERE id = ?)`, [`Test alert: ${req.user.name || 'Student'}`, `${req.user.name || 'A student'} may be attempting to copy during test "${attempt.title}". Reason: ${reason}`, studentId, req.params.id]);
+  const [announcement] = await pool.query(`INSERT INTO announcements(title, message, type, related_test_id, created_by) SELECT ?, ?, 'general', t.id, ?FROM tests t WHERE t.id = (SELECT test_id FROM test_attempts WHERE id = ?)`, [`Test alert: ${req.user.name || 'Student'
+    }`, `${req.user.name || 'A student'} may be attempting to copy during test "${attempt.title}".Reason: ${reason}`, studentId, req.params.id]);
   await pool.query('INSERT IGNORE INTO announcement_recipients (announcement_id, user_id) VALUES (?, ?)', [announcement.insertId, attempt.teacherId]);
   res.json({ message: 'Teacher has been notified.' });
 });
@@ -1340,6 +1516,19 @@ app.get('/api/grades', requireAuth, async (req, res) => {
   if (req.user.role === 'parent') { const [linked] = await pool.query('SELECT 1 FROM parent_students WHERE parent_id = ? AND student_id = ?', [req.user.sub, studentId]); if (!linked.length) return res.status(403).json({ error: 'This student is not linked to your account.' }); }
   const [rows] = await pool.query('SELECT g.id, s.name AS subject, g.assessment_name AS assessmentName, g.score, g.max_score AS maxScore, g.created_at AS createdAt FROM grades g JOIN subjects s ON s.id = g.subject_id WHERE g.student_id = ? ORDER BY g.created_at DESC', [studentId]);
   res.json({ grades: rows });
+});
+
+app.get('/api/teacher/report-students', requireAuth, authorize('teacher', 'admin', 'dos'), async (req, res) => {
+  const teacherFilter = req.user.role === 'teacher' ? 'AND ta.teacher_id = ?' : '';
+  const params = req.user.role === 'teacher' ? [req.user.sub] : [];
+  const [rows] = await pool.query(`SELECT DISTINCT s.id, s.full_name AS fullName, s.admission_number AS admissionNumber,
+  s.class_name AS className, s.academic_year AS academicYear
+    FROM students s
+    JOIN student_classes sc ON sc.student_id = s.id
+    JOIN teacher_assignments ta ON ta.class_id = sc.class_id
+    WHERE s.status = 'active' ${teacherFilter}
+    ORDER BY s.full_name`, params);
+  res.json({ students: rows });
 });
 
 app.patch('/api/grades/:id', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => {
@@ -1410,7 +1599,7 @@ app.post('/api/news/upload', requireAuth, authorize('admin', 'dos'), upload.fiel
   const error = bodyErrors(req.body, [['title', 'Title', 220], ['description', 'Description', 10000]]);
   if (error) return res.status(400).json({ error });
   const files = req.files || {};
-  const fileUrl = (file) => file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${file.filename}` : null;
+  const fileUrl = (file) => file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`} / uploads / ${file.filename}` : null;
   const category = String(req.body.category || 'news').trim().slice(0, 60) || 'news';
   const photoUrl = fileUrl(files.photo?.[0]) || req.body.photoUrl?.trim() || null;
   const videoUrl = fileUrl(files.video?.[0]) || req.body.videoUrl?.trim() || null;
@@ -1540,7 +1729,7 @@ app.patch('/api/academic-years/:id', requireAuth, authorize('admin', 'dos'), asy
   if (req.body.startDate !== undefined) { updates.push('start_date = ?'); values.push(req.body.startDate); }
   if (req.body.endDate !== undefined) { updates.push('end_date = ?'); values.push(req.body.endDate); }
   if (!updates.length) return res.status(400).json({ error: 'No academic year fields supplied.' });
-  values.push(yearId); const [result] = await pool.query(`UPDATE academic_years SET ${updates.join(', ')} WHERE id = ?`, values);
+  values.push(yearId); const [result] = await pool.query(`UPDATE academic_years SET ${updates.join(', ')} WHERE id = ? `, values);
   if (!result.affectedRows) return res.status(404).json({ error: 'Academic year not found.' });
   res.json({ message: 'Academic year updated.' });
 });
@@ -1652,12 +1841,12 @@ app.post('/api/finance/expenses', requireAuth, authorize('accountant'), async (r
 app.post('/api/finance/expenses/upload', requireAuth, authorize('accountant'), upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'document', maxCount: 1 }, { name: 'video', maxCount: 1 }]), async (req, res) => {
   const amount = Number(req.body?.amount); const error = bodyErrors(req.body, [['category', 'Budget', 100], ['description', 'Description', 180]]); const files = req.files || {};
   if (error || !Number.isFinite(amount) || amount <= 0 || !req.body.spentAt) { Object.values(files).flat().forEach((file) => fs.rmSync(file.path, { force: true })); return res.status(400).json({ error: error || 'Budget, description, positive amount and date are required.' }); }
-  const fileUrl = (file) => file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${file.filename}` : null;
+  const fileUrl = (file) => file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`} / uploads / ${file.filename}` : null;
   try { const [result] = await pool.query('INSERT INTO expenses (category, description, amount, spent_at, recorded_by, photo_url, document_url, video_url, budget_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [req.body.category.trim(), req.body.description.trim(), amount, req.body.spentAt, req.user.sub, fileUrl(files.photo?.[0]), fileUrl(files.document?.[0]), fileUrl(files.video?.[0]), ['greater', 'equal', 'less'].includes(req.body.budgetStatus) ? req.body.budgetStatus : 'less']); res.status(201).json({ id: result.insertId, message: 'Expense evidence saved.' }); } catch (error) { Object.values(files).flat().forEach((file) => fs.rmSync(file.path, { force: true })); throw error; }
 });
 app.get('/api/finance/budgets', requireAuth, authorize('admin', 'dos', 'accountant'), async (_req, res) => { const [rows] = await pool.query('SELECT id, name, fiscal_year AS fiscalYear, amount, status, description, photo_url AS photoUrl, document_url AS documentUrl FROM budgets ORDER BY fiscal_year DESC'); res.json({ budgets: rows }); });
 app.post('/api/finance/budgets', requireAuth, authorize('accountant'), async (req, res) => { const error = bodyErrors(req.body, [['name', 'Budget name', 120], ['fiscalYear', 'Fiscal year', 20]]); const amount = Number(req.body?.amount); if (error || !Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: error || 'Budget amount must be positive.' }); const [result] = await pool.query('INSERT INTO budgets (name, fiscal_year, amount, status, created_by) VALUES (?, ?, ?, ?, ?)', [req.body.name.trim(), req.body.fiscalYear.trim(), amount, req.body.status === 'approved' ? 'approved' : 'draft', req.user.sub]); res.status(201).json({ id: result.insertId, message: 'Budget saved.' }); });
-app.post('/api/finance/budgets/upload', requireAuth, authorize('accountant'), upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'document', maxCount: 1 }]), async (req, res) => { const error = bodyErrors(req.body, [['name', 'Budget name', 120], ['fiscalYear', 'Fiscal year', 20], ['description', 'Description', 10000]]); const amount = Number(req.body?.amount); const files = req.files || {}; if (error || !Number.isFinite(amount) || amount <= 0) { Object.values(files).flat().forEach((file) => fs.rmSync(file.path, { force: true })); return res.status(400).json({ error: error || 'Budget name, description and a positive amount are required.' }); } const fileUrl = (file) => file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${file.filename}` : null; try { const [result] = await pool.query('INSERT INTO budgets (name, fiscal_year, amount, status, created_by, description, photo_url, document_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [req.body.name.trim(), req.body.fiscalYear.trim(), amount, req.body.status === 'approved' ? 'approved' : 'draft', req.user.sub, req.body.description.trim(), fileUrl(files.photo?.[0]), fileUrl(files.document?.[0])]); res.status(201).json({ id: result.insertId, message: 'Budget evidence saved.' }); } catch (uploadError) { Object.values(files).flat().forEach((file) => fs.rmSync(file.path, { force: true })); throw uploadError; } });
+app.post('/api/finance/budgets/upload', requireAuth, authorize('accountant'), upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'document', maxCount: 1 }]), async (req, res) => { const error = bodyErrors(req.body, [['name', 'Budget name', 120], ['fiscalYear', 'Fiscal year', 20], ['description', 'Description', 10000]]); const amount = Number(req.body?.amount); const files = req.files || {}; if (error || !Number.isFinite(amount) || amount <= 0) { Object.values(files).flat().forEach((file) => fs.rmSync(file.path, { force: true })); return res.status(400).json({ error: error || 'Budget name, description and a positive amount are required.' }); } const fileUrl = (file) => file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`} / uploads / ${file.filename}` : null; try { const [result] = await pool.query('INSERT INTO budgets (name, fiscal_year, amount, status, created_by, description, photo_url, document_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [req.body.name.trim(), req.body.fiscalYear.trim(), amount, req.body.status === 'approved' ? 'approved' : 'draft', req.user.sub, req.body.description.trim(), fileUrl(files.photo?.[0]), fileUrl(files.document?.[0])]); res.status(201).json({ id: result.insertId, message: 'Budget evidence saved.' }); } catch (uploadError) { Object.values(files).flat().forEach((file) => fs.rmSync(file.path, { force: true })); throw uploadError; } });
 
 app.get('/api/transport/routes', requireAuth, async (_req, res) => { const [rows] = await pool.query('SELECT r.id, r.name, r.bus_number AS busNumber, r.driver_name AS driverName, r.driver_phone AS driverPhone, r.capacity, r.is_active AS isActive, COUNT(st.student_id) AS assignedCount, GREATEST(r.capacity - COUNT(st.student_id), 0) AS availableCapacity FROM transport_routes r LEFT JOIN student_transport st ON st.route_id = r.id GROUP BY r.id, r.name, r.bus_number, r.driver_name, r.driver_phone, r.capacity, r.is_active ORDER BY r.name'); res.json({ routes: rows }); });
 app.post('/api/transport/routes', requireAuth, authorize('admin', 'dos', 'accountant'), async (req, res) => {
@@ -1687,9 +1876,9 @@ app.get('/api/feeding/stock', requireAuth, authorize('admin', 'dos', 'accountant
 app.post('/api/feeding/stock', requireAuth, authorize('admin', 'dos', 'accountant'), async (req, res) => { const error = bodyErrors(req.body, [['itemName', 'Item name', 120], ['unit', 'Unit', 30]]); const quantity = Number(req.body?.quantity); if (error || !Number.isFinite(quantity) || quantity < 0) return res.status(400).json({ error: error || 'A non-negative quantity is required.' }); const [result] = await pool.query('INSERT INTO feeding_stock (item_name, quantity, unit, reorder_level, updated_by) VALUES (?, ?, ?, ?, ?)', [req.body.itemName.trim(), quantity, req.body.unit.trim(), Number(req.body.reorderLevel || 0), req.user.sub]); res.status(201).json({ id: result.insertId, message: 'Feeding stock saved.' }); });
 app.post('/api/feeding/records', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => { const studentId = Number(req.body?.studentId); if (!Number.isInteger(studentId) || !req.body.mealType?.trim()) return res.status(400).json({ error: 'Student and meal type are required.' }); await pool.query('INSERT INTO feeding_records (student_id, feeding_date, served, meal_type, recorded_by) VALUES (?, COALESCE(?, CURRENT_DATE), ?, ?, ?) ON DUPLICATE KEY UPDATE served = VALUES(served), recorded_by = VALUES(recorded_by)', [studentId, req.body.date || null, req.body.served !== false, req.body.mealType.trim(), req.user.sub]); res.status(201).json({ message: 'Feeding record saved.' }); });
 
-app.get('/api/documents', requireAuth, async (req, res) => { const allowed = { admin: ['public', 'admin', 'dos', 'staff', 'parent', 'student'], dos: ['public', 'dos', 'staff', 'parent', 'student'], teacher: ['staff'], accountant: ['staff'], librarian: ['staff'], parent: ['parent'], student: ['student'] }; const visibility = allowed[req.user.role] || []; const placeholders = visibility.map(() => '?').join(','); const [rows] = await pool.query(`SELECT id, title, category, document_type AS documentType, storage_key AS storageKey, mime_type AS mimeType, file_size AS fileSize, visibility, created_at AS createdAt FROM documents WHERE visibility IN (${placeholders}) OR uploaded_by = ? ORDER BY created_at DESC`, [...visibility, req.user.sub]); res.json({ documents: rows }); });
+app.get('/api/documents', requireAuth, async (req, res) => { const allowed = { admin: ['public', 'admin', 'dos', 'staff', 'parent', 'student'], dos: ['public', 'dos', 'staff', 'parent', 'student'], teacher: ['staff'], accountant: ['staff'], librarian: ['staff'], parent: ['parent'], student: ['student'] }; const visibility = allowed[req.user.role] || []; const placeholders = visibility.map(() => '?').join(','); const [rows] = await pool.query(`SELECT id, title, category, document_type AS documentType, storage_key AS storageKey, mime_type AS mimeType, file_size AS fileSize, visibility, created_at AS createdAt FROM documents WHERE visibility IN(${placeholders}) OR uploaded_by = ? ORDER BY created_at DESC`, [...visibility, req.user.sub]); res.json({ documents: rows }); });
 app.post('/api/documents', requireAuth, authorize('admin', 'dos'), async (req, res) => { const error = bodyErrors(req.body, [['title', 'Title', 180], ['storageKey', 'File URL', 255], ['mimeType', 'MIME type', 100]]); const fileSize = Number(req.body?.fileSize || 0); if (error || !Number.isInteger(fileSize) || fileSize < 0) return res.status(400).json({ error: error || 'A valid non-negative file size is required.' }); const types = ['contract', 'certificate', 'letter', 'policy', 'report', 'other']; const visibility = ['public', 'admin', 'dos', 'staff', 'parent', 'student']; const category = String(req.body.category || 'general').trim().slice(0, 60) || 'general'; const [result] = await pool.query('INSERT INTO documents (title, category, document_type, storage_key, mime_type, file_size, visibility, uploaded_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [req.body.title.trim(), category, types.includes(req.body.documentType) ? req.body.documentType : 'other', req.body.storageKey.trim(), req.body.mimeType.trim(), fileSize, visibility.includes(req.body.visibility) ? req.body.visibility : 'admin', req.user.sub]); res.status(201).json({ id: result.insertId, message: 'Document registered.' }); });
-app.post('/api/documents/upload', requireAuth, authorize('admin', 'dos'), upload.single('file'), async (req, res) => { const error = bodyErrors(req.body, [['title', 'Title', 180]]); const types = ['contract', 'certificate', 'letter', 'policy', 'report', 'other']; const visibility = ['public', 'admin', 'dos', 'staff', 'parent', 'student']; if (error || !req.file) { if (req.file) fs.rmSync(req.file.path, { force: true }); return res.status(400).json({ error: error || 'Choose a file to upload.' }); } const category = String(req.body.category || 'general').trim().slice(0, 60) || 'general'; const documentType = types.includes(req.body.documentType) ? req.body.documentType : 'other'; const documentVisibility = visibility.includes(req.body.visibility) ? req.body.visibility : 'admin'; const storageKey = `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${req.file.filename}`; try { const [result] = await pool.query('INSERT INTO documents (title, category, document_type, storage_key, mime_type, file_size, visibility, uploaded_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [req.body.title.trim(), category, documentType, storageKey, req.file.mimetype, req.file.size, documentVisibility, req.user.sub]); res.status(201).json({ id: result.insertId, storageKey, message: 'Document uploaded.' }); } catch (uploadError) { fs.rmSync(req.file.path, { force: true }); throw uploadError; } });
+app.post('/api/documents/upload', requireAuth, authorize('admin', 'dos'), upload.single('file'), async (req, res) => { const error = bodyErrors(req.body, [['title', 'Title', 180]]); const types = ['contract', 'certificate', 'letter', 'policy', 'report', 'other']; const visibility = ['public', 'admin', 'dos', 'staff', 'parent', 'student']; if (error || !req.file) { if (req.file) fs.rmSync(req.file.path, { force: true }); return res.status(400).json({ error: error || 'Choose a file to upload.' }); } const category = String(req.body.category || 'general').trim().slice(0, 60) || 'general'; const documentType = types.includes(req.body.documentType) ? req.body.documentType : 'other'; const documentVisibility = visibility.includes(req.body.visibility) ? req.body.visibility : 'admin'; const storageKey = `${process.env.PUBLIC_API_URL || `http://localhost:${port}`} / uploads / ${req.file.filename}`; try { const [result] = await pool.query('INSERT INTO documents (title, category, document_type, storage_key, mime_type, file_size, visibility, uploaded_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [req.body.title.trim(), category, documentType, storageKey, req.file.mimetype, req.file.size, documentVisibility, req.user.sub]); res.status(201).json({ id: result.insertId, storageKey, message: 'Document uploaded.' }); } catch (uploadError) { fs.rmSync(req.file.path, { force: true }); throw uploadError; } });
 
 app.get('/api/homework', requireAuth, async (req, res) => { let query = 'SELECT h.id, h.title, h.description, h.class_id AS classId, h.subject_id AS subjectId, h.teacher_id AS teacherId, h.due_date AS dueDate FROM homework h'; const params = []; if (req.user.role === 'teacher') { query += ' WHERE h.teacher_id = ?'; params.push(req.user.sub); } else if (req.user.role === 'student') { query += ' JOIN student_classes sc ON sc.class_id = h.class_id JOIN students s ON s.id = sc.student_id WHERE s.user_id = ?'; params.push(req.user.sub); } else if (req.user.role === 'parent') { query += ' JOIN student_classes sc ON sc.class_id = h.class_id JOIN parent_students ps ON ps.student_id = sc.student_id WHERE ps.parent_id = ?'; params.push(req.user.sub); } query += ' ORDER BY h.due_date'; const [rows] = await pool.query(query, params); res.json({ homework: rows }); });
 app.post('/api/homework', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => { const ids = [Number(req.body?.classId), Number(req.body?.subjectId)]; const error = bodyErrors(req.body, [['title', 'Title', 180], ['description', 'Description', 5000]]); if (error || !ids.every(Number.isInteger) || !req.body.dueDate) return res.status(400).json({ error: error || 'Class, subject and due date are required.' }); if (req.user.role === 'teacher') { const [assignment] = await pool.query('SELECT 1 FROM teacher_assignments WHERE teacher_id = ? AND class_id = ? AND subject_id = ?', [req.user.sub, ...ids]); if (!assignment.length) return res.status(403).json({ error: 'You can only create homework for your assignments.' }); } const [result] = await pool.query('INSERT INTO homework (title, description, class_id, subject_id, teacher_id, due_date) VALUES (?, ?, ?, ?, ?, ?)', [req.body.title.trim(), req.body.description.trim(), ...ids, req.user.sub, req.body.dueDate]); res.status(201).json({ id: result.insertId, message: 'Homework created.' }); });
@@ -1711,28 +1900,28 @@ app.get('/api/academic-years/graduates', requireAuth, authorize('admin', 'dos', 
   let query = `
     SELECT 
       sp.id as promotion_id,
-      s.id,
-      s.user_id,
-      s.full_name,
-      SUBSTRING_INDEX(s.full_name, ' ', 1) as first_name,
-      SUBSTRING_INDEX(s.full_name, ' ', -1) as last_name,
-      s.admission_number as reg_number,
-      s.photo_key,
-      s.class_name as from_level,
-      sp.to_level as final_level,
-      COALESCE(sp.to_level, sp.from_level) as trade,
-      s.academic_year,
-      ay.name as academic_year_name,
-      ay.start_date,
-      ay.end_date,
-      s.graduation_date as graduated_at,
-      s.graduated_cohort as promotion_notes,
-      u.email as contact_email,
-      u.phone as contact_phone,
-      NULL as address_district,
-      NULL as address_sector,
-      NULL as guardian_name,
-      NULL as guardian_phone
+  s.id,
+  s.user_id,
+  s.full_name,
+  SUBSTRING_INDEX(s.full_name, ' ', 1) as first_name,
+  SUBSTRING_INDEX(s.full_name, ' ', -1) as last_name,
+  s.admission_number as reg_number,
+  s.photo_key,
+  s.class_name as from_level,
+  sp.to_level as final_level,
+  COALESCE(sp.to_level, sp.from_level) as trade,
+  s.academic_year,
+  ay.name as academic_year_name,
+  ay.start_date,
+  ay.end_date,
+  s.graduation_date as graduated_at,
+  s.graduated_cohort as promotion_notes,
+  u.email as contact_email,
+  u.phone as contact_phone,
+  NULL as address_district,
+  NULL as address_sector,
+  NULL as guardian_name,
+  NULL as guardian_phone
     FROM students s
     LEFT JOIN student_promotions sp ON s.id = sp.student_id
     LEFT JOIN academic_years ay ON sp.academic_year_id = ay.id
@@ -1753,7 +1942,7 @@ app.get('/api/academic-years/graduates', requireAuth, authorize('admin', 'dos', 
 
   if (search) {
     query += ' AND (LOWER(s.full_name) LIKE ? OR LOWER(s.admission_number) LIKE ?)';
-    params.push(`%${search}%`, `%${search}%`);
+    params.push(`% ${search} % `, ` % ${search} % `);
   }
 
   query += ' ORDER BY ay.start_date DESC, s.full_name ASC LIMIT ?';
@@ -1923,12 +2112,33 @@ app.post('/api/academic-years/:id/close', requireAuth, authorize('admin', 'dos')
   }
 });
 
-app.post('/api/behavior', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => { const studentId = Number(req.body?.studentId); const categories = ['excellent', 'good', 'needs_improvement', 'discipline']; const error = bodyErrors(req.body, [['note', 'Behavior note', 3000]]); if (error || !Number.isInteger(studentId) || !categories.includes(req.body.category)) return res.status(400).json({ error: error || 'Student, category and note are required.' }); if (req.user.role === 'teacher' && !(await teacherCanAccessStudent(req.user.sub, studentId))) return res.status(403).json({ error: 'This student is outside your assignment.' }); const connection = await pool.getConnection(); try { await connection.beginTransaction(); const [[student]] = await connection.query('SELECT id, full_name AS fullName, user_id AS userId, conduct_score AS conductScore FROM students WHERE id = ? FOR UPDATE', [studentId]); if (!student) { await connection.rollback(); return res.status(404).json({ error: 'Student not found.' }); } const [[countRow]] = await connection.query("SELECT COUNT(*) AS total FROM behavior_records WHERE student_id = ? AND category = 'needs_improvement'", [studentId]); const deduction = req.body.category === 'discipline' || (req.body.category === 'needs_improvement' && Number(countRow.total) >= 1) ? 2 : 0; const nextScore = Math.max(0, Number(student.conductScore ?? 100) - deduction); const [result] = await connection.query('INSERT INTO behavior_records (student_id, category, note, recorded_by, score_deduction, score_after) VALUES (?, ?, ?, ?, ?, ?)', [studentId, req.body.category, req.body.note.trim(), req.user.sub, deduction, nextScore]); await connection.query('UPDATE students SET conduct_score = ?, conduct_updated_at = IF(? > 0, CURRENT_TIMESTAMP, conduct_updated_at) WHERE id = ?', [nextScore, deduction, studentId]); if (deduction > 0) { const message = `Your conduct score changed by -${deduction}. Current score: ${nextScore}/100.`; if (student.userId) await connection.query('INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, \'in_app\', ?, ?, NOW())', [student.userId, 'Conduct score updated', message]); await connection.query('INSERT INTO notifications (recipient_id, channel, title, message, sent_at) SELECT ps.parent_id, \'in_app\', ?, ?, NOW() FROM parent_students ps WHERE ps.student_id = ?', ['Student conduct score updated', `${student.fullName}: ${message}`, studentId]); } await connection.commit(); res.status(201).json({ id: result.insertId, deduction, score: nextScore, message: deduction ? `Behavior record saved. ${deduction} points deducted.` : 'Behavior record saved.' }); } catch (behaviorError) { await connection.rollback(); throw behaviorError; } finally { connection.release(); } });
+app.post('/api/behavior', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => { const studentId = Number(req.body?.studentId); const categories = ['excellent', 'good', 'needs_improvement', 'discipline']; const error = bodyErrors(req.body, [['note', 'Behavior note', 3000]]); if (error || !Number.isInteger(studentId) || !categories.includes(req.body.category)) return res.status(400).json({ error: error || 'Student, category and note are required.' }); if (req.user.role === 'teacher' && !(await teacherCanAccessStudent(req.user.sub, studentId))) return res.status(403).json({ error: 'This student is outside your assignment.' }); const connection = await pool.getConnection(); try { await connection.beginTransaction(); const [[student]] = await connection.query('SELECT id, full_name AS fullName, user_id AS userId, conduct_score AS conductScore FROM students WHERE id = ? FOR UPDATE', [studentId]); if (!student) { await connection.rollback(); return res.status(404).json({ error: 'Student not found.' }); } const [[countRow]] = await connection.query("SELECT COUNT(*) AS total FROM behavior_records WHERE student_id = ? AND category = 'needs_improvement'", [studentId]); const deduction = req.body.category === 'discipline' || (req.body.category === 'needs_improvement' && Number(countRow.total) >= 1) ? 2 : 0; const nextScore = Math.max(0, Number(student.conductScore ?? 100) - deduction); const [result] = await connection.query('INSERT INTO behavior_records (student_id, category, note, recorded_by, score_deduction, score_after) VALUES (?, ?, ?, ?, ?, ?)', [studentId, req.body.category, req.body.note.trim(), req.user.sub, deduction, nextScore]); await connection.query('UPDATE students SET conduct_score = ?, conduct_updated_at = IF(? > 0, CURRENT_TIMESTAMP, conduct_updated_at) WHERE id = ?', [nextScore, deduction, studentId]); if (deduction > 0) { const message = `Your conduct score changed by - ${deduction}. Current score: ${nextScore}/100.`; if (student.userId) await connection.query('INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, \'in_app\', ?, ?, NOW())', [student.userId, 'Conduct score updated', message]); await connection.query('INSERT INTO notifications (recipient_id, channel, title, message, sent_at) SELECT ps.parent_id, \'in_app\', ?, ?, NOW() FROM parent_students ps WHERE ps.student_id = ?', ['Student conduct score updated', `${student.fullName}: ${message}`, studentId]); } await connection.commit(); res.status(201).json({ id: result.insertId, deduction, score: nextScore, message: deduction ? `Behavior record saved. ${deduction} points deducted.` : 'Behavior record saved.' }); } catch (behaviorError) { await connection.rollback(); throw behaviorError; } finally { connection.release(); } });
 app.delete('/api/behavior/:id', requireAuth, authorize('admin', 'dos', 'teacher'), async (req, res) => { const recordId = Number(req.params.id); if (!Number.isInteger(recordId)) return res.status(400).json({ error: 'A valid behavior record id is required.' }); const [records] = await pool.query('SELECT student_id AS studentId FROM behavior_records WHERE id = ?', [recordId]); if (!records[0]) return res.status(404).json({ error: 'Behavior record not found.' }); if (req.user.role === 'teacher' && !(await teacherCanAccessStudent(req.user.sub, records[0].studentId))) return res.status(403).json({ error: 'This student is outside your assignment.' }); const studentId = records[0].studentId; const [result] = await pool.query('DELETE FROM behavior_records WHERE id = ?', [recordId]); if (!result.affectedRows) return res.status(404).json({ error: 'Behavior record not found.' }); const [[counts]] = await pool.query("SELECT SUM(category = 'discipline') AS disciplineCount, SUM(category = 'needs_improvement') AS needsCount FROM behavior_records WHERE student_id = ?", [studentId]); const restoredScore = Math.max(0, 100 - (Number(counts.disciplineCount || 0) * 2) - (Math.max(0, Number(counts.needsCount || 0) - 1) * 2)); await pool.query('UPDATE students SET conduct_score = ?, conduct_updated_at = CURRENT_TIMESTAMP WHERE id = ?', [restoredScore, studentId]); res.json({ score: restoredScore, message: 'Behavior record deleted.' }); });
 app.get('/api/behavior', requireAuth, async (req, res) => { const studentId = Number(req.query.studentId); if (!Number.isInteger(studentId)) return res.status(400).json({ error: 'studentId is required.' }); if (req.user.role === 'teacher' && !(await teacherCanAccessStudent(req.user.sub, studentId))) return res.status(403).json({ error: 'This student is outside your assignment.' }); if (req.user.role === 'student' && (await getStudentForUser(req.user)) !== studentId) return res.status(403).json({ error: 'You can only view your own behavior records.' }); if (req.user.role === 'parent') { const [linked] = await pool.query('SELECT 1 FROM parent_students WHERE parent_id = ? AND student_id = ?', [req.user.sub, studentId]); if (!linked.length) return res.status(403).json({ error: 'This student is not linked to your account.' }); } const [[student]] = await pool.query('SELECT conduct_score AS conductScore FROM students WHERE id = ?', [studentId]); const [rows] = await pool.query('SELECT id, category, note, score_deduction AS deduction, score_after AS scoreAfter, created_at AS createdAt FROM behavior_records WHERE student_id = ? ORDER BY created_at DESC', [studentId]); res.json({ score: Number(student?.conductScore ?? 100), records: rows }); });
 app.get('/api/students/:id/report', requireAuth, async (req, res) => { const studentId = Number(req.params.id); if (!Number.isInteger(studentId)) return res.status(400).json({ error: 'A valid student id is required.' }); if (req.user.role === 'teacher' && !(await teacherCanAccessStudent(req.user.sub, studentId))) return res.status(403).json({ error: 'This student is outside your assignment.' }); if (req.user.role === 'student' && (await getStudentForUser(req.user)) !== studentId) return res.status(403).json({ error: 'You can only view your own report.' }); if (req.user.role === 'parent') { const [linked] = await pool.query('SELECT 1 FROM parent_students WHERE parent_id = ? AND student_id = ?', [req.user.sub, studentId]); if (!linked.length) return res.status(403).json({ error: 'This student is not linked to your account.' }); } const [[student]] = await pool.query('SELECT id, admission_number AS admissionNumber, full_name AS fullName, class_name AS className, status FROM students WHERE id = ?', [studentId]); if (!student) return res.status(404).json({ error: 'Student not found.' }); const [grades] = await pool.query('SELECT s.name AS subject, SUM(g.score) AS score, SUM(g.max_score) AS maxScore FROM grades g JOIN subjects s ON s.id = g.subject_id WHERE g.student_id = ? GROUP BY g.subject_id, s.name ORDER BY s.name', [studentId]); const [attendance] = await pool.query("SELECT status, COUNT(*) AS total FROM attendance WHERE student_id = ? GROUP BY status", [studentId]); const [behavior] = await pool.query('SELECT category, note, created_at AS createdAt FROM behavior_records WHERE student_id = ? ORDER BY created_at DESC LIMIT 20', [studentId]); res.json({ student, grades, attendance, behavior }); });
 
 app.get('/api/parent/summary', requireAuth, authorize('parent'), async (req, res) => { const [rows] = await pool.query(`SELECT s.id, s.full_name AS fullName, s.admission_number AS admissionNumber, s.class_name AS className, s.conduct_score AS conductScore, COALESCE((SELECT SUM(f.amount) FROM fees f WHERE f.student_id = s.id), 0) AS feesPaid, (SELECT COUNT(*) FROM attendance a WHERE a.student_id = s.id AND a.status = 'absent') AS absences FROM students s JOIN parent_students ps ON ps.student_id = s.id WHERE ps.parent_id = ?`, [req.user.sub]); res.json({ children: rows }); });
+
+app.get('/api/parent/learning-summary', requireAuth, authorize('parent'), async (req, res) => {
+  const [children] = await pool.query(`SELECT s.id, s.full_name AS fullName, s.admission_number AS admissionNumber, s.class_name AS className
+    FROM students s JOIN parent_students ps ON ps.student_id = s.id WHERE ps.parent_id = ? ORDER BY s.full_name`, [req.user.sub]);
+  const childIds = children.map((child) => child.id);
+  if (!childIds.length) return res.json({ children: [], tests: [], attendance: [], discipline: [], publicInfo: [] });
+  const [tests] = await pool.query(`SELECT ta.id AS attemptId, ta.student_id AS studentId, t.title, sub.name AS subject,
+    ta.score, ta.submitted_at AS submittedAt, ta.status, COALESCE(SUM(tq.points), 0) AS maxScore
+    FROM test_attempts ta JOIN tests t ON t.id = ta.test_id JOIN subjects sub ON sub.id = t.subject_id
+    LEFT JOIN test_questions tq ON tq.test_id = t.id
+    WHERE ta.student_id IN (?) GROUP BY ta.id, ta.student_id, t.title, sub.name, ta.score, ta.submitted_at, ta.status ORDER BY ta.submitted_at DESC`, [childIds]);
+  const [attendance] = await pool.query(`SELECT student_id AS studentId, status, COUNT(*) AS total FROM attendance WHERE student_id IN (?) GROUP BY student_id, status`, [childIds]);
+  const [discipline] = await pool.query(`SELECT student_id AS studentId, category, note, created_at AS createdAt FROM behavior_records WHERE student_id IN (?) ORDER BY created_at DESC`, [childIds]);
+  const [notices] = await pool.query("SELECT id, title, body AS message, category, published_at AS publishedAt FROM notices WHERE audience IN ('all', 'parents') ORDER BY published_at DESC LIMIT 30");
+  const [documents] = await pool.query("SELECT id, title, category, document_type AS documentType, created_at AS publishedAt, storage_key AS storageKey FROM documents WHERE visibility IN ('public', 'parent') ORDER BY created_at DESC LIMIT 30");
+  res.json({ children, tests, attendance, discipline, publicInfo: [...notices, ...documents].sort((left, right) => new Date(right.publishedAt) - new Date(left.publishedAt)) });
+});
+
+app.get('/api/dos/report-subjects', requireAuth, authorize('dos', 'admin'), async (_req, res) => { const [subjects] = await pool.query('SELECT id, name FROM subjects ORDER BY name'); res.json({ subjects }); });
+app.put('/api/dos/reports/:studentId/settings', requireAuth, authorize('dos', 'admin'), async (req, res) => { const studentId = Number(req.params.studentId); const term = String(req.body?.term || '').trim(); const academicYear = String(req.body?.academicYear || '').trim(); if (!Number.isInteger(studentId) || !term || !academicYear) return res.status(400).json({ error: 'Student, term and academic year are required.' }); await pool.query('INSERT INTO student_report_settings (student_id, academic_year, term, updated_by) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE academic_year = VALUES(academic_year), term = VALUES(term), updated_by = VALUES(updated_by)', [studentId, academicYear, term, req.user.sub]); res.json({ academicYear, term }); });
+app.delete('/api/dos/reports/:studentId/subjects/:subjectId', requireAuth, authorize('dos', 'admin'), async (req, res) => { const studentId = Number(req.params.studentId); const subjectId = Number(req.params.subjectId); if (!Number.isInteger(studentId) || !Number.isInteger(subjectId)) return res.status(400).json({ error: 'Valid student and subject are required.' }); await pool.query('DELETE FROM grades WHERE student_id = ? AND subject_id = ?', [studentId, subjectId]); res.json({ message: 'Subject removed from report.' }); });
 
 app.use((error, _req, res, _next) => { console.error(error); res.status(500).json({ error: 'An unexpected server error occurred.' }); });
 

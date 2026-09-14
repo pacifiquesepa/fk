@@ -1,6 +1,6 @@
 -- Migration 009: complete test question columns after a partial 007 migration
 ALTER TABLE test_questions
-MODIFY COLUMN question_type ENUM('choice', 'fill', 'match', 'drag', 'rearrange') NOT NULL;
+MODIFY COLUMN question_type ENUM('choice', 'fill', 'match', 'drag', 'rearrange', 'open') NOT NULL;
 
 SET @sql = (SELECT IF(COUNT(*) = 0,
   'ALTER TABLE test_questions ADD COLUMN is_draft BOOLEAN NOT NULL DEFAULT FALSE COMMENT ''Flag to indicate if question is still being edited''',

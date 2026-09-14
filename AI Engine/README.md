@@ -356,11 +356,14 @@ Do not copy the displayed response rows such as `status`, `ok`, or `assessment` 
 ## Sample endpoints
 
 - `GET /health`
+- `GET /api/assessments/trained?subject=English&class_name=P1&unit=Unit%201`
 - `POST /api/assessments/generate`
 - `POST /api/assessments/grade`
 - `GET /api/analytics/student-performance`
 - `GET /api/analytics/students-needing-support`
 - `GET /api/reports/student/{student_id}`
+
+The AI Engine enriches trained questions with `subject`, `class_name`, and `unit` metadata. The frontend uses the trained-question endpoint for local assessments, so selecting `English`, `P1`, and `Unit 1` returns only questions matching those three values and the selected difficulty. Valid curriculum records from `data/dataset/question_generation.jsonl` are added to the local trained bank when the service starts.
 
 ## Notes
 

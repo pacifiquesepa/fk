@@ -22,6 +22,8 @@ class AssessmentService:
         self.curriculum_map = json.loads(curriculum_map_path.read_text(encoding="utf-8")) if curriculum_map_path.exists() else {}
         self.trained_path = trained_path
         self.trained = json.loads(trained_path.read_text(encoding="utf-8")) if trained_path.exists() else []
+        self.training_source_path = Path(__file__).resolve().parents[2] / "data" / "dataset" / "question_generation.jsonl"
+        self._enrich_trained_scope()
         self.type_templates = {
             "multiple_choice": self._generate_multiple_choice,
             "match": self._generate_match,
@@ -34,7 +36,8 @@ class AssessmentService:
     def curriculum_topics(self, class_name: str | None, subject: str | None, unit: str | None = None) -> List[str]:
         if not class_name or not subject:
             return []
-        class_map = self.curriculum_map.get("primary", {}).get(class_name, {})
+        normalized_class = self.normalize_class_name(class_name)
+        class_map = self.curriculum_map.get("primary", {}).get(normalized_class, {})
         subject_map = class_map.get(subject, {})
         if unit and unit in subject_map and isinstance(subject_map[unit], dict):
             return list(subject_map[unit].get("topics", []))
@@ -47,7 +50,7 @@ class AssessmentService:
     def generate_assessment(self, request: Dict[str, Any]) -> AssessmentGenerationResult:
         subject = request.get("subject_name") or "General Subject"
         unit = request.get("unit") or ""
-        class_name = request.get("class_name")
+        class_name = self.normalize_class_name(request.get("class_name")) or request.get("class_name")
         topic = request.get("topic") or f"{unit or 'selected unit'} activities"
         book_context = request.get("book_context") or []
         book_sources = self._evaluate_book(book_context, subject, unit, class_name)
@@ -127,13 +130,93 @@ class AssessmentService:
         self.trained_path.write_text(json.dumps(self.trained, indent=2, ensure_ascii=True), encoding="utf-8")
         return {"added": added, "skipped": skipped}
 
+    def trained_questions(self, subject: str, class_name: str, unit: str, difficulty: str | None = None, limit: int = 50) -> List[Dict[str, Any]]:
+        requested_subject = self._scope_value(subject)
+        requested_class = self.normalize_class_name(class_name)
+        requested_unit = self._scope_value(unit)
+        matches = []
+        for item in self.trained:
+            metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
+            if not self._same_scope(metadata.get("subject"), requested_subject):
+                continue
+            if not self._same_scope(metadata.get("class_name"), requested_class):
+                continue
+            if not self._same_scope(metadata.get("unit"), requested_unit) and str(metadata.get("unit", "")).lower() != "all units":
+                continue
+            if difficulty and str(item.get("difficulty", "")).lower() != difficulty.lower():
+                continue
+            matches.append(item)
+        return matches[:max(1, min(limit, 100))]
+
+    def _enrich_trained_scope(self) -> None:
+        source_by_prompt = {}
+        if self.training_source_path.exists():
+            for line in self.training_source_path.read_text(encoding="utf-8").splitlines():
+                try:
+                    source = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                source_by_prompt[self._normalize_prompt(source.get("question", ""))] = source
+
+        changed = False
+        existing_prompts = {self._normalize_prompt(item.get("prompt", "")) for item in self.trained}
+        for source in source_by_prompt.values():
+            normalized = self._normalize_training_question(source)
+            prompt = self._normalize_prompt(normalized.get("prompt", ""))
+            if not prompt or prompt in existing_prompts or not self._has_valid_answer(normalized):
+                continue
+            self.trained.append({**normalized, "trained": True, "training_status": "teacher_approved"})
+            existing_prompts.add(prompt)
+            changed = True
+
+        for item in self.trained:
+            metadata = dict(item.get("metadata") or {})
+            source = source_by_prompt.get(self._normalize_prompt(item.get("prompt", "")), {})
+            fallback_math = str(item.get("id", "")).lower().startswith("q") and str(item.get("id", ""))[1:].isdigit()
+            scope = {
+                "subject": metadata.get("subject") or item.get("subject") or source.get("subject") or ("Mathematics" if fallback_math else "General Subject"),
+                "class_name": metadata.get("class_name") or item.get("class_name") or source.get("class") or ("P1" if fallback_math else "Unknown"),
+                "unit": metadata.get("unit") or item.get("unit") or source.get("unit") or ("Unit 1" if fallback_math else "Unassigned"),
+            }
+            scope["class_name"] = self.normalize_class_name(scope["class_name"]) or scope["class_name"]
+            for key, value in scope.items():
+                if metadata.get(key) != value or item.get(key) != value:
+                    changed = True
+                metadata[key] = value
+                item[key] = value
+            item["metadata"] = metadata
+        if changed:
+            self.trained_path.write_text(json.dumps(self.trained, indent=2, ensure_ascii=True), encoding="utf-8")
+
+    @staticmethod
+    def _scope_value(value: Any) -> str:
+        return str(value or "").strip()
+
+    @staticmethod
+    def normalize_class_name(value: Any) -> str:
+        text = re.sub(r"[^a-z0-9]", "", str(value or "").lower())
+        match = re.fullmatch(r"(?:p|primary)(\d+)", text)
+        return f"P{match.group(1)}" if match else str(value or "").strip()
+
+    @classmethod
+    def _same_scope(cls, actual: Any, requested: str) -> bool:
+        return cls._scope_value(actual).lower() == requested.lower()
+
     @staticmethod
     def _normalize_training_question(question: Dict[str, Any]) -> Dict[str, Any]:
         item = dict(question)
-        item["prompt"] = str(item.get("prompt") or item.get("question") or "").strip()
+        item["prompt"] = str(item.get("question") or item.get("prompt") or "").strip()
         item["type"] = str(item.get("type") or item.get("question_type") or "open_question")
+        if not item.get("points") and item.get("total_points"):
+            item["points"] = item["total_points"]
         if item.get("answer") is None:
             item["answer"] = item.get("correct_answer") or item.get("expected_answer")
+        if item["type"] == "multiple_choice" and isinstance(item.get("answer"), str) and isinstance(item.get("options"), list):
+            answer_text = item["answer"].strip().lower()
+            for position, option in enumerate(item["options"]):
+                if answer_text == str(option).strip().lower():
+                    item["answer"] = position
+                    break
         if item["type"] == "match" and item.get("answer") is None:
             item["answer"] = item.get("correct_matches")
         if item["type"] == "rearrange" and item.get("answer") is None:
@@ -141,7 +224,7 @@ class AssessmentService:
         if item["type"] == "drag_and_drop" and item.get("answer") is None:
             item["answer"] = item.get("correct_answer")
         metadata = dict(item.get("metadata") or {})
-        for key in ("level", "class", "class_name", "subject", "unit", "topic", "subtopic", "language", "accepted_answers", "marking_scheme", "grading", "grading_method", "source", "left", "right", "items", "groups", "instruction", "explanation"):
+        for key in ("country", "curriculum", "level", "class", "class_name", "subject", "unit", "topic", "subtopic", "learning_outcome", "language", "accepted_answers", "marking_scheme", "grading", "grading_method", "correction_engine", "source", "left", "right", "items", "groups", "instruction", "explanation", "total_points"):
             if key in item and key not in metadata:
                 metadata["class_name" if key == "class" else key] = item[key]
         item["metadata"] = metadata
@@ -170,10 +253,10 @@ class AssessmentService:
             if not item_prompt:
                 continue
             item_subject = str(item.get("metadata", {}).get("subject") or item.get("subject") or "").strip()
-            item_class = str(item.get("metadata", {}).get("class_name") or item.get("class_name") or "").strip()
+            item_class = self.normalize_class_name(item.get("metadata", {}).get("class_name") or item.get("class_name"))
             if subject and item_subject and item_subject.lower() != str(subject).lower():
                 continue
-            if class_name and item_class and item_class.lower() != str(class_name).lower():
+            if class_name and item_class and item_class.lower() != self.normalize_class_name(class_name).lower():
                 continue
 
             normalized_item = self._normalize_prompt(item_prompt)
@@ -312,6 +395,8 @@ class AssessmentService:
     def _has_valid_answer(question: Dict[str, Any]) -> bool:
         answer = question.get("answer")
         if answer is None or answer == "":
+            if question.get("type") == "open_question" and (question.get("marking_scheme") or question.get("grading") or question.get("correction_engine")):
+                return True
             return False
         options = question.get("options")
         if question.get("type") == "multiple_choice":

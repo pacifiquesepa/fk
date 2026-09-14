@@ -170,7 +170,7 @@ CREATE TABLE test_questions (
   id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   test_id INT UNSIGNED NOT NULL,
   question_order SMALLINT UNSIGNED NOT NULL,
-  question_type ENUM('choice','fill','match') NOT NULL,
+  question_type ENUM('choice','fill','match','drag','rearrange','open') NOT NULL,
   prompt TEXT NOT NULL,
   options_json JSON NULL,
   answer_json JSON NOT NULL,

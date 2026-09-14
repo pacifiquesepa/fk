@@ -214,6 +214,8 @@ export function TestResultsPage({ test, onBack, t }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [sortBy, setSortBy] = useState('score'); // score, name, date
+    const [reportEntries, setReportEntries] = useState({});
+    const [selectedResult, setSelectedResult] = useState(null);
 
     useEffect(() => {
         loadResults();
@@ -224,6 +226,7 @@ export function TestResultsPage({ test, onBack, t }) {
             const { data } = await api.get(`/teacher/tests/${test.id}/results`);
             setStats(data.statistics);
             setResults(data.results || []);
+            setReportEntries(Object.fromEntries((data.results || []).filter((item) => item.reportEntryId).map((item) => [item.attemptId, item.reportEntryId])));
             setError('');
         } catch (err) {
             setError(err.response?.data?.error || 'Unable to load results.');
@@ -263,6 +266,18 @@ export function TestResultsPage({ test, onBack, t }) {
     };
 
     const sortedResults = getSortedResults();
+    const addToReport = async (attemptId) => {
+        try {
+            const { data } = await api.post(`/teacher/test-attempts/${attemptId}/report`);
+            setReportEntries((current) => ({ ...current, [attemptId]: data.id }));
+        } catch (err) { setError(err.response?.data?.error || 'Unable to add result to report.'); }
+    };
+    const removeFromReport = async (attemptId) => {
+        try {
+            await api.delete(`/teacher/reports/grade/${reportEntries[attemptId]}`);
+            setReportEntries((current) => { const next = { ...current }; delete next[attemptId]; return next; });
+        } catch (err) { setError(err.response?.data?.error || 'Unable to remove result from report.'); }
+    };
 
     return (
         <div className="space-y-6">
@@ -357,12 +372,12 @@ export function TestResultsPage({ test, onBack, t }) {
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                         {sortedResults.map((result, idx) => {
                             const percentage = result.score !== null
-                                ? getScorePercentage(result.score, 100)
+                                ? Number(result.percentage ?? getScorePercentage(result.score, result.maxScore || 100))
                                 : 0;
 
                             return (
                                 <div
-                                    key={result.studentId}
+                                    key={result.attemptId}
                                     className="p-4 border border-slate-200 rounded-lg hover:border-cyan-400 hover:bg-slate-50 transition"
                                 >
                                     <div className="flex items-center justify-between gap-3">
@@ -381,7 +396,7 @@ export function TestResultsPage({ test, onBack, t }) {
                                                             {percentage}%
                                                         </p>
                                                         <p className="text-xs text-slate-600 mt-1">
-                                                            {result.score} / 100
+                                                            {result.score} / {result.maxScore || 100}
                                                         </p>
                                                     </div>
                                                     <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-gradient-to-br from-cyan-100 to-cyan-50 border border-cyan-200">
@@ -408,6 +423,8 @@ export function TestResultsPage({ test, onBack, t }) {
                                             <span>Duration: {result.durationTaken} min</span>
                                         )}
                                     </div>
+                                    {result.status !== 'in_progress' && <div className="mt-3 flex flex-wrap justify-end gap-2"><button type="button" onClick={() => setSelectedResult(selectedResult === result.attemptId ? null : result.attemptId)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700">{selectedResult === result.attemptId ? 'Hide marks' : 'View marks'}</button>{reportEntries[result.attemptId] ? <button type="button" onClick={() => removeFromReport(result.attemptId)} className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-bold text-rose-700">Remove on report</button> : <button type="button" onClick={() => addToReport(result.attemptId)} className="rounded-lg bg-cyan-700 px-3 py-2 text-sm font-bold text-white">Add on report</button>}</div>}
+                                    {selectedResult === result.attemptId && <div className="mt-4 space-y-3 border-t border-slate-200 pt-4"><h4 className="text-sm font-bold text-slate-800">Answers and marking</h4>{(result.breakdown || []).map((item, index) => <div key={item.questionId} className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm"><p className="font-bold text-slate-700">Question {index + 1}: {item.prompt}</p><p className={`mt-2 font-bold ${item.correct ? 'text-emerald-700' : 'text-rose-700'}`}>{item.correct ? 'Correct' : 'Incorrect'} · {item.points} points</p><p className="mt-1 text-slate-600">Student answer: {formatResultAnswer(item.actual)}</p><p className="mt-1 font-semibold text-cyan-800">Correct answer: {formatResultAnswer(item.expected)}</p></div>)}</div>}
                                 </div>
                             );
                         })}

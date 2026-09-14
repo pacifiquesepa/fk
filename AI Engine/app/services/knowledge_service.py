@@ -57,7 +57,7 @@ class KnowledgeService:
                 continue
             if unit and str(document.get("unit", "")).lower() != unit.lower():
                 continue
-            if class_name and str(document.get("class_name", "")).lower() != class_name.lower():
+            if class_name and self._normalize_class(document.get("class_name")) != self._normalize_class(class_name):
                 continue
             haystack = " ".join(str(document.get(key, "")) for key in ("title", "subject", "topic", "text")).lower()
             score = sum(1 for term in terms if term in haystack)
@@ -65,6 +65,12 @@ class KnowledgeService:
                 scored.append((score + (1 if document.get("verified") else 0), document))
         scored.sort(key=lambda item: item[0], reverse=True)
         return [document for _, document in scored[:max(1, min(limit, 20))]]
+
+    @staticmethod
+    def _normalize_class(value: Any) -> str:
+        text = re.sub(r"[^a-z0-9]", "", str(value or "").lower())
+        match = re.fullmatch(r"(?:p|primary)(\d+)", text)
+        return f"p{match.group(1)}" if match else text
 
     def stats(self) -> Dict[str, int]:
         return {

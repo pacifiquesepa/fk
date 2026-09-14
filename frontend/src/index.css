@@ -13,6 +13,58 @@
 body {
     margin: 0;
     min-width: 320px;
+    background: #f4f8f9;
+    color: #1e293b;
+    transition: background-color 180ms ease, color 180ms ease;
+}
+
+.theme-dark body {
+    background: #0f1720;
+    color: #e2e8f0;
+}
+
+.theme-dark .bg-white {
+    background-color: #17232d;
+}
+
+.theme-dark .bg-slate-50 {
+    background-color: #1d2b36;
+}
+
+.theme-dark .bg-slate-100 {
+    background-color: #263642;
+}
+
+.theme-dark .text-slate-800,
+.theme-dark .text-slate-900 {
+    color: #f1f5f9;
+}
+
+.theme-dark .text-slate-700,
+.theme-dark .text-slate-600 {
+    color: #cbd5e1;
+}
+
+.theme-dark .text-slate-500,
+.theme-dark .text-slate-400 {
+    color: #94a3b8;
+}
+
+.theme-dark .border-slate-200,
+.theme-dark .border-slate-300 {
+    border-color: #334756;
+}
+
+.theme-dark input,
+.theme-dark textarea,
+.theme-dark select {
+    background-color: #17232d;
+    color: #e2e8f0;
+    border-color: #405565;
+}
+
+.theme-dark .hover\:bg-slate-100:hover {
+    background-color: #263642;
 }
 
 button,

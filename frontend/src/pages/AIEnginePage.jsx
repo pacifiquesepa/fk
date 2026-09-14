@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertCircle, ArrowLeft, Brain, CheckCircle2, Cpu, Eye, EyeOff, ImageUp, Loader2, MessageSquareText, Paperclip, Sparkles } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Brain, CheckCircle2, Cpu, Eye, EyeOff, FilePlus, ImageUp, Loader2, MessageSquareText, Paperclip, Sparkles } from 'lucide-react';
 
 const AI_ENGINE_URL = import.meta.env.VITE_AI_ENGINE_URL || 'http://localhost:8001';
 const REQUEST_TIMEOUT_MS = 4000;
@@ -13,12 +13,26 @@ const questionTypes = [
     ['open_question', 'Open question', 5],
 ];
 
-export default function AIEnginePage({ user, onBack }) {
+function normalizeClassName(value) {
+    const compact = String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const match = compact.match(/^(?:p|primary)(\d+)$/);
+    return match ? `p${match[1]}` : compact;
+}
+
+function normalizeLabel(value) {
+    return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+
+export default function AIEnginePage({ user, onBack, onNavigate }) {
     const buildAssessmentRef = useRef(null);
     const [status, setStatus] = useState('checking');
     const [error, setError] = useState('');
     const [assessment, setAssessment] = useState(null);
     const [showAnswers, setShowAnswers] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [editDrafts, setEditDrafts] = useState({});
     const [loading, setLoading] = useState(false);
     const [training, setTraining] = useState(false);
     const [trainingMessage, setTrainingMessage] = useState('');
@@ -34,6 +48,18 @@ export default function AIEnginePage({ user, onBack }) {
     ]);
     const [form, setForm] = useState({ subject: 'Mathematics', unit: 'Unit 1', className: 'Level 3', difficulty: 'medium', provider: 'local' });
     const [counts, setCounts] = useState(Object.fromEntries(questionTypes.map(([type, , count]) => [type, count])));
+
+    const beginEdit = (question) => setEditDrafts((current) => ({ ...current, [question.id]: { prompt: question.prompt || '', options: JSON.stringify(question.options || [], null, 2), answer: JSON.stringify(question.answer ?? '', null, 2), points: question.points || 1 } }));
+    const updateEdit = (questionId, key, value) => setEditDrafts((current) => ({ ...current, [questionId]: { ...current[questionId], [key]: value } }));
+    const saveEdit = (questionId) => {
+        const draft = editDrafts[questionId];
+        if (!draft || !assessment) return;
+        let options = []; let answer = draft.answer;
+        try { options = JSON.parse(draft.options || '[]'); } catch { setError('Options must be valid JSON.'); return; }
+        try { answer = JSON.parse(draft.answer); } catch { answer = draft.answer; }
+        setAssessment((current) => ({ ...current, questions: current.questions.map((question) => question.id === questionId ? { ...question, prompt: draft.prompt.trim(), options, answer, points: Number(draft.points) || 1 } : question) }));
+        setTrainingMessage('Question edit saved locally. Review it, then train the approved version.');
+    };
 
     const checkHealth = async () => {
         setStatus('checking');
@@ -67,6 +93,28 @@ export default function AIEnginePage({ user, onBack }) {
         const controller = new AbortController();
         const timeout = window.setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
         try {
+            if (form.provider === 'local') {
+                const params = new URLSearchParams({ subject: form.subject, class_name: form.className, unit: form.unit, difficulty: form.difficulty, limit: String(Math.max(totalRequested, 1)) });
+                const trainedResponse = await fetch(`${AI_ENGINE_URL}/api/assessments/trained?${params.toString()}`, { signal: controller.signal });
+                const trainedData = await trainedResponse.json();
+                if (!trainedResponse.ok) throw new Error(trainedData.detail || 'Unable to search the trained question bank.');
+                if (trainedData.questions?.length) {
+                    setAssessment({
+                        subject: form.subject,
+                        unit: form.unit,
+                        topic: 'Teacher-trained curriculum questions',
+                        class_name: form.className,
+                        difficulty: form.difficulty,
+                        total_questions: trainedData.questions.length,
+                        total_points: trainedData.questions.reduce((sum, question) => sum + Number(question.points || 0), 0),
+                        questions: trainedData.questions,
+                        provider: 'trained_dataset',
+                    });
+                    setTrainingMessage(`${trainedData.questions.length} matching trained question(s) found for ${form.subject} / ${form.className} / ${form.unit}.`);
+                    return;
+                }
+                throw new Error(`No trained questions match ${form.subject} / ${form.className} / ${form.unit} at ${form.difficulty} difficulty.`);
+            }
             const response = await fetch(`${AI_ENGINE_URL}/api/assessments/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -155,6 +203,37 @@ export default function AIEnginePage({ user, onBack }) {
         finally { setTraining(false); }
     };
 
+    const addAssessmentAsTest = async () => {
+        if (!assessment?.questions?.length) return;
+        try {
+            setTraining(true); setError('');
+            const assignmentResponse = await fetch(`${BACKEND_URL}/teacher/my-assignments`, { headers: { Authorization: `Bearer ${localStorage.getItem('fkams_token')}` } });
+            const assignmentData = await assignmentResponse.json();
+            const assignment = (assignmentData.assignments || []).find((item) => normalizeClassName(item.className) === normalizeClassName(form.className) && normalizeLabel(item.subjectName) === normalizeLabel(form.subject));
+            if (!assignment) throw new Error('Your account is not assigned to this class and subject.');
+            const response = await fetch(`${BACKEND_URL}/teacher/tests/draft`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('fkams_token')}` }, body: JSON.stringify({ title: `${form.subject} ${form.unit} Test`, description: `AI-reviewed assessment for ${form.className}.`, classId: assignment.classId, subjectId: assignment.subjectId, durationMinutes: 60 }) });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Unable to create test draft.');
+            for (const question of assessment.questions) {
+                const questionType = question.type === 'multiple_choice' ? 'choice' : question.type === 'fill_in_gap' ? 'fill' : question.type === 'drag_and_drop' ? 'drag' : question.type === 'open_question' ? 'open' : question.type;
+                const options = question.type === 'match'
+                    ? { leftItems: question.metadata?.left || [], rightItems: question.metadata?.right || [] }
+                    : question.type === 'drag_and_drop'
+                        ? { items: question.metadata?.items || question.options || [], groups: question.metadata?.groups || Object.keys(question.answer || {}) }
+                        : question.options || question.metadata?.items || [];
+                const answer = ['match', 'drag_and_drop'].includes(question.type) ? question.answer : Array.isArray(question.answer) ? question.answer : [question.answer];
+                const questionResponse = await fetch(`${BACKEND_URL}/teacher/tests/${data.id}/questions`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('fkams_token')}` }, body: JSON.stringify({ questionType, prompt: question.prompt, options, answer, points: question.points || 1 }) });
+                if (!questionResponse.ok) {
+                    const questionError = await questionResponse.json().catch(() => ({}));
+                    throw new Error(questionError.error || `Question upload failed for ${question.type}.`);
+                }
+            }
+            setTrainingMessage('Test draft created with your edited questions. Continue in the test builder.');
+            onNavigate?.('upload-test');
+        } catch (requestError) { setError(requestError.message || 'Unable to add assessment as a test.'); }
+        finally { setTraining(false); }
+    };
+
     const uploadQuestionDocument = async () => {
         if (!questionFile) return;
         setTraining(true); setTrainingMessage(''); setError('');
@@ -225,21 +304,23 @@ export default function AIEnginePage({ user, onBack }) {
                 </div>
             </div>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-display text-base font-bold text-slate-800">Generated questions</h2>{assessment && <p className="mt-1 text-[10px] text-slate-400">{assessment.subject} · {assessment.unit || form.unit} · {assessment.topic || 'Book activities'} · {assessment.difficulty || form.difficulty}</p>}{trainingMessage && <p className="mt-2 text-[10px] text-emerald-700">{trainingMessage}</p>}</div>{assessment && <div className="flex gap-2"><button onClick={() => setShowAnswers((value) => !value)} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600">{showAnswers ? <EyeOff size={14} /> : <Eye size={14} />}{showAnswers ? 'Hide answers' : 'Show answers'}</button><button onClick={trainModel} disabled={training} className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[10px] font-bold text-white disabled:bg-slate-300"><Brain size={14} />{training ? 'Training...' : 'Train model'}</button></div>}</div>{!assessment ? <div className="grid min-h-80 place-items-center rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-400"><div><Sparkles className="mx-auto mb-3 text-cyan-500" size={28} /><p>Build an assessment or upload a teacher document to generate reviewable questions.</p></div></div> : <div className="space-y-3">{assessment.questions.map((question, index) => <QuestionCard key={question.id || index} question={question} index={index} showAnswers={showAnswers} />)}</div>}</section>
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-display text-base font-bold text-slate-800">Generated questions</h2>{assessment && <p className="mt-1 text-[10px] text-slate-400">{assessment.subject} · {assessment.unit || form.unit} · {assessment.topic || 'Book activities'} · {assessment.difficulty || form.difficulty}</p>}{trainingMessage && <p className="mt-2 text-[10px] text-emerald-700">{trainingMessage}</p>}</div>{assessment && <div className="flex flex-wrap gap-2"><button onClick={() => { setEditMode((value) => !value); assessment.questions.forEach(beginEdit); }} className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-800">{editMode ? 'Finish editing' : 'Edit before upload'}</button><button onClick={() => setShowAnswers((value) => !value)} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600">{showAnswers ? <EyeOff size={14} /> : <Eye size={14} />}{showAnswers ? 'Hide answers' : 'Show answers'}</button><button onClick={trainModel} disabled={training || editMode} className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[10px] font-bold text-white disabled:bg-slate-300"><Brain size={14} />{training ? 'Training...' : 'Train model'}</button><button onClick={addAssessmentAsTest} disabled={training || editMode} className="flex items-center gap-2 rounded-lg bg-cyan-700 px-3 py-2 text-[10px] font-bold text-white disabled:bg-slate-300"><FilePlus size={14} />Add test</button></div>}</div>{!assessment ? <div className="grid min-h-80 place-items-center rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-400"><div><Sparkles className="mx-auto mb-3 text-cyan-500" size={28} /><p>Build an assessment or upload a teacher document to generate reviewable questions.</p></div></div> : <div className="space-y-3">{assessment.questions.map((question, index) => <QuestionCard key={question.id || index} question={question} index={index} showAnswers={showAnswers} editMode={editMode} draft={editDrafts[question.id]} onUpdate={updateEdit} onSave={saveEdit} />)}</div>}</section>
         </section>
     </div>;
 }
 
 function Field({ label, children }) { return <label className="block"><span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">{label}</span>{<div className="[&>input]:w-full [&>input]:rounded-xl [&>input]:border [&>input]:border-slate-200 [&>input]:px-3 [&>input]:py-3 [&>input]:text-xs [&>input]:outline-none [&>input]:focus:border-cyan-500 [&>select]:w-full [&>select]:rounded-xl [&>select]:border [&>select]:border-slate-200 [&>select]:bg-white [&>select]:px-3 [&>select]:py-3 [&>select]:text-xs">{children}</div>}</label>; }
-function QuestionCard({ question, index, showAnswers }) {
+function QuestionCard({ question, index, showAnswers, editMode, draft, onUpdate, onSave }) {
     const metadata = question.metadata || {};
+    const referenceAnswer = question.answer ?? metadata.reference_answer ?? metadata.expected_answer ?? metadata.sample_answer ?? metadata.model_answer;
     return <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-        <div className="flex items-start justify-between gap-3"><p className="text-xs font-bold leading-5 text-slate-700">{index + 1}. {question.prompt}</p><span className="shrink-0 rounded-full bg-cyan-100 px-2 py-1 text-[9px] font-bold uppercase text-cyan-700">{question.type.replaceAll('_', ' ')}</span></div>
+        <div className="flex items-start justify-between gap-3"><p className="text-xs font-bold leading-5 text-slate-700">{index + 1}. {editMode && draft ? <textarea value={draft.prompt} onChange={(event) => onUpdate(question.id, 'prompt', event.target.value)} className="w-full rounded-lg border border-amber-300 bg-white p-2 text-xs" /> : question.prompt}</p><span className="shrink-0 rounded-full bg-cyan-100 px-2 py-1 text-[9px] font-bold uppercase text-cyan-700">{question.type.replaceAll('_', ' ')}</span></div>
+        {editMode && draft && <div className="mt-3 grid gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3"><label className="text-[10px] font-bold text-amber-900">Options JSON<textarea value={draft.options} onChange={(event) => onUpdate(question.id, 'options', event.target.value)} className="mt-1 min-h-16 w-full rounded border border-amber-200 bg-white p-2 font-mono text-[10px]" /></label><label className="text-[10px] font-bold text-amber-900">Answer JSON<textarea value={draft.answer} onChange={(event) => onUpdate(question.id, 'answer', event.target.value)} className="mt-1 min-h-12 w-full rounded border border-amber-200 bg-white p-2 font-mono text-[10px]" /></label><label className="text-[10px] font-bold text-amber-900">Points<input type="number" min="1" value={draft.points} onChange={(event) => onUpdate(question.id, 'points', event.target.value)} className="mt-1 w-full rounded border border-amber-200 bg-white p-2 text-xs" /></label><button type="button" onClick={() => onSave(question.id)} className="rounded bg-amber-700 px-3 py-2 text-[10px] font-bold text-white">Save question edit</button></div>}
         {metadata.instruction && <p className="mt-2 text-[10px] italic text-slate-500">{metadata.instruction}</p>}
         {question.options?.length > 0 && <ol className="mt-3 grid gap-2 text-xs text-slate-600">{question.options.map((option, optionIndex) => <li key={`${question.id}-${optionIndex}`} className="rounded-lg bg-white px-3 py-2">{String.fromCharCode(65 + optionIndex)}. {option}</li>)}</ol>}
         {question.type === 'match' && metadata.left && metadata.right && <div className="mt-3 grid gap-2 sm:grid-cols-2"><div><p className="mb-1 text-[9px] font-bold uppercase text-slate-400">Items</p>{metadata.left.map((item) => <p key={item} className="rounded bg-white px-2 py-1 text-[10px] text-slate-600">{item}</p>)}</div><div><p className="mb-1 text-[9px] font-bold uppercase text-slate-400">Choices</p>{metadata.right.map((item) => <p key={item} className="rounded bg-white px-2 py-1 text-[10px] text-slate-600">{item}</p>)}</div></div>}
         {question.type === 'drag_and_drop' && metadata.groups && <p className="mt-2 text-[10px] text-slate-500">Groups: {metadata.groups.join(', ')}</p>}
-        {showAnswers && <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-[10px] text-emerald-800"><b>Answer:</b> {formatAnswer(question.answer, question.options)}{metadata.accepted_answers?.length > 0 && <p className="mt-2"><b>Accepted:</b> {metadata.accepted_answers.join(', ')}</p>}{(metadata.marking_scheme || metadata.grading) && <p className="mt-2"><b>Marking scheme:</b> {formatAnswer(metadata.marking_scheme || metadata.grading)}</p>}{metadata.explanation && <p className="mt-2 leading-5"><b>Explanation:</b> {metadata.explanation}</p>}<p className="mt-1">{question.points} points · {question.type === 'open_question' ? 'Teacher review' : question.difficulty}</p></div>}
+        {showAnswers && <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-[10px] text-emerald-800"><b>{question.type === 'open_question' ? 'Reference answer:' : 'Answer:'}</b> {formatAnswer(referenceAnswer, question.options)}{metadata.accepted_answers?.length > 0 && <p className="mt-2"><b>Accepted:</b> {metadata.accepted_answers.join(', ')}</p>}{(metadata.marking_scheme || metadata.grading) && <p className="mt-2"><b>Marking scheme:</b> {formatAnswer(metadata.marking_scheme || metadata.grading)}</p>}{metadata.explanation && <p className="mt-2 leading-5"><b>Explanation:</b> {metadata.explanation}</p>}<p className="mt-1">{question.points} points · {question.type === 'open_question' ? 'Teacher review required' : question.difficulty}</p></div>}
     </article>;
 }
-function formatAnswer(answer, options) { if (answer === null || answer === undefined) return 'Teacher/AI review required'; if (typeof answer === 'number' && Array.isArray(options) && options[answer] !== undefined) return `${String.fromCharCode(65 + answer)}. ${options[answer]}`; if (Array.isArray(answer)) return answer.join(' → '); if (typeof answer === 'object') return Object.entries(answer).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' · '); return String(answer); }
+function formatAnswer(answer, options) { if (answer === null || answer === undefined || answer === '') return 'No reference answer returned; teacher review required.'; if (typeof answer === 'number' && Array.isArray(options) && options[answer] !== undefined) return `${String.fromCharCode(65 + answer)}. ${options[answer]}`; if (Array.isArray(answer)) return answer.join(' → '); if (typeof answer === 'object') return Object.entries(answer).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' · '); return String(answer); }

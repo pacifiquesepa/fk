@@ -126,7 +126,7 @@ export default function ActivitiesTab({ subject, user }) {
       ) : activities.length ? (
         <div className="space-y-3">
           {activities.map((item) => (
-            <div key={item.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <button type="button" key={item.id} onClick={() => window.dispatchEvent(new CustomEvent('fkams-navigate', { detail: { page: 'test-runner' } }))} className="block w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-cyan-400 hover:bg-cyan-50">
               <div className="flex items-center justify-between gap-3">
                 <p className="font-bold text-slate-800">{item.title}</p>
                 <span className="rounded-full bg-cyan-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-700">
@@ -134,7 +134,7 @@ export default function ActivitiesTab({ subject, user }) {
                 </span>
               </div>
               <p className="mt-2 text-sm text-slate-500">{item.subjectName || subject?.subjectName} · {item.durationMinutes || 30} min</p>
-            </div>
+            </button>
           ))}
         </div>
       ) : (

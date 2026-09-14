@@ -69,7 +69,13 @@ class ProviderService:
             if not prompt_text or prompt_text.lower() in seen:
                 continue
             seen.add(prompt_text.lower())
-            question["metadata"] = {**question.get("metadata", {}), "source": provider, "requires_teacher_review": True}
+            metadata = dict(question.get("metadata") or {})
+            if question.get("type") == "open_question" and question.get("answer") in (None, ""):
+                for answer_key in ("reference_answer", "expected_answer", "sample_answer", "model_answer"):
+                    if metadata.get(answer_key):
+                        question["answer"] = metadata[answer_key]
+                        break
+            question["metadata"] = {**metadata, "source": provider, "requires_teacher_review": True}
             unique.append(question)
         return {"questions": unique, "provider": provider, "requires_teacher_review": True, "sources": context}
 
@@ -100,10 +106,12 @@ class ProviderService:
         counts = json.dumps(request.get("counts", {}), ensure_ascii=True)
         types = ", ".join(request.get("question_types", []))
         return (f"Create a {request.get('difficulty', 'medium')} assessment for {request.get('subject_name')} unit {request.get('unit')} topic {request.get('topic')} "
-                f"class {request.get('class_name')}. Required types: {types}. Required counts: {counts}. "
-                "Return JSON with a questions array. Each item must have id, type, prompt, options when needed, answer, points, difficulty, "
-                "and metadata containing learning_outcome. Make every prompt materially different, age-appropriate, curriculum-grounded, "
-                "and mark open_question answer as null with a marking rubric in metadata.")
+            f"class {request.get('class_name')}. Required types: {types}. Required counts: {counts}. "
+            "Return JSON with a questions array. Each item must have id, type, prompt, options when needed, answer, points, difficulty, "
+            "and metadata containing learning_outcome. Make every prompt materially different, age-appropriate, and curriculum-grounded. "
+            "For every open_question, provide a concise curriculum-grounded model answer in answer (or metadata.reference_answer), "
+            "plus metadata.marking_scheme or metadata.grading for partial marking. Never leave an open_question answer null when the approved context supports an answer. "
+            "Mark every external question as requiring teacher review because the model answer is a reference answer, not automatic final grading.")
 
     @staticmethod
     def _compose(prompt: str, context: List[Dict[str, Any]]) -> str:

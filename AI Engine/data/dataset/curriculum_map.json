@@ -174,22 +174,6 @@
                     },
                     "source": "REB Competence-Based Curriculum",
                     "status": "teacher_ground_truth_seeded"
-                },
-                "Unit 7: Home": {
-                    "topics": [
-                        "Our house has different rooms",
-                        "Our home: Activities at home",
-                        "Sounds and spellings",
-                        "Identifying places"
-                    ],
-                    "subtopics": {
-                        "Our house has different rooms": ["Vocabulary Identification", "Functional Rooms", "Productive Expression"],
-                        "Our home: Activities at home": ["Action Matching", "Sentence Mechanics", "Syntax Layout", "Activity Categorization"],
-                        "Sounds and spellings": ["Letter Completion"],
-                        "Identifying places": ["Sentence Construction"]
-                    },
-                    "source": "REB Competence-Based Curriculum",
-                    "status": "teacher_ground_truth_seeded"
                 }
             }
         },

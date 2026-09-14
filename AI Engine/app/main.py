@@ -112,7 +112,7 @@ def parse_assessment_request(text: str) -> Dict[str, Any]:
     request = str(text or "").strip()
     lowered = request.lower()
     count_match = re.search(r"\b(\d+)\s+(?:questions?|ibibazo)\b", lowered)
-    class_match = re.search(r"\b(?:primary\s*|p\s*)([1-6])\b", lowered)
+    class_match = re.search(r"\b(?:primary\s*|p\s*)(\d+)\b", lowered)
     unit_match = re.search(r"\bunit\s*([0-9]+)\b", request, re.I)
     difficulty = next((value for value in ("easy", "medium", "strong") if value in lowered), "medium")
     type_aliases = {
@@ -174,6 +174,19 @@ def generate_assessment(payload: AssessmentRequest):
         return {"assessment": {"subject": payload.subject_name or "General Subject", "unit": payload.unit, "topic": provider_request["topic"], "class_name": payload.class_name, "difficulty": payload.difficulty, "total_questions": len(questions), "total_points": sum(question.points for question in questions), "questions": [question.model_dump() for question in questions], "provider": external["provider"], "requires_teacher_review": True, "sources": external["sources"]}}
     result = assessment_service.generate_assessment({**payload.model_dump(), "book_context": context})
     return {"assessment": result.model_dump()}
+
+
+@app.get("/api/assessments/trained")
+def get_trained_questions(subject: str, class_name: str, unit: str, difficulty: str | None = None, limit: int = 50):
+    questions = assessment_service.trained_questions(subject, class_name, unit, difficulty, limit)
+    return {
+        "subject": subject,
+        "class_name": class_name,
+        "unit": unit,
+        "difficulty": difficulty,
+        "total_questions": len(questions),
+        "questions": questions,
+    }
 
 
 @app.post("/api/assessments/train")
