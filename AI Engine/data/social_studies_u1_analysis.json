@@ -1,0 +1,109 @@
+{
+  "report_generated_at": "2026-09-23T10:46:22",
+  "subject": "Études Sociales",
+  "class": "P1",
+  "unit": "Unité 1: Membres de la famille",
+  "summary": {
+    "total_questions": 64,
+    "total_points": 99,
+    "questions_by_difficulty": {
+      "easy": 20,
+      "medium": 34,
+      "strong": 10
+    },
+    "questions_by_type": {
+      "multiple_choice": 24,
+      "match": 10,
+      "fill_in_gap": 10,
+      "rearrange": 10,
+      "open_question": 10
+    },
+    "points_by_difficulty": {
+      "easy": 30,
+      "medium": 44,
+      "strong": 25
+    }
+  },
+  "subtopics": [
+    "Membres de la MAISON",
+    "Membres de la famille",
+    "Rôles et responsabilités",
+    "Une famille nucléaire"
+  ],
+  "open_ended_questions": {
+    "count": 10,
+    "total_points": 25
+  },
+  "grading_rubrics": [
+    {
+      "question_prompt": "Regardez la page 1. Expliquez en vos propres mots ce que font les membres de la famille pour s'aider mutuellement à la maison.",
+      "max_points": 3,
+      "full_credit_criteria": "mentionne_cuisiner_ou_nettoyer (+1); mentionne_travailler (+1); contient_aide_mutuelle (+1)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    },
+    {
+      "question_prompt": "Décrivez la composition complète d'une famille nucléaire en vous basant sur les informations de la page 4.",
+      "max_points": 3,
+      "full_credit_criteria": "contient_pere (+1); contient_mere (+1); contient_enfants (+1)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    },
+    {
+      "question_prompt": "Selon l'histoire de la famille de Mutoni à la page 6, citez deux tâches ménagères spécifiques faites par ses enfants Ganza et Uwera.",
+      "max_points": 2,
+      "full_credit_criteria": "mentionne_ganza_cuisine (+1); mentionne_uwera_nettoie (+1)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    },
+    {
+      "question_prompt": "Donnez trois responsabilités principales des parents envers leurs enfants selon la liste officielle de la page 7.",
+      "max_points": 3,
+      "full_credit_criteria": "fournir_nourriture_ou_vetements (+1); payer_frais_scolarite (+1); acheter_medicaments_ou_prendre_soin (+1)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    },
+    {
+      "question_prompt": "Donnez trois responsabilités importantes des enfants au sein du foyer selon les règles apprises à la page 7.",
+      "max_points": 3,
+      "full_credit_criteria": "respecter_les_parents_ou_personnes_agees (+1); aider_a_nettoyer_la_maison (+1); faire_les_devoirs_ou_aller_ecole (+1)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    },
+    {
+      "question_prompt": "Expliquez pourquoi il est écrit à la page 8 que 'tout le monde devrait aider à la maison' au lieu d'une seule personne.",
+      "max_points": 3,
+      "full_credit_criteria": "mentionne_cooperation_ou_travail_equipe (+1); eviter_la_paresse (+2)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    },
+    {
+      "question_prompt": "En vous basant sur l'arbre généalogique de la page 5, décrivez la relation familiale qui existe entre Ganza, Keza, Shema et Isaro.",
+      "max_points": 2,
+      "full_credit_criteria": "mentionne_freres_et_soeurs (+1); enfants_de_jabo_et_simbi (+1)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    },
+    {
+      "question_prompt": "D'après les images de la page 6, décrivez comment les parents soutiennent l'éducation de leurs enfants financièrement.",
+      "max_points": 2,
+      "full_credit_criteria": "la_mere_paie_les_frais (+2)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    },
+    {
+      "question_prompt": "Pourquoi les parents doivent-ils enseigner le 'bon comportement' aux enfants selon la page 7?",
+      "max_points": 2,
+      "full_credit_criteria": "devenir_citoyen_responsable_ou_respect (+2)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    },
+    {
+      "question_prompt": "Résumez en une phrase claire l'importance d'une famille heureuse et en bonne santé selon le résumé de la page 8.",
+      "max_points": 2,
+      "full_credit_criteria": "chacun_remplit_son_role (+2)",
+      "partial_credit_criteria": "Response addresses some but not all key points.",
+      "zero_credit_criteria": "Response fails to address the question."
+    }
+  ]
+}

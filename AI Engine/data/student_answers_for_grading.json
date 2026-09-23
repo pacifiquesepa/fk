@@ -1,0 +1,83 @@
+[
+  {
+    "student_id": "stu_001",
+    "student_name": "Ganza Alice",
+    "class": "P1 Green",
+    "answers": [
+      {
+        "question_id": "q1",
+        "response": "Her name is Susan. She is a girl."
+      },
+      {
+        "question_id": "q2",
+        "response": "This is a blue pen."
+      },
+      {
+        "question_id": "q3",
+        "response": "I am pointing to the window."
+      },
+      {
+        "question_id": "q4",
+        "response": "I like to read my book at school."
+      },
+      {
+        "question_id": "q5",
+        "response": "My bag is on the desk."
+      }
+    ]
+  },
+  {
+    "student_id": "stu_002",
+    "student_name": "Habimana Eric",
+    "class": "P1 Green",
+    "answers": [
+      {
+        "question_id": "q1",
+        "response": "His name is Susan."
+      },
+      {
+        "question_id": "q2",
+        "response": "this is a green pencil"
+      },
+      {
+        "question_id": "q3",
+        "response": "I am pointing to the window."
+      },
+      {
+        "question_id": "q4",
+        "response": "I like mangoes."
+      },
+      {
+        "question_id": "q5",
+        "response": "It is under the chair."
+      }
+    ]
+  },
+  {
+    "student_id": "stu_003",
+    "student_name": "Mukarurinda Sarah",
+    "class": "P1 Green",
+    "answers": [
+      {
+        "question_id": "q1",
+        "response": "Susan is my friend. She likes cats."
+      },
+      {
+        "question_id": "q2",
+        "response": "The big brown elephant is dancing."
+      },
+      {
+        "question_id": "q3",
+        "response": "I like to play football."
+      },
+      {
+        "question_id": "q4",
+        "response": "My favourite colour is pink."
+      },
+      {
+        "question_id": "q5",
+        "response": "It is a bag."
+      }
+    ]
+  }
+]

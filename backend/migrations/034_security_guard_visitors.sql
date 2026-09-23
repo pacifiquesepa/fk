@@ -1,0 +1,42 @@
+CREATE TABLE IF NOT EXISTS security_guard_permissions (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  title VARCHAR(180) NOT NULL,
+  description TEXT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  granted_by INT UNSIGNED NOT NULL,
+  granted_to INT UNSIGNED NULL,
+  permission_start DATETIME NULL,
+  permission_end DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_guard_permission_enabled (enabled),
+  KEY idx_guard_permission_dates (permission_start, permission_end),
+  CONSTRAINT fk_guard_permission_granted_by FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_guard_permission_granted_to FOREIGN KEY (granted_to) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS security_visit_requests (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  visitor_type ENUM('guest','parent') NOT NULL,
+  full_name VARCHAR(120) NOT NULL,
+  email VARCHAR(190) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  purpose VARCHAR(60) NOT NULL DEFAULT 'visit',
+  arrival_time DATETIME NOT NULL,
+  description TEXT NULL,
+  student_name VARCHAR(120) NULL,
+  photo_data MEDIUMTEXT NULL,
+  status ENUM('pending','approved','rejected','out') NOT NULL DEFAULT 'pending',
+  review_comment TEXT NULL,
+  reviewed_by INT UNSIGNED NULL,
+  reviewed_at DATETIME NULL,
+  created_by INT UNSIGNED NULL,
+  language ENUM('en','fr','rw') NOT NULL DEFAULT 'en',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_visit_status (status),
+  KEY idx_visit_type (visitor_type),
+  KEY idx_visit_email (email),
+  CONSTRAINT fk_visit_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  CONSTRAINT fk_visit_reviewed_by FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

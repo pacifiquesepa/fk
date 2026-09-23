@@ -1,0 +1,1860 @@
+{
+    "subject": "English",
+    "class_name": "P1",
+    "unit": "Unit 1: Welcome to the classroom",
+    "assessment_matrix": {
+        "easy": {
+            "multiple_choice": [
+                {
+                    "prompt": "What do you say to your teacher in the morning?",
+                    "options": [
+                        "Good morning, Teacher.",
+                        "Good afternoon, Teacher.",
+                        "Good evening, Teacher.",
+                        "Goodbye, Teacher."
+                    ],
+                    "answer": 0,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Greetings",
+                        "source": "P1 English Pupil's Book One, page 2",
+                        "accepted_answers": [
+                            "Good morning, Teacher."
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Complete the phrase: 'Clap your ________.'",
+                    "options": [
+                        "feet",
+                        "hands",
+                        "eyes",
+                        "window"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Instructions",
+                        "source": "P1 English Pupil's Book One, page 8",
+                        "accepted_answers": [
+                            "hands"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "What sound family does the word 'bag' belong to?",
+                    "options": [
+                        "short /a/",
+                        "short /e/",
+                        "short /i/",
+                        "short /o/"
+                    ],
+                    "answer": 0,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Sounds and spellings",
+                        "source": "P1 English Pupil's Book One, page 1",
+                        "accepted_answers": [
+                            "short /a/"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Which letter comes first in the alphabet?",
+                    "options": [
+                        "B",
+                        "A",
+                        "C",
+                        "D"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Letters of the Alphabet",
+                        "source": "P1 English Pupil's Book One, page 1",
+                        "accepted_answers": [
+                            "A"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "How do you greet someone in the afternoon?",
+                    "options": [
+                        "Good morning",
+                        "Good afternoon",
+                        "Good evening",
+                        "Hello night"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Greetings",
+                        "source": "P1 English Pupil's Book One, page 2",
+                        "accepted_answers": [
+                            "Good afternoon"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Point to your head. What body part is it?",
+                    "options": [
+                        "Hand",
+                        "Head",
+                        "Foot",
+                        "Eye"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Parts of my body",
+                        "source": "P1 English Pupil's Book One, page 35",
+                        "accepted_answers": [
+                            "Head"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "What do you say when leaving the classroom?",
+                    "options": [
+                        "Good morning",
+                        "See you later",
+                        "Goodbye, Teacher.",
+                        "How are you?"
+                    ],
+                    "answer": 2,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Greetings",
+                        "source": "P1 English Pupil's Book One, page 4",
+                        "accepted_answers": [
+                            "Goodbye, Teacher."
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Which object is used for writing?",
+                    "options": [
+                        "Chair",
+                        "Pen",
+                        "Desk",
+                        "Bag"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Classroom objects",
+                        "source": "P1 English Pupil's Book One, page 15",
+                        "accepted_answers": [
+                            "Pen"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "What is the colour of a ripe plantain?",
+                    "options": [
+                        "Red",
+                        "Yellow",
+                        "Green",
+                        "Blue"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing colours",
+                        "source": "P1 English Pupil's Book One, page 19",
+                        "accepted_answers": [
+                            "Yellow"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Count the apples: if you see three apples, what number do you say?",
+                    "options": [
+                        "One",
+                        "Two",
+                        "Three",
+                        "Four"
+                    ],
+                    "answer": 2,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Numbers and counting",
+                        "source": "P1 English Pupil's Book One, page 22",
+                        "accepted_answers": [
+                            "Three"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                }
+            ],
+            "match": [
+                {
+                    "prompt": "Match the greeting phrase with its correct response.",
+                    "options": [
+                        "Good morning, children.",
+                        "How are you all?",
+                        "Goodbye, Keza."
+                    ],
+                    "answer": {
+                        "Good morning, children.": "Good morning, Teacher.",
+                        "How are you all?": "We are fine, thank you.",
+                        "Goodbye, Keza.": "Goodbye, Kamana. See you tomorrow."
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Greetings Dialogue",
+                        "source": "P1 English Pupil's Book One, pages 2 and 4",
+                        "left": [
+                            "Good morning, children.",
+                            "How are you all?",
+                            "Goodbye, Keza."
+                        ],
+                        "right": [
+                            "Good morning, Teacher.",
+                            "We are fine, thank you.",
+                            "Goodbye, Kamana. See you tomorrow."
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Match the word to its starting phonetic letter example.",
+                    "options": [
+                        "Apple",
+                        "Bag",
+                        "Cat"
+                    ],
+                    "answer": {
+                        "Apple": "Aa",
+                        "Bag": "Bb",
+                        "Cat": "Cc"
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Letters of the Alphabet",
+                        "source": "P1 English Pupil's Book One, page 1",
+                        "left": [
+                            "Apple",
+                            "Bag",
+                            "Cat"
+                        ],
+                        "right": [
+                            "Aa",
+                            "Bb",
+                            "Cc"
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Match the person with their correct description.",
+                    "options": [
+                        "The head teacher",
+                        "My mother",
+                        "My father"
+                    ],
+                    "answer": {
+                        "The head teacher": "Mr. Karambizi",
+                        "My mother": "A woman",
+                        "My father": "A man"
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing others",
+                        "source": "P1 English Pupil's Book One, pages 6 and 30",
+                        "left": [
+                            "The head teacher",
+                            "My mother",
+                            "My father"
+                        ],
+                        "right": [
+                            "Mr. Karambizi",
+                            "A woman",
+                            "A man"
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Match each action word with its meaning.",
+                    "options": [
+                        "Run",
+                        "Sit",
+                        "Clap"
+                    ],
+                    "answer": {
+                        "Run": "Move fast with your legs",
+                        "Sit": "Stay in a seat",
+                        "Clap": "Bring your hands together"
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Action words",
+                        "source": "P1 English Pupil's Book One, page 11",
+                        "left": [
+                            "Run",
+                            "Sit",
+                            "Clap"
+                        ],
+                        "right": [
+                            "Move fast with your legs",
+                            "Stay in a seat",
+                            "Bring your hands together"
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Match the object to its use.",
+                    "options": [
+                        "Pencil",
+                        "Bag",
+                        "Chair"
+                    ],
+                    "answer": {
+                        "Pencil": "We write with it",
+                        "Bag": "We keep things in it",
+                        "Chair": "We sit on it"
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Classroom objects",
+                        "source": "P1 English Pupil's Book One, page 15",
+                        "left": [
+                            "Pencil",
+                            "Bag",
+                            "Chair"
+                        ],
+                        "right": [
+                            "We write with it",
+                            "We keep things in it",
+                            "We sit on it"
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Match the question with its correct answer.",
+                    "options": [
+                        "What is your name?",
+                        "How old are you?",
+                        "Where is the cat?"
+                    ],
+                    "answer": {
+                        "What is your name?": "My name is Kalinda.",
+                        "How old are you?": "I am six years old.",
+                        "Where is the cat?": "It is on the mat."
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing myself",
+                        "source": "P1 English Pupil's Book One, page 4",
+                        "left": [
+                            "What is your name?",
+                            "How old are you?",
+                            "Where is the cat?"
+                        ],
+                        "right": [
+                            "My name is Kalinda.",
+                            "I am six years old.",
+                            "It is on the mat."
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Match the colour word with its description.",
+                    "options": [
+                        "Red",
+                        "Blue",
+                        "Green"
+                    ],
+                    "answer": {
+                        "Red": "The colour of a tomato",
+                        "Blue": "The colour of the sky",
+                        "Green": "The colour of grass"
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing colours",
+                        "source": "P1 English Pupil's Book One, page 19",
+                        "left": [
+                            "Red",
+                            "Blue",
+                            "Green"
+                        ],
+                        "right": [
+                            "The colour of a tomato",
+                            "The colour of the sky",
+                            "The colour of grass"
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Match the body part word to itself.",
+                    "options": [
+                        "Eyes",
+                        "Nose",
+                        "Mouth"
+                    ],
+                    "answer": {
+                        "Eyes": "eyes",
+                        "Nose": "nose",
+                        "Mouth": "mouth"
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Parts of my body",
+                        "source": "P1 English Pupil's Book One, page 34",
+                        "left": [
+                            "Eyes",
+                            "Nose",
+                            "Mouth"
+                        ],
+                        "right": [
+                            "eyes",
+                            "nose",
+                            "mouth"
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Match each number word with its numeral.",
+                    "options": [
+                        "Three",
+                        "Five",
+                        "Two"
+                    ],
+                    "answer": {
+                        "Three": "3",
+                        "Five": "5",
+                        "Two": "2"
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Numbers and counting",
+                        "source": "P1 English Pupil's Book One, page 22",
+                        "left": [
+                            "Three",
+                            "Five",
+                            "Two"
+                        ],
+                        "right": [
+                            "3",
+                            "5",
+                            "2"
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Match the clothing item to where it is worn.",
+                    "options": [
+                        "Shirt",
+                        "Shoes",
+                        "Hat"
+                    ],
+                    "answer": {
+                        "Shirt": "Worn on the upper body",
+                        "Shoes": "Worn on the feet",
+                        "Hat": "Worn on the head"
+                    },
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Clothes that we wear",
+                        "source": "P1 English Pupil's Book One, page 33",
+                        "left": [
+                            "Shirt",
+                            "Shoes",
+                            "Hat"
+                        ],
+                        "right": [
+                            "Worn on the upper body",
+                            "Worn on the feet",
+                            "Worn on the head"
+                        ],
+                        "grading_method": "partial_match",
+                        "marking_scheme": {
+                            "each_correct_match": 1
+                        },
+                        "correction_engine": {
+                            "rules": "Award 1 point for every matching key-value string pair accurately connected.",
+                            "partial_marking": true
+                        }
+                    }
+                }
+            ]
+        },
+        "medium": {
+            "multiple_choice": [
+                {
+                    "prompt": "If a friend asks you, 'What is your name?', what is the best way to answer?",
+                    "options": [
+                        "I am fine, thank you.",
+                        "My name is Kalinda.",
+                        "Good afternoon.",
+                        "This is my ball."
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing myself",
+                        "source": "P1 English Pupil's Book One, page 4",
+                        "accepted_answers": [
+                            "My name is Kalinda."
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "What is the correct way to ask a friend their age?",
+                    "options": [
+                        "What is your name?",
+                        "How old are you?",
+                        "Who is this?",
+                        "How are you?"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Telling your age",
+                        "source": "P1 English Pupil's Book One, page 28",
+                        "accepted_answers": [
+                            "How old are you?"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Which of these is a complete sentence?",
+                    "options": [
+                        "Run quickly.",
+                        "The cat is black.",
+                        "Very tall.",
+                        "Beautiful day."
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Simple sentences",
+                        "source": "P1 English Pupil's Book One, page 5",
+                        "accepted_answers": [
+                            "The cat is black."
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Choose the word that names an action.",
+                    "options": [
+                        "Book",
+                        "Jump",
+                        "Red",
+                        "Fast"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Action words",
+                        "source": "P1 English Pupil's Book One, page 11",
+                        "accepted_answers": [
+                            "Jump"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "What sound does the word 'pen' begin with?",
+                    "options": [
+                        "short /a/",
+                        "short /e/",
+                        "short /i/",
+                        "short /o/"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Sounds and spellings",
+                        "source": "P1 English Pupil's Book One, page 13",
+                        "accepted_answers": [
+                            "short /e/"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "How many letters are in the word 'cat'?",
+                    "options": [
+                        "2",
+                        "3",
+                        "4",
+                        "5"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Letters of the alphabet",
+                        "source": "P1 English Pupil's Book One, page 1",
+                        "accepted_answers": [
+                            "3"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Pick the sentence that uses the correct article.",
+                    "options": [
+                        "This is my bag",
+                        "This my bag",
+                        "This is bag"
+                    ],
+                    "answer": 0,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Yes or NO",
+                        "source": "P1 English Pupil's Book One, page 55",
+                        "accepted_answers": [
+                            "This is my bag"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "What question word asks about quantity?",
+                    "options": [
+                        "What",
+                        "How many",
+                        "Where",
+                        "Who"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "How many…?",
+                        "source": "P1 English Pupil's Book One, page 54",
+                        "accepted_answers": [
+                            "How many"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Which colour mixed with white makes light blue?",
+                    "options": [
+                        "Red",
+                        "Yellow",
+                        "Blue",
+                        "Green"
+                    ],
+                    "answer": 2,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing colours",
+                        "source": "P1 English Pupil's Book One, page 19",
+                        "accepted_answers": [
+                            "Blue"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Look at page 34. Which body part do you use to smell?",
+                    "options": [
+                        "Nose",
+                        "Eye",
+                        "Ear",
+                        "Mouth"
+                    ],
+                    "answer": 0,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Parts of my body",
+                        "source": "P1 English Pupil's Book One, page 34",
+                        "accepted_answers": [
+                            "Nose"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "How should you respond when someone says 'Goodbye'?",
+                    "options": [
+                        "Hello",
+                        "Good morning",
+                        "Goodbye",
+                        "Thank you"
+                    ],
+                    "answer": 2,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Greetings",
+                        "source": "P1 English Pupil's Book One, page 4",
+                        "accepted_answers": [
+                            "Goodbye"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Which word goes with 'these are my'?",
+                    "options": [
+                        "This",
+                        "These",
+                        "My"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing family members",
+                        "source": "P1 English Pupil's Book One, page 27",
+                        "accepted_answers": [
+                            "These"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "What comes next: Aa, Bb, Cc, ____?",
+                    "options": [
+                        "Dd",
+                        "Ee",
+                        "Ff",
+                        "Gg"
+                    ],
+                    "answer": 0,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Letters of the alphabet",
+                        "source": "P1 English Pupil's Book One, page 1",
+                        "accepted_answers": [
+                            "Dd"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Look at the picture on page 15. Which object do you sit on?",
+                    "options": [
+                        "Desk",
+                        "Chair",
+                        "Bag",
+                        "Pen"
+                    ],
+                    "answer": 1,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Classroom objects",
+                        "source": "P1 English Pupil's Book One, page 15",
+                        "accepted_answers": [
+                            "Chair"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Choose the correct plural of 'book'.",
+                    "options": [
+                        "books",
+                        "boooks",
+                        "boks",
+                        "bokes"
+                    ],
+                    "answer": 0,
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Simple sentences",
+                        "source": "P1 English Pupil's Book One, page 20",
+                        "accepted_answers": [
+                            "books"
+                        ],
+                        "correction_engine": {
+                            "rules": "Match exact index choice.",
+                            "partial_marking": false
+                        }
+                    }
+                }
+            ],
+            "fill_in_gap": [
+                {
+                    "prompt": "A cat and a r__t.",
+                    "answer": "a",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Sounds and spellings",
+                        "source": "P1 English Pupil's Book One, page 13",
+                        "accepted_answers": [
+                            "a",
+                            "A"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners should be able to spell vocabulary words utilizing the /a/ vowel sound."
+                    }
+                },
+                {
+                    "prompt": "Mr. Rutera is our t__acher.",
+                    "answer": "e",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing others",
+                        "source": "P1 English Pupil's Book One, page 6",
+                        "accepted_answers": [
+                            "e",
+                            "E"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners identify school workers and complete basic spelling blocks."
+                    }
+                },
+                {
+                    "prompt": "The word 'book' ends with the letter ____.",
+                    "answer": "k",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Sounds and spellings",
+                        "source": "P1 English Pupil's Book One, page 13",
+                        "accepted_answers": [
+                            "k",
+                            "K"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners should be able to identify final letter sounds."
+                    }
+                },
+                {
+                    "prompt": "I like to ride my ____.",
+                    "answer": "bike",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Likes and dislikes",
+                        "source": "P1 English Pupil's Book One, page 42",
+                        "accepted_answers": [
+                            "bike",
+                            "BIKE"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners should be able to fill in a favourite object spelling."
+                    }
+                },
+                {
+                    "prompt": "The sun is ____.",
+                    "answer": "yellow",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing colours",
+                        "source": "P1 English Pupil's Book One, page 19",
+                        "accepted_answers": [
+                            "yellow",
+                            "YELLOW"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners should name a colour from description."
+                    }
+                },
+                {
+                    "prompt": "My little sister is ____ years old.",
+                    "answer": "three",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Telling your age",
+                        "source": "P1 English Pupil's Book One, page 28",
+                        "accepted_answers": [
+                            "three",
+                            "THREE"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners should spell number words."
+                    }
+                },
+                {
+                    "prompt": "Clap your _____.",
+                    "answer": "hands",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Instructions",
+                        "source": "P1 English Pupil's Book One, page 8",
+                        "accepted_answers": [
+                            "hands",
+                            "HANDS"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners follow action instructions with vocabulary."
+                    }
+                },
+                {
+                    "prompt": "These books are ____ (singular: book).",
+                    "answer": "books",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Simple sentences",
+                        "source": "P1 English Pupil's Book One, page 20",
+                        "accepted_answers": [
+                            "books",
+                            "BOOKS"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners form plurals of common nouns."
+                    }
+                },
+                {
+                    "prompt": "The first letter of 'apple' is ____.",
+                    "answer": "a",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Letters of the alphabet",
+                        "source": "P1 English Pupil's Book One, page 1",
+                        "accepted_answers": [
+                            "a",
+                            "A"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners identify initial letter sounds."
+                    }
+                },
+                {
+                    "prompt": "Stand u__ when the teacher enters.",
+                    "answer": "p",
+                    "points": 1,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Instructions",
+                        "source": "P1 English Pupil's Book One, page 8",
+                        "accepted_answers": [
+                            "p",
+                            "P"
+                        ],
+                        "grading_method": "accepted_answers",
+                        "correction_engine": {
+                            "rules": "Case-insensitive exact string match.",
+                            "partial_marking": false
+                        },
+                        "learning_outcome": "Learners complete spelling of action command."
+                    }
+                }
+            ],
+            "rearrange": [
+                {
+                    "prompt": "Rearrange these words to make a correct instruction: [down, Sit]",
+                    "options": [
+                        "down",
+                        "Sit"
+                    ],
+                    "answer": [
+                        "Sit",
+                        "down"
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Giving and receiving instructions",
+                        "source": "P1 English Pupil's Book One, page 9",
+                        "accepted_answers": [
+                            "Sit down",
+                            "sit down"
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Rearrange these words to make a proper greeting expression: [you, How, are, ?]",
+                    "options": [
+                        "you",
+                        "How",
+                        "are",
+                        "?"
+                    ],
+                    "answer": [
+                        "How",
+                        "are",
+                        "you",
+                        "?"
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Greetings",
+                        "source": "P1 English Pupil's Book One, page 2",
+                        "accepted_answers": [
+                            "How are you ?",
+                            "how are you ?"
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Arrange the words to introduce yourself: [is, My, Amara, name]",
+                    "options": [
+                        "is",
+                        "My",
+                        "Amara",
+                        "name"
+                    ],
+                    "answer": [
+                        "My",
+                        "name",
+                        "is",
+                        "Amara"
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing myself",
+                        "source": "P1 English Pupil's Book One, page 4",
+                        "accepted_answers": [
+                            "My name is Amara",
+                            "my name is amara"
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Order the words: [blue, my, These, are, books]",
+                    "options": [
+                        "blue",
+                        "my",
+                        "These",
+                        "are",
+                        "books"
+                    ],
+                    "answer": [
+                        "These",
+                        "are",
+                        "my",
+                        "blue",
+                        "books"
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing colours",
+                        "source": "P1 English Pupil's Book One, page 19",
+                        "accepted_answers": [
+                            "These are my blue books",
+                            "these are my blue books"
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Make a sentence: [teacher, is, Mr. Rutera, our]",
+                    "options": [
+                        "teacher",
+                        "is",
+                        "Mr. Rutera",
+                        "our"
+                    ],
+                    "answer": [
+                        "Mr. Rutera",
+                        "is",
+                        "our",
+                        "teacher"
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing others",
+                        "source": "P1 English Pupil's Book One, page 6",
+                        "accepted_answers": [
+                            "Mr. Rutera is our teacher",
+                            "mr. rutera is our teacher"
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Rearrange: [old, am, I, six, years]",
+                    "options": [
+                        "old",
+                        "am",
+                        "I",
+                        "six",
+                        "years"
+                    ],
+                    "answer": [
+                        "I",
+                        "am",
+                        "six",
+                        "years",
+                        "old"
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Telling your age",
+                        "source": "P1 English Pupil's Book One, page 28",
+                        "accepted_answers": [
+                            "I am six years old",
+                            "i am six years old"
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Arrange: [feet., stamping, are, They, their]",
+                    "options": [
+                        "feet.",
+                        "stamping",
+                        "are",
+                        "They",
+                        "their"
+                    ],
+                    "answer": [
+                        "They",
+                        "are",
+                        "stamping",
+                        "their",
+                        "feet."
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Action words",
+                        "source": "P1 English Pupil's Book One, page 11",
+                        "accepted_answers": [
+                            "They are stamping their feet.",
+                            "they are stamping their feet."
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Order: [ruler., my, is, This]",
+                    "options": [
+                        "ruler.",
+                        "my",
+                        "is",
+                        "This"
+                    ],
+                    "answer": [
+                        "This",
+                        "is",
+                        "my",
+                        "ruler."
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Yes or NO",
+                        "source": "P1 English Pupil's Book One, page 55",
+                        "accepted_answers": [
+                            "This is my ruler.",
+                            "this is my ruler."
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Make a sentence: [a, dog, is, This, brown]",
+                    "options": [
+                        "a",
+                        "dog",
+                        "is",
+                        "This",
+                        "brown"
+                    ],
+                    "answer": [
+                        "This",
+                        "is",
+                        "a",
+                        "brown",
+                        "dog"
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Clothes that we wear",
+                        "source": "P1 English Pupil's Book One, page 37",
+                        "accepted_answers": [
+                            "This is a brown dog",
+                            "this is a brown dog"
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                },
+                {
+                    "prompt": "Arrange: [many, do, How, books, you, see, ?]",
+                    "options": [
+                        "many",
+                        "do",
+                        "How",
+                        "books",
+                        "you",
+                        "see",
+                        "?"
+                    ],
+                    "answer": [
+                        "How",
+                        "many",
+                        "books",
+                        "do",
+                        "you",
+                        "see",
+                        "?"
+                    ],
+                    "points": 2,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "How many…?",
+                        "source": "P1 English Pupil's Book One, page 54",
+                        "accepted_answers": [
+                            "How many books do you see ?",
+                            "how many books do you see ?"
+                        ],
+                        "correction_engine": {
+                            "rules": "Verify case-insensitive string match with trimming of leading/trailing spaces.",
+                            "partial_marking": false
+                        }
+                    }
+                }
+            ]
+        },
+        "strong": {
+            "open_question": [
+                {
+                    "prompt": "Look at page 7 of your book. Write a full sentence introducing your friend Susan.",
+                    "answer": null,
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing others",
+                        "source": "P1 English Pupil's Book One, page 7",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "starts_with_her_name_is",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "correct_spelling_of_susan",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "ends_with_she_is_a_girl_or_equivalent",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Evaluate sentence frameworks dynamically. Award point components for target indicators.",
+                            "partial_marking": true
+                        },
+                        "explanation": "Accept 'Her name is Susan' or 'She is Susan.'"
+                    }
+                },
+                {
+                    "prompt": "Imagine your teacher tells you to respond to an action. Write down what you say out loud while you are pointing to the window.",
+                    "answer": null,
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Action words and responses",
+                        "source": "P1 English Pupil's Book One, page 11",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "contains_i_am",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "contains_pointing_to",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "specifies_the_window",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Scan text for matching present continuous format 'I am pointing to the window'. Allow minor spelling tolerances for P1 evaluation.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Look at page 2. Write the greeting phrase you say to your teacher in the morning and the answer you expect back.",
+                    "answer": null,
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Greetings",
+                        "source": "P1 English Pupil's Book One, page 2",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "includes_good_morning",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "includes_a_teacher_address",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "includes_expected_response",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Scan for 'Good morning' plus teacher reference and reciprocal greeting.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Write three full sentences about your family. Mention who they are.",
+                    "answer": null,
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing family members",
+                        "source": "P1 English Pupil's Book One, page 27",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "contains_sentence_one",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "contains_sentence_two",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "contains_sentence_three",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Award a mark for each complete sentence that names and identifies a family member.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Look at page 15. Name three objects you find in your classroom.",
+                    "answer": null,
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Classroom objects",
+                        "source": "P1 English Pupil's Book One, page 15",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "names_first_object",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "names_second_object",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "names_third_object",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Match against textbook vocabulary list from page 15.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Look at page 34. Point to your nose and write a sentence saying 'This is my nose.'",
+                    "answer": null,
+                    "points": 3,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Parts of my body",
+                        "source": "P1 English Pupil's Book One, page 34",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "contains_this_is_my",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "contains_nose",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "uses_correct_capitalization",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Check the sentence frame 'This is my …' with the target body word.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Write a complete sentence telling the teacher one thing you like very much at school.",
+                    "answer": null,
+                    "points": 4,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Likes and dislikes",
+                        "source": "P1 English Pupil's Book One, page 42",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "starts_with_i_like",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "includes_a_school_activity_or_object",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "mentions_school_context",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "full_sentence_structure",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Evaluate I like plus a school-related action or noun.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Look at page 19 of your book. Describe the colour of two objects shown in short sentences.",
+                    "answer": null,
+                    "points": 4,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Introducing colours",
+                        "source": "P1 English Pupil's Book One, page 19",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "mentions_first_colour_word",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "identifies_first_object",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "mentions_second_colour_word",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "identifies_second_object",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Award marks for colour vocabulary and object identification from the picture.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Write the numbers from one to five in words.",
+                    "answer": null,
+                    "points": 4,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Numbers and counting",
+                        "source": "P1 English Pupil's Book One, page 22",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "writes_one",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "writes_two",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "writes_three",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "writes_four_and_five",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Check word spellings for numbers 1-5.",
+                            "partial_marking": true
+                        }
+                    }
+                },
+                {
+                    "prompt": "Look at page 8. Write down the instruction the teacher gives for standing up and explain what you should do.",
+                    "answer": null,
+                    "points": 4,
+                    "metadata": {
+                        "country": "Rwanda",
+                        "curriculum": "REB Competence-Based Curriculum",
+                        "subtopic": "Instructions",
+                        "source": "P1 English Pupil's Book One, page 8",
+                        "grading": {
+                            "method": "rubric",
+                            "criteria": [
+                                {
+                                    "criterion": "quotes_stand_up",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "describes_the_action",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "mentions_teacher_giving_command",
+                                    "points": 1
+                                },
+                                {
+                                    "criterion": "shows_attention_to_instruction",
+                                    "points": 1
+                                }
+                            ]
+                        },
+                        "correction_engine": {
+                            "rules": "Match against the action command vocabulary on page 8.",
+                            "partial_marking": true
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

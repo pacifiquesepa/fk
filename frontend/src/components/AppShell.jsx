@@ -1,20 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bell, BookOpen, BriefcaseBusiness, Bus, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CircleDollarSign, FileText, GraduationCap, LayoutDashboard, Library, LogOut, Menu, Newspaper, Package, Search, Settings, ShieldCheck, Sparkles, UserCircle, Users, X } from 'lucide-react';
+import { Bell, BookOpen, BriefcaseBusiness, Bus, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CircleDollarSign, Clock3, FileText, GraduationCap, LayoutDashboard, Library, LogOut, Menu, Newspaper, Package, Search, Settings, ShieldCheck, Sparkles, UserCircle, Users, X } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const itemMap = [
   ['add-department', 'addDepartment', BriefcaseBusiness], ['our-programs', 'ourPrograms', BookOpen], ['my-courses', 'myCourses', BookOpen], ['ai-engine', 'aiEngine', Sparkles],
-  ['overview', 'overview', LayoutDashboard], ['students', 'students', GraduationCap], ['admissions', 'admissions', Users], ['academics', 'academics', BookOpen], ['discipline', 'discipline', ShieldCheck], ['attendance', 'attendance', CalendarDays], ['finance', 'finance', CircleDollarSign], ['library', 'library', Library], ['transport', 'transport', Bus], ['inventory', 'inventory', Package], ['news', 'news', Newspaper], ['notices', 'notices', Bell], ['documents', 'documents', FileText], ['timetable', 'timetable', CalendarDays], ['teachers', 'teachers', Users], ['reports', 'reports', FileText], ['homework', 'academics', BookOpen], ['feeding', 'inventory', Package], ['expenses', 'finance', CircleDollarSign], ['loans', 'library', Library], ['settings', 'settings', Settings],
+  ['overview', 'overview', LayoutDashboard], ['students', 'students', GraduationCap], ['admissions', 'admissions', Users], ['academics', 'academics', BookOpen], ['discipline', 'discipline', ShieldCheck], ['permission', 'permission', ShieldCheck], ['security-guard', 'security', ShieldCheck], ['teacher_attendance', 'teacherAttendance', Clock3], ['attendance', 'attendance', CalendarDays], ['finance', 'finance', CircleDollarSign], ['library', 'library', Library], ['transport', 'transport', Bus], ['inventory', 'inventory', Package], ['news', 'news', Newspaper], ['notices', 'notices', Bell], ['documents', 'documents', FileText], ['timetable', 'timetable', CalendarDays], ['teachers', 'teachers', Users], ['reports', 'reports', FileText], ['homework', 'academics', BookOpen], ['feeding', 'inventory', Package], ['expenses', 'finance', CircleDollarSign], ['loans', 'library', Library], ['settings', 'settings', Settings],
+    ['parents', 'parents', Users],
 ];
 
 const roleItems = {
-  admin: ['overview', 'add-department', 'students', 'admissions', 'academics', 'academic-years', 'ai-engine', 'discipline', 'attendance', 'finance', 'expenses', 'inventory', 'news', 'notices', 'documents', 'timetable', 'teachers', 'reports', 'settings'],
-  dos: ['overview', 'students', 'admissions', 'academics', 'academic-years', 'ai-engine', 'discipline', 'attendance', 'news', 'notices', 'documents', 'timetable', 'teachers', 'reports', 'settings'],
-  teacher: ['overview', 'students', 'academics', 'ai-engine', 'discipline', 'our-programs', 'attendance', 'notices', 'timetable', 'homework', 'reports', 'settings'],
-  parent: ['overview', 'attendance', 'finance', 'academics', 'library', 'transport', 'notices', 'reports', 'homework', 'feeding', 'settings'],
-  accountant: ['overview', 'students', 'academics', 'finance', 'transport', 'inventory', 'expenses', 'settings'],
-  librarian: ['overview', 'students', 'academics', 'library', 'loans', 'settings'],
-  student: ['overview', 'academics', 'my-courses', 'discipline', 'attendance', 'finance', 'library', 'transport', 'notices', 'reports', 'homework', 'settings'],
+  admin: ['overview', 'add-department', 'students', 'parents', 'admissions', 'academics', 'academic-years', 'ai-engine', 'discipline', 'permission', 'security-guard', 'teacher_attendance', 'attendance', 'finance', 'expenses', 'inventory', 'news', 'notices', 'documents', 'timetable', 'teachers', 'reports', 'settings'],
+  dos: ['overview', 'students', 'parents', 'admissions', 'academics', 'academic-years', 'ai-engine', 'discipline', 'permission', 'security-guard', 'teacher_attendance', 'attendance', 'news', 'notices', 'documents', 'timetable', 'teachers', 'reports', 'settings'],
+  doc: ['overview', 'students', 'admissions', 'academics', 'discipline', 'permission', 'security-guard', 'teacher_attendance', 'attendance', 'news', 'notices', 'documents', 'timetable', 'teachers', 'reports', 'settings'],
+  teacher: ['overview', 'students', 'academics', 'ai-engine', 'discipline', 'permission', 'teacher_attendance', 'our-programs', 'attendance', 'notices', 'timetable', 'homework', 'reports', 'settings'],
+  parent: ['overview', 'attendance', 'finance', 'academics', 'library', 'transport', 'permission', 'notices', 'reports', 'homework', 'feeding', 'settings'],
+  accountant: ['overview', 'students', 'parents', 'academics', 'finance', 'transport', 'inventory', 'permission', 'teacher_attendance', 'expenses', 'settings'],
+  librarian: ['overview', 'students', 'academics', 'library', 'loans', 'permission', 'teacher_attendance', 'settings'],
+  student: ['overview', 'academics', 'my-courses', 'discipline', 'permission', 'attendance', 'finance', 'library', 'transport', 'notices', 'reports', 'homework', 'settings'],
+  security_guard: ['overview', 'security-guard', 'notices', 'documents', 'permission', 'settings'],
 };
 
 export default function AppShell({ t, language, onLanguageChange, user, activePage, onNavigate, onLogout, children }) {
@@ -35,7 +38,13 @@ export default function AppShell({ t, language, onLanguageChange, user, activePa
           ? 'Our Programs'
           : id === 'my-courses'
             ? 'My Courses'
-            : (t[key] || (id === 'academic-years' ? 'Academic year' : id)),
+            : id === 'permission'
+              ? 'Permission'
+              : id === 'security-guard'
+                ? 'Security guard'
+                : id === 'teacher_attendance'
+                  ? 'Department attendance'
+                : (t[key] || (id === 'academic-years' ? 'Academic year' : id)),
     ]),
   );
 

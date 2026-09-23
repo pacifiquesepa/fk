@@ -1,0 +1,58 @@
+{
+  "quiz_id": "eng_p1_unit1_2024",
+  "title": "Unit 1: Welcome to the classroom - Open-Ended Assessment",
+  "subject": "English",
+  "class_name": "P1",
+  "questions": [
+    {
+      "question_id": "q1",
+      "prompt": "Look at page 7 of your book. Write a full sentence introducing your friend Susan.",
+      "max_points": 3,
+      "rubric": {
+        "full_credit_criteria": "The response starts with 'Her name is' or equivalent phrasing, correctly spells 'Susan', and includes a gender marker such as 'she is a girl' or equivalent.",
+        "partial_credit_criteria": "The response is mostly correct but omits one element — for example, it introduces Susan correctly but does not spell her name properly, or it spells the name correctly but forgets the gender marker.",
+        "zero_credit_criteria": "The response does not introduce Susan at all, mentions a completely wrong name, or is off-topic / incomprehensible."
+      }
+    },
+    {
+      "question_id": "q2",
+      "prompt": "Look at page 19. Write one full sentence describing one object and its colour (Example: This is a red pen).",
+      "max_points": 4,
+      "rubric": {
+        "full_credit_criteria": "The response uses the sentence opener 'This is a', identifies a classroom object (pen, pencil, ruler, etc.), includes a valid colour word (red, blue, yellow, etc.), and uses proper capitalization.",
+        "partial_credit_criteria": "The response identifies an object and a colour but is missing one element — for example, it omits capitalization, uses lowercase, or misses the article 'a'.",
+        "zero_credit_criteria": "The response does not describe an object with a colour, is incomprehensible, or describes something unrelated to classroom objects."
+      }
+    },
+    {
+      "question_id": "q3",
+      "prompt": "Imagine your teacher tells you to respond to an action. Write down what you say out loud while you are pointing to the window.",
+      "max_points": 3,
+      "rubric": {
+        "full_credit_criteria": "The response uses present continuous structure ('I am pointing to the window'), includes 'I am', mentions the action of pointing, and specifies the target 'window'.",
+        "partial_credit_criteria": "The response includes 'I am' and mentions pointing or the window, but is missing one component — for example, it says 'I am pointing' without naming the window, or names the window but omits 'I am'.",
+        "zero_credit_criteria": "The response does not describe the action of pointing or does not mention the window, or is irrelevant to the instructed action."
+      }
+    },
+    {
+      "question_id": "q4",
+      "prompt": "Write a complete sentence telling your teacher one thing you like very much at school.",
+      "max_points": 4,
+      "rubric": {
+        "full_credit_criteria": "The response starts with 'I like', includes a specific school-related activity or object, uses complete sentence structure, and is clearly about something at school.",
+        "partial_credit_criteria": "The response mentions something liked but is missing one element — for example, it does not start with 'I like', or mentions a preference but is not clearly about school.",
+        "zero_credit_criteria": "The response does not express a liking for anything, is incomprehensible, or describes something unrelated to school preferences."
+      }
+    },
+    {
+      "question_id": "q5",
+      "prompt": "Where is your school bag right now? Write a single sentence to tell your teacher where it is (Example: My bag is on the desk).",
+      "max_points": 5,
+      "rubric": {
+        "full_credit_criteria": "The response starts with 'My bag is' or equivalent, uses correct present tense verb structure, and specifies a valid classroom location (on the desk, in class, under the chair, etc.) with proper sentence structure.",
+        "partial_credit_criteria": "The response mentions the location correctly but is missing one element — for example, it omits the possessive 'my', uses slightly incorrect grammar, or lacks proper capitalization.",
+        "zero_credit_criteria": "The response does not state where the bag is, gives no location at all, or is completely unrelated to the question."
+      }
+    }
+  ]
+}

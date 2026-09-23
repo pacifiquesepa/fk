@@ -11,7 +11,7 @@ async function runPendingMigrations(pool) {
 
     const migrationsDir = path.join(__dirname, 'migrations');
     const migrationFiles = fs.readdirSync(migrationsDir)
-        .filter(f => ['011_behavior_scores.sql', '012_behavior_record_scores.sql', '013_user_profile_photo.sql', '014_graduates_promotions.sql', '015_attendance_workflow.sql', '016_admission_notifications.sql', '017_application_files.sql', '018_delayed_admission_enrollment.sql', '019_subject_notes.sql', '020_subject_modules.sql', '021_finance_evidence.sql', '022_transport_tables.sql', '023_inventory_transactions.sql'].includes(f))
+        .filter(f => ['011_behavior_scores.sql', '012_behavior_record_scores.sql', '013_user_profile_photo.sql', '014_graduates_promotions.sql', '015_attendance_workflow.sql', '016_admission_notifications.sql', '017_application_files.sql', '018_delayed_admission_enrollment.sql', '019_subject_notes.sql', '020_subject_modules.sql', '021_finance_evidence.sql', '022_transport_tables.sql', '023_inventory_transactions.sql', '028_department_attendance_on_loc.sql', '029_application_review_codes.sql', '030_admission_credentials.sql', '031_parent_profiles.sql', '032_school_communications.sql', '033_school_message_notes.sql', '034_security_guard_visitors.sql'].includes(f))
         .sort();
 
     for (const file of migrationFiles) {

@@ -1,0 +1,92 @@
+{
+  "quiz_title": "Unit 2: Classroom Objects - Vocabulary Quiz",
+  "subject": "English",
+  "class_name": "P1",
+  "questions": [
+    {
+      "question_id": "q01",
+      "type": "multiple_choice",
+      "prompt": "What do we use to write in a notebook?",
+      "options": ["A pen", "A chair", "A duster", "A cupboard"],
+      "correct_answer": "A pen",
+      "points": 2
+    },
+    {
+      "question_id": "q02",
+      "type": "multiple_choice",
+      "prompt": "Complete the sentence: 'Clap your ________.'",
+      "options": ["feet", "hands", "eyes", "window"],
+      "correct_answer": "hands",
+      "points": 2
+    },
+    {
+      "question_id": "q03",
+      "type": "multiple_choice",
+      "prompt": "What colour is the sun?",
+      "options": ["Yellow", "Blue", "Black", "Green"],
+      "correct_answer": "Yellow",
+      "points": 2
+    },
+    {
+      "question_id": "q04",
+      "type": "multiple_choice",
+      "prompt": "Which letter does the word 'Book' start with?",
+      "options": ["A", "B", "C", "D"],
+      "correct_answer": "B",
+      "points": 2
+    },
+    {
+      "question_id": "q05",
+      "type": "multiple_choice",
+      "prompt": "If a friend asks 'What is your name?', what is the best way to answer?",
+      "options": ["I am fine, thank you.", "My name is Kalinda.", "Good afternoon.", "This is my ball."],
+      "correct_answer": "My name is Kalinda.",
+      "points": 3
+    },
+    {
+      "question_id": "q06",
+      "type": "open_ended",
+      "prompt": "Look at page 15. Write one full sentence describing one object and its colour (Example: This is a red pen).",
+      "correct_keywords": ["this is a", "pen", "red"],
+      "points": 4,
+      "rubric": {
+        "criteria": [
+          { "name": "uses sentence opener 'this is a'", "points": 1 },
+          { "name": "identifies a classroom object", "points": 1 },
+          { "name": "includes a valid colour word", "points": 1 },
+          { "name": "proper capitalization and punctuation", "points": 1 }
+        ]
+      }
+    },
+    {
+      "question_id": "q07",
+      "type": "open_ended",
+      "prompt": "Imagine your teacher tells you to respond to an action. Write down what you say out loud while you are pointing to the window.",
+      "correct_keywords": ["pointing to", "window", "I am"],
+      "points": 4,
+      "rubric": {
+        "criteria": [
+          { "name": "contains 'I am' present continuous opener", "points": 1 },
+          { "name": "includes the word 'pointing to'", "points": 1 },
+          { "name": "specifies the target 'window'", "points": 1 },
+          { "name": "forms a complete sentence", "points": 1 }
+        ]
+      }
+    },
+    {
+      "question_id": "q08",
+      "type": "open_ended",
+      "prompt": "Look at page 7 of your book. Write a full sentence introducing your friend Susan.",
+      "correct_keywords": ["name is Susan", "Her name", "She is Susan"],
+      "points": 4,
+      "rubric": {
+        "criteria": [
+          { "name": "starts with 'Her name is' or equivalent", "points": 1 },
+          { "name": "spells 'Susan' correctly", "points": 1 },
+          { "name": "includes gender marker (she/her)", "points": 1 },
+          { "name": "proper sentence structure", "points": 1 }
+        ]
+      }
+    }
+  ]
+}

@@ -200,7 +200,14 @@ class AssessmentService:
 
     @classmethod
     def _same_scope(cls, actual: Any, requested: str) -> bool:
-        return cls._scope_value(actual).lower() == requested.lower()
+        actual_str = cls._scope_value(actual).lower()
+        requested_str = requested.lower()
+        if actual_str == requested_str:
+            return True
+        if actual_str and requested_str:
+            if actual_str in requested_str or requested_str in actual_str:
+                return True
+        return False
 
     @staticmethod
     def _normalize_training_question(question: Dict[str, Any]) -> Dict[str, Any]:

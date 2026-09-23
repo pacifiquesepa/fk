@@ -9,6 +9,22 @@ const jwt = require('jsonwebtoken');
 const mysql = require('mysql2/promise');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const whatsappModule = (() => {
+  try {
+    return require('whatsapp-web.js');
+  } catch (error) {
+    console.warn('[FKAMS WhatsApp] whatsapp-web.js is not installed. WhatsApp notifications are disabled until the package is available.');
+    return null;
+  }
+})();
+const { Client, LocalAuth } = whatsappModule || {};
+const qrcode = (() => {
+  try {
+    return require('qrcode-terminal');
+  } catch (error) {
+    return null;
+  }
+})();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
@@ -29,12 +45,18 @@ const allowedOrigins = new Set([
   'http://127.0.0.1:5174',
   'http://127.0.0.1:5175',
 ].filter(Boolean));
-const otpRoles = new Set((process.env.OTP_ROLES || 'admin,dos,parent,teacher,accountant,librarian').split(',').map((role) => role.trim()).filter(Boolean));
-const emailLoginRoles = new Set(['teacher', 'dos', 'admin', 'accountant', 'librarian']);
+const otpRoles = new Set((process.env.OTP_ROLES || 'admin,dos,parent,teacher,accountant,librarian,security_guard').split(',').map((role) => role.trim()).filter(Boolean));
+const emailLoginRoles = new Set(['teacher', 'dos', 'admin', 'accountant', 'librarian', 'security_guard']);
 const otpChannel = process.env.OTP_CHANNEL === 'sms' ? 'sms' : 'email';
 const otpExpiresMinutes = Math.max(1, Number(process.env.OTP_EXPIRES_MINUTES || 5));
 const otpMaxAttempts = Math.max(1, Number(process.env.OTP_MAX_ATTEMPTS || 5));
 const smtpPassword = String(process.env.SMTP_PASSWORD || '').replace(/\s/g, '');
+const whatsappEnabled = String(process.env.WHATSAPP_ENABLED || '').toLowerCase() === 'true' && Boolean(Client && LocalAuth);
+const whatsappDelayMs = Number(process.env.WHATSAPP_DELAY_MS || 3000);
+const whatsappDefaultCountryCode = String(process.env.WHATSAPP_DEFAULT_COUNTRY_CODE || '250').replace(/\D/g, '') || '250';
+let whatsappClient = null;
+let whatsappReady = false;
+let whatsappInitializing = false;
 
 if (!jwtSecret) {
   console.warn('JWT_SECRET is not set. Login endpoints are disabled until the environment is configured.');
@@ -49,6 +71,297 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   enableKeepAlive: true,
+});
+
+async function ensurePermissionRequestsTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS permission_requests (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+      requester_id INT UNSIGNED NOT NULL,
+      requester_role VARCHAR(40) NOT NULL,
+      student_id INT UNSIGNED NULL,
+      title VARCHAR(180) NOT NULL,
+      reason VARCHAR(240) NOT NULL,
+      description TEXT NULL,
+      attachment_path VARCHAR(255) NULL,
+      status ENUM('pending', 'approved', 'denied') NOT NULL DEFAULT 'pending',
+      permission_start DATE NULL,
+      permission_end DATE NULL,
+      approved_by INT UNSIGNED NULL,
+      decision_note TEXT NULL,
+      qr_token CHAR(36) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY uq_permission_qr (qr_token),
+      KEY idx_permission_status (status),
+      KEY idx_permission_requester (requester_id),
+      KEY idx_permission_student (student_id),
+      CONSTRAINT fk_permission_requester FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
+      CONSTRAINT fk_permission_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE SET NULL,
+      CONSTRAINT fk_permission_approver FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
+}
+
+async function ensureSecurityGuardTables() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS security_guard_permissions (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+      title VARCHAR(180) NOT NULL,
+      description TEXT NULL,
+      enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      granted_by INT UNSIGNED NOT NULL,
+      granted_to INT UNSIGNED NULL,
+      permission_start DATETIME NULL,
+      permission_end DATETIME NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      KEY idx_guard_permission_enabled (enabled),
+      KEY idx_guard_permission_dates (permission_start, permission_end),
+      CONSTRAINT fk_guard_permission_granted_by FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE CASCADE,
+      CONSTRAINT fk_guard_permission_granted_to FOREIGN KEY (granted_to) REFERENCES users(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS security_visit_requests (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+      visitor_type ENUM('guest','parent') NOT NULL,
+      full_name VARCHAR(120) NOT NULL,
+      email VARCHAR(190) NOT NULL,
+      phone VARCHAR(30) NOT NULL,
+      purpose VARCHAR(60) NOT NULL DEFAULT 'visit',
+      arrival_time DATETIME NOT NULL,
+      description TEXT NULL,
+      student_name VARCHAR(120) NULL,
+      photo_data MEDIUMTEXT NULL,
+      status ENUM('pending','approved','rejected','out') NOT NULL DEFAULT 'pending',
+      review_comment TEXT NULL,
+      reviewed_by INT UNSIGNED NULL,
+      reviewed_at DATETIME NULL,
+      created_by INT UNSIGNED NULL,
+      language ENUM('en','fr','rw') NOT NULL DEFAULT 'en',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      KEY idx_visit_status (status),
+      KEY idx_visit_type (visitor_type),
+      KEY idx_visit_email (email),
+      CONSTRAINT fk_visit_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+      CONSTRAINT fk_visit_reviewed_by FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
+
+  await pool.query('ALTER TABLE security_guard_permissions ADD COLUMN IF NOT EXISTS granted_to INT UNSIGNED NULL AFTER granted_by');
+  await pool.query('ALTER TABLE security_guard_permissions ADD COLUMN IF NOT EXISTS permission_start DATETIME NULL AFTER granted_to');
+  await pool.query('ALTER TABLE security_guard_permissions ADD COLUMN IF NOT EXISTS permission_end DATETIME NULL AFTER permission_start');
+  await pool.query('ALTER TABLE security_guard_permissions ADD COLUMN IF NOT EXISTS enabled BOOLEAN NOT NULL DEFAULT TRUE AFTER description');
+  await pool.query('ALTER TABLE security_guard_permissions ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER permission_end');
+
+  await pool.query('ALTER TABLE security_visit_requests ADD COLUMN IF NOT EXISTS review_comment TEXT NULL AFTER status');
+  await pool.query('ALTER TABLE security_visit_requests ADD COLUMN IF NOT EXISTS reviewed_by INT UNSIGNED NULL AFTER review_comment');
+  await pool.query('ALTER TABLE security_visit_requests ADD COLUMN IF NOT EXISTS reviewed_at DATETIME NULL AFTER reviewed_by');
+  await pool.query('ALTER TABLE security_visit_requests ADD COLUMN IF NOT EXISTS created_by INT UNSIGNED NULL AFTER reviewed_at');
+  await pool.query('ALTER TABLE security_visit_requests ADD COLUMN IF NOT EXISTS language ENUM(\'en\',\'fr\',\'rw\') NOT NULL DEFAULT \'en\' AFTER created_by');
+}
+
+async function getActiveSecurityGuardPermission() {
+  try {
+    const [rows] = await pool.query('SELECT id FROM security_guard_permissions WHERE enabled = TRUE AND permission_start <= NOW() AND permission_end >= NOW() ORDER BY created_at DESC LIMIT 1');
+    return rows[0] || null;
+  } catch (error) {
+    if (error && error.code === 'ER_NO_SUCH_TABLE') return null;
+    throw error;
+  }
+}
+
+async function sendPermissionEmail({ to, subject, text, html }) {
+  if (!to || !to.includes('@')) return null;
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !smtpPassword || smtpPassword.includes('PUT_YOUR_')) {
+    console.log(`[FKAMS email] ${subject} => ${to}`);
+    return null;
+  }
+
+  const transporter = createSmtpTransport();
+  await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to, subject, text, html });
+  return 'email';
+}
+
+async function notifyPermissionRequest({ request, recipientId, title, message }) {
+  if (!recipientId) return null;
+  await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [recipientId, title, message]);
+  return { recipientId, title, message };
+}
+
+async function notifyPermissionDecision({ request, recipientId, status }) {
+  const action = status === 'approved' ? 'approved' : 'denied';
+  const title = status === 'approved' ? 'Permission request approved' : 'Permission request denied';
+  const message = `${request.title}: your requested permission was ${action}. ${request.decision_note ? request.decision_note : 'Please review the decision in the system.'}`;
+  await notifyPermissionRequest({ request, recipientId, title, message });
+  const [user] = await pool.query('SELECT email, full_name AS fullName, phone FROM users WHERE id = ? LIMIT 1', [recipientId]);
+  if (user?.[0]?.email) {
+    await sendPermissionEmail({
+      to: user[0].email,
+      subject: title,
+      text: message,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;padding:24px;border-radius:12px;background:#f6fbff"><h2 style="color:#1d7b91;margin-bottom:8px">${title}</h2><p>${escapeHtml(request.title)}</p><p>${escapeHtml(message)}</p></div>`,
+    });
+  }
+  if (user?.[0]?.phone) {
+    await sendWhatsAppNotification({
+      to: user[0].phone,
+      name: user[0].fullName || 'Student',
+      message,
+    }).catch(() => {});
+  }
+  console.log(`[FKAMS WhatsApp] ${title}: ${message}`);
+  return { title, message };
+}
+
+function normalizeWhatsAppNumber(phoneNumber) {
+  if (!phoneNumber) return null;
+  const cleaned = String(phoneNumber).replace(/[^\d+]/g, '').replace(/^00/, '');
+  if (!cleaned) return null;
+  if (cleaned.startsWith('+')) return cleaned;
+  if (cleaned.startsWith('0')) return `+${whatsappDefaultCountryCode}${cleaned.slice(1)}`;
+  if (/^\d{9,12}$/.test(cleaned)) return `+${cleaned}`;
+  return cleaned.startsWith('250') ? `+${cleaned}` : `+${whatsappDefaultCountryCode}${cleaned}`;
+}
+
+async function ensureWhatsAppClient() {
+  if (!whatsappEnabled || !Client || !LocalAuth) return null;
+  if (whatsappClient) return whatsappClient;
+  if (whatsappInitializing) {
+    while (whatsappInitializing) {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+    return whatsappClient;
+  }
+
+  whatsappInitializing = true;
+  try {
+    whatsappClient = new Client({
+      authStrategy: new LocalAuth({ clientId: 'fkams-whatsapp' }),
+      puppeteer: {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      },
+    });
+
+    whatsappClient.on('qr', (qr) => {
+      if (qrcode) {
+        qrcode.generate(qr, { small: true });
+      }
+      console.log('[FKAMS WhatsApp] Scan the QR code in the terminal to pair the WhatsApp session.');
+    });
+
+    whatsappClient.on('ready', () => {
+      whatsappReady = true;
+      console.log('[FKAMS WhatsApp] ready');
+    });
+
+    whatsappClient.on('auth_failure', () => {
+      whatsappReady = false;
+      console.log('[FKAMS WhatsApp] authentication failed.');
+    });
+
+    whatsappClient.on('disconnected', () => {
+      whatsappReady = false;
+      console.log('[FKAMS WhatsApp] disconnected.');
+    });
+
+    await whatsappClient.initialize();
+    return whatsappClient;
+  } catch (error) {
+    console.error('[FKAMS WhatsApp] unable to initialize client:', error.message);
+    whatsappClient = null;
+    whatsappReady = false;
+    return null;
+  } finally {
+    whatsappInitializing = false;
+  }
+}
+
+async function sendWhatsAppNotification({ to, name, message, delayMs = whatsappDelayMs }) {
+  if (!whatsappEnabled || !to || !message) return null;
+  const normalizedPhone = normalizeWhatsAppNumber(to);
+  if (!normalizedPhone) return null;
+
+  if (delayMs > 0) {
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+
+  const client = await ensureWhatsAppClient();
+  if (!client || !whatsappReady) {
+    console.log(`[FKAMS WhatsApp] queued for ${normalizedPhone}: Hello ${name || 'there'}, ${message}`);
+    return { queued: true, to: normalizedPhone };
+  }
+
+  try {
+    await client.sendMessage(normalizedPhone, `Muraho ${name || 'there'}, ${message}`);
+    return { sent: true, to: normalizedPhone };
+  } catch (error) {
+    console.error('[FKAMS WhatsApp] send failed:', error.message);
+    return null;
+  }
+}
+
+function buildVisitorRequestMessage({ name, status, language = 'en', actorLabel = 'review team' }) {
+  const schoolName = 'Forever King Academy';
+  const messages = {
+    pending: {
+      en: `Hello ${name}, your request has been received and is waiting for review by the school guard and admin team.`,
+      fr: `Bonjour ${name}, votre demande a bien été reçue et est en attente de validation par le personnel de sécurité et l'administration.`,
+      rw: `Muraho ${name}, icyifuzo cyawe cyanditswe kandi kirategerezwa kugenzurwa n'abashinzwe umutekano n'abayobozi.`,
+    },
+    approved: {
+      en: `Hello ${name}, your request has been approved by ${actorLabel}. You are allowed to enter ${schoolName}.`,
+      fr: `Bonjour ${name}, votre demande a été approuvée par ${actorLabel}. Vous êtes autorisé à entrer dans ${schoolName}.`,
+      rw: `Muraho ${name}, icyifuzo cyawe cyemewe na ${actorLabel}. Uremererwa kwinjira muri ${schoolName}.`,
+    },
+    rejected: {
+      en: `Hello ${name}, your request was not approved by ${actorLabel}. Please contact admin at admin@fkacademy.rw for more information.`,
+      fr: `Bonjour ${name}, votre demande n'a pas été approuvée par ${actorLabel}. Veuillez contacter l'administrateur à admin@fkacademy.rw pour plus d'informations.`,
+      rw: `Muraho ${name}, icyifuzo cyawe nticyemewe na ${actorLabel}. Mwambaze admin kuri admin@fkacademy.rw kugira mubone ibisobanuro.`,
+    },
+    out: {
+      en: `Hello ${name}, thank you for visiting ${schoolName}. We wish you a safe journey home.`,
+      fr: `Bonjour ${name}, merci pour votre visite à ${schoolName}. Nous vous souhaitons un bon retour chez vous.`,
+      rw: `Muraho ${name}, tubashimiye kuza kwa ${schoolName}. Tubifurije urugendo ruhire.`,
+    },
+  };
+  return messages[status]?.[language] || messages.pending[language] || messages.pending.en;
+}
+
+async function sendVisitorRequestNotification({ to, name, status, language = 'en', actorLabel = 'review team' }) {
+  const subject = status === 'approved' ? 'Visit approved' : status === 'rejected' ? 'Visit request update' : status === 'out' ? 'Visit ended' : 'Visit request received';
+  const text = buildVisitorRequestMessage({ name, status, language, actorLabel });
+
+  if (to && String(to).includes('@')) {
+    await sendPermissionEmail({
+      to,
+      subject,
+      text,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;padding:24px;border-radius:12px;background:#f6fbff"><h2 style="color:#1d7b91;margin-bottom:8px">${escapeHtml(subject)}</h2><p>${escapeHtml(text)}</p></div>`,
+    });
+  }
+
+  if (to && String(to).match(/\d/)) {
+    await sendWhatsAppNotification({
+      to,
+      name,
+      message: text,
+    }).catch(() => {});
+  }
+
+  return text;
+}
+
+ensurePermissionRequestsTable().catch((error) => {
+  console.error('[FKAMS permissions] Unable to initialize permission table.', error);
+});
+ensureSecurityGuardTables().catch((error) => {
+  console.error('[FKAMS security guard] Unable to initialize security guard tables.', error);
 });
 
 app.disable('x-powered-by');
@@ -124,6 +437,14 @@ function hashOtp(code) {
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
 }
+function distanceInMeters(latitudeOne, longitudeOne, latitudeTwo, longitudeTwo) {
+  const earthRadius = 6371000;
+  const toRadians = (value) => (Number(value) * Math.PI) / 180;
+  const latitudeDelta = toRadians(Number(latitudeTwo) - Number(latitudeOne));
+  const longitudeDelta = toRadians(Number(longitudeTwo) - Number(longitudeOne));
+  const a = Math.sin(latitudeDelta / 2) ** 2 + Math.cos(toRadians(latitudeOne)) * Math.cos(toRadians(latitudeTwo)) * Math.sin(longitudeDelta / 2) ** 2;
+  return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 function explainSmtpError(error) {
   const message = error && (error.message || String(error));
   if (!message) return 'SMTP delivery failed.';
@@ -183,15 +504,15 @@ async function deliverAdmissionNotice({ destination, name, status, admissionNumb
   }
   throw Object.assign(new Error('Gmail SMTP is not configured. The application status was not changed.'), { statusCode: 503 });
 }
-async function deliverApplicationReceived({ destination, name }) {
+async function deliverApplicationReceived({ destination, name, applicationId, reviewCode }) {
   if (!destination || !destination.includes('@')) throw Object.assign(new Error('A valid parent email is required.'), { statusCode: 422 });
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !smtpPassword || smtpPassword.includes('PUT_YOUR_')) throw Object.assign(new Error('Gmail SMTP is not configured. The application was not submitted.'), { statusCode: 503 });
   const transporter = createSmtpTransport();
   const logoPath = path.join(__dirname, '..', 'frontend', 'public', 'forever.jpg');
   const logoUrl = fs.existsSync(logoPath) ? 'cid:fkams-logo' : (process.env.PUBLIC_LOGO_URL || `${allowedOrigin}/forever.jpg`);
   const safeName = escapeHtml(name);
-  const text = `Congratulations. Dear parent, ${name}'s application was submitted successfully. Our admissions team will review it and contact you by email. Please wait for the approval decision.`;
-  const html = `<div style="font-family:Arial,sans-serif;max-width:600px;color:#17333d"><img src="${escapeHtml(logoUrl)}" alt="Forever King Academy" style="max-width:220px;max-height:80px;object-fit:contain"><h2 style="color:#1d7b91">Congratulations, application submitted</h2><p>Dear parent,</p><p><strong>${safeName}</strong>'s application was submitted successfully.</p><div style="background:#eef8f6;border-radius:10px;padding:16px"><p>Our admissions team will review the application and contact you by email.</p><p style="margin-bottom:0"><strong>Status:</strong> Waiting for approval</p></div><p>Please wait for the approval decision. You will receive another email when the application is approved or rejected.</p></div>`;
+  const text = `Congratulations. Dear parent, ${name}'s application was submitted successfully. Application number: ${applicationId}. Review code: ${reviewCode}. Use both on the Admissions Review card at ${allowedOrigin} to check whether the application is pending, approved, or rejected.`;
+  const html = `<div style="font-family:Arial,sans-serif;max-width:600px;color:#17333d"><img src="${escapeHtml(logoUrl)}" alt="Forever King Academy" style="max-width:220px;max-height:80px;object-fit:contain"><h2 style="color:#1d7b91">Congratulations, application submitted</h2><p>Dear parent,</p><p><strong>${safeName}</strong>'s application was submitted successfully.</p><div style="background:#eef8f6;border-radius:10px;padding:16px"><p>Our admissions team will review the application and contact you by email.</p><p><strong>Application number:</strong> ${applicationId}</p><p style="margin-bottom:0"><strong>Review code:</strong> ${escapeHtml(reviewCode)}</p></div><p>Open the Admissions Review card at ${escapeHtml(allowedOrigin)}, enter both values, and you will see whether the application is pending, approved, or rejected.</p></div>`;
   try {
     await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: destination, subject: 'Congratulations, FKAMS application submitted', text, html, ...(fs.existsSync(logoPath) ? { attachments: [{ filename: 'forever.jpg', path: logoPath, cid: 'fkams-logo' }] } : {}) });
     return 'email';
@@ -205,6 +526,19 @@ async function notifyAdmission({ application, status, admissionNumber, username,
   const destination = application.parent_email || application.parent_phone;
   return deliverAdmissionNotice({ destination, name: application.applicant_name, status, admissionNumber, username, temporaryPassword });
 }
+async function notifyAdmissionInSystem({ application, status, admissionNumber, username, temporaryPassword, studentUserId }) {
+  const approved = status === 'approved';
+  const message = approved
+    ? `Application approved. Admission number: ${admissionNumber}. Login username: ${username}. Default password: ${temporaryPassword}. Please change the password after first login.`
+    : `Application rejected. ${application.reviewer_comment || 'Please contact the admissions office for more information.'}`;
+  const recipients = new Set(studentUserId ? [Number(studentUserId)] : []);
+  if (application.parent_email) {
+    const [parentUsers] = await pool.query('SELECT id FROM users WHERE email = ? AND is_active = TRUE LIMIT 1', [application.parent_email]);
+    if (parentUsers[0]) recipients.add(Number(parentUsers[0].id));
+  }
+  for (const recipientId of recipients) await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [recipientId, approved ? 'Admission approved' : 'Admission rejected', message]);
+  return message;
+}
 async function createStudentForApplication(connection, application) {
   const admissionNumber = `FK-${new Date().getFullYear()}-${String(application.id).padStart(5, '0')}`;
   const username = admissionNumber.toLowerCase();
@@ -216,8 +550,8 @@ async function createStudentForApplication(connection, application) {
   const [studentResult] = await connection.query(`INSERT INTO students (user_id, admission_number, full_name, gender, birthday, academic_year, class_name, parent_phone, qr_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [userResult.insertId, admissionNumber, application.applicant_name, application.gender || 'other', application.birthday || '2000-01-01', application.academic_year || String(new Date().getFullYear()), application.desired_class, application.parent_phone, qrToken]);
   const [[classRow]] = await connection.query('SELECT id FROM classes WHERE name = ? AND academic_year = ? AND is_active = TRUE LIMIT 1', [application.desired_class, application.academic_year]);
   if (classRow) await connection.query('INSERT IGNORE INTO student_classes (student_id, class_id, enrolled_at) VALUES (?, ?, CURRENT_DATE)', [studentResult.insertId, classRow.id]);
-  await connection.query('UPDATE applications SET approved_student_id = ? WHERE id = ?', [studentResult.insertId, application.id]);
-  return { admissionNumber, username, temporaryPassword, qrToken, studentId: studentResult.insertId };
+  await connection.query('UPDATE applications SET approved_student_id = ?, temporary_password = ? WHERE id = ?', [studentResult.insertId, temporaryPassword, application.id]);
+  return { admissionNumber, username, temporaryPassword, qrToken, studentId: studentResult.insertId, userId: userResult.insertId };
 }
 async function processEnrollmentQueue() {
   const connection = await pool.getConnection();
@@ -528,7 +862,7 @@ app.get('/api/dashboard', requireAuth, authorize('admin', 'dos', 'accountant'), 
 
 app.post('/api/users', requireAuth, authorize('admin', 'dos'), async (req, res) => {
   const error = bodyErrors(req.body, [['fullName', 'Full name', 120], ['username', 'Username', 60], ['email', 'Email', 190], ['password', 'Password', 100]]);
-  const roles = ['admin', 'dos', 'teacher', 'student', 'parent', 'accountant', 'librarian'];
+  const roles = ['admin', 'dos', 'teacher', 'student', 'parent', 'accountant', 'librarian', 'security_guard'];
   if (error) return res.status(400).json({ error });
   if (!/^[a-zA-Z0-9._-]{3,60}$/.test(req.body.username)) return res.status(400).json({ error: 'Username may contain letters, numbers, dots, underscores and hyphens.' });
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(req.body.email)) return res.status(400).json({ error: 'Enter a valid email address.' });
@@ -555,7 +889,7 @@ app.post('/api/users', requireAuth, authorize('admin', 'dos'), async (req, res) 
   }
 });
 
-app.get('/api/users', requireAuth, authorize('admin'), async (_req, res) => {
+app.get('/api/users', requireAuth, authorize('admin', 'dos', 'doc'), async (_req, res) => {
   const [rows] = await pool.query(`SELECT u.id, u.full_name AS fullName, u.username, u.email, u.phone, u.role, u.is_active AS isActive, u.created_at AS createdAt,
     s.id AS profileId, s.admission_number AS admissionNumber, s.class_name AS className, s.parent_phone AS parentPhone, s.gender, s.birthday, s.academic_year AS academicYear,
     tp.employee_number AS employeeNumber, tp.subject_or_module AS subjectOrModule, tp.gender, tp.birthday, tp.diploma_key AS diplomaKey
@@ -563,13 +897,192 @@ app.get('/api/users', requireAuth, authorize('admin'), async (_req, res) => {
   res.json({ users: rows });
 });
 
+app.get('/api/security-guard/permissions', requireAuth, authorize('admin', 'dos', 'doc', 'security_guard'), async (_req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT id, title, description, enabled, granted_by AS grantedBy, granted_to AS grantedTo, permission_start AS permissionStart, permission_end AS permissionEnd, created_at AS createdAt FROM security_guard_permissions ORDER BY created_at DESC LIMIT 10');
+    const [enabledRow] = await pool.query('SELECT id, title, description, enabled, granted_by AS grantedBy, granted_to AS grantedTo, permission_start AS permissionStart, permission_end AS permissionEnd, created_at AS createdAt FROM security_guard_permissions WHERE enabled = TRUE AND permission_start <= NOW() AND permission_end >= NOW() ORDER BY created_at DESC LIMIT 1');
+    return res.json({ enabled: Boolean(enabledRow[0]), permissions: rows });
+  } catch (error) {
+    if (error && error.code === 'ER_NO_SUCH_TABLE') {
+      return res.json({ enabled: false, permissions: [] });
+    }
+    console.error('[FKAMS security guard] Failed to load permissions.', error);
+    return res.status(500).json({ error: 'Unable to load security guard permissions.' });
+  }
+});
+
+app.post('/api/security-guard/permissions', requireAuth, authorize('admin', 'dos', 'doc'), async (req, res) => {
+  try {
+    const title = String(req.body?.title || '').trim();
+    const description = String(req.body?.description || '').trim();
+    const grantedTo = req.body?.grantedTo ? Number(req.body.grantedTo) : null;
+    const permissionStart = String(req.body?.permissionStart || '').trim();
+    const permissionEnd = String(req.body?.permissionEnd || '').trim();
+    if (!title) return res.status(400).json({ error: 'Title is required.' });
+    if (!permissionStart || !permissionEnd) return res.status(400).json({ error: 'Permission start and end time are required.' });
+    const permissionStartDate = new Date(permissionStart);
+    const permissionEndDate = new Date(permissionEnd);
+    if (Number.isNaN(permissionStartDate.getTime()) || Number.isNaN(permissionEndDate.getTime())) return res.status(400).json({ error: 'Permission start and end must be valid date-time values.' });
+    if (permissionEndDate <= permissionStartDate) return res.status(400).json({ error: 'Permission end time must be later than the start time.' });
+    if (grantedTo && (!Number.isInteger(grantedTo) || grantedTo <= 0)) return res.status(400).json({ error: 'A valid security guard user is required.' });
+    if (grantedTo) {
+      const [guardUserRows] = await pool.query('SELECT id, email, role FROM users WHERE id = ? LIMIT 1', [grantedTo]);
+      if (!guardUserRows[0]) return res.status(404).json({ error: 'Security guard user not found.' });
+      if (guardUserRows[0].role !== 'security_guard') return res.status(400).json({ error: 'The selected user must be a security guard.' });
+    }
+    const [result] = await pool.query(
+      'INSERT INTO security_guard_permissions (title, description, enabled, granted_by, granted_to, permission_start, permission_end, created_at) VALUES (?, ?, TRUE, ?, ?, ?, ?, NOW())',
+      [title, description || null, req.user.sub, grantedTo, permissionStart, permissionEnd]
+    );
+    const [[permission]] = await pool.query('SELECT id, title, description, enabled, granted_by AS grantedBy, granted_to AS grantedTo, permission_start AS permissionStart, permission_end AS permissionEnd, created_at AS createdAt FROM security_guard_permissions WHERE id = ?', [result.insertId]);
+
+    const recipients = grantedTo ? [grantedTo] : (await pool.query("SELECT id FROM users WHERE role = 'security_guard'"))[0].map((user) => user.id);
+    for (const recipientId of recipients) {
+      const [userRows] = await pool.query('SELECT email, full_name AS fullName FROM users WHERE id = ? LIMIT 1', [recipientId]);
+      const recipient = userRows[0];
+      if (!recipient?.email) continue;
+      const subject = 'Security guard permission granted';
+      const text = `Hello ${recipient.fullName || 'Security guard'}, your review permission for visitor approval has been granted. It is active from ${permissionStart} to ${permissionEnd}. Admin or DOS authorized this permission.`;
+      await sendPermissionEmail({
+        to: recipient.email,
+        subject,
+        text,
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;padding:24px;border-radius:12px;background:#f6fbff"><h2 style="color:#1d7b91;margin-bottom:8px">${subject}</h2><p><strong>Security guard permission:</strong> ${escapeHtml(title)}</p><p><strong>Valid from:</strong> ${escapeHtml(permissionStart)}</p><p><strong>Valid until:</strong> ${escapeHtml(permissionEnd)}</p><p>${escapeHtml(description || 'No additional details were provided.')}</p><p>This permission allows approval or rejection of visitor requests during the active period.</p></div>`,
+      }).catch(() => {});
+    }
+
+    return res.status(201).json({ enabled: true, permission });
+  } catch (error) {
+    if (error && error.code === 'ER_NO_SUCH_TABLE') {
+      return res.status(503).json({ error: 'Security guard permission tables are not initialized yet. Please run the database migration.' });
+    }
+    console.error('[FKAMS security guard] Failed to save permission.', error);
+    return res.status(500).json({ error: 'Unable to save the security guard permission.' });
+  }
+});
+
+app.get('/api/security-guard/visits', requireAuth, authorize('admin', 'dos', 'doc', 'security_guard'), async (_req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM security_visit_requests ORDER BY created_at DESC');
+    return res.json({ requests: rows.map((row) => ({ ...row, photo: row.photo_data || null })) });
+  } catch (error) {
+    if (error && error.code === 'ER_NO_SUCH_TABLE') {
+      return res.json({ requests: [] });
+    }
+    console.error('[FKAMS security guard] Failed to load visit requests.', error);
+    return res.status(500).json({ error: 'Unable to load visit requests.' });
+  }
+});
+
+app.post('/api/security-guard/visits', requireAuth, async (req, res) => {
+  try {
+    const type = ['guest', 'parent'].includes(req.body?.type) ? req.body.type : null;
+    const fullName = String(req.body?.fullName || '').trim();
+    const email = String(req.body?.email || '').trim();
+    const phone = String(req.body?.phone || '').trim();
+    const purpose = String(req.body?.purpose || '').trim() || 'visit';
+    const arrivalTime = req.body?.arrivalTime || new Date().toISOString();
+    const description = String(req.body?.description || '').trim();
+    const studentName = String(req.body?.studentName || '').trim();
+    const photoData = String(req.body?.photo || '').trim();
+    const language = ['en', 'fr', 'rw'].includes(req.body?.language) ? req.body.language : 'en';
+    if (!type || !fullName || !email || !phone || !arrivalTime) return res.status(400).json({ error: 'Visitor type, full name, email, phone, and arrival time are required.' });
+    const [result] = await pool.query(
+      'INSERT INTO security_visit_requests (visitor_type, full_name, email, phone, purpose, arrival_time, description, student_name, photo_data, status, created_by, language, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+      [type, fullName, email, phone, purpose, arrivalTime, description || null, studentName || null, photoData || null, 'pending', req.user?.sub || null, language]
+    );
+    const [[request]] = await pool.query('SELECT * FROM security_visit_requests WHERE id = ?', [result.insertId]);
+    if (email) {
+      await sendVisitorRequestNotification({ to: email, name: fullName, status: 'pending', language, actorLabel: 'school guard' }).catch(() => {});
+    }
+    return res.status(201).json({ request: { ...request, photo: request.photo_data || null } });
+  } catch (error) {
+    if (error && error.code === 'ER_NO_SUCH_TABLE') {
+      return res.status(503).json({ error: 'Security guard visitor tracking tables are not initialized yet. Please run the database migration.' });
+    }
+    console.error('[FKAMS security guard] Failed to save visitor request.', error);
+    return res.status(500).json({ error: 'Unable to save the visitor request.' });
+  }
+});
+
+app.patch('/api/security-guard/visits/:id/status', requireAuth, authorize('admin', 'dos', 'doc', 'security_guard'), async (req, res) => {
+  const requestId = Number(req.params.id);
+  const status = ['approved', 'rejected', 'out', 'pending'].includes(req.body?.status) ? req.body.status : null;
+  const comment = String(req.body?.comment || '').trim();
+  if (!Number.isInteger(requestId) || !status) return res.status(400).json({ error: 'A valid request id and status are required.' });
+
+  try {
+    const [rows] = await pool.query('SELECT * FROM security_visit_requests WHERE id = ?', [requestId]);
+    const currentRequest = rows[0];
+    if (!currentRequest) return res.status(404).json({ error: 'Visitor request not found.' });
+
+    if (req.user.role === 'security_guard') {
+      const activePermission = await getActiveSecurityGuardPermission();
+      if (!activePermission) return res.status(403).json({ error: 'Security guard review is not enabled by admin or DOS for the current date and time.' });
+    }
+
+    if (status === 'out' && currentRequest.status !== 'approved') return res.status(400).json({ error: 'Only approved visitors can be marked as out.' });
+
+    const actorLabel = req.user.role === 'security_guard' ? 'security guard' : req.user.role === 'doc' ? 'school admin' : 'school admin';
+    const [result] = await pool.query(
+      'UPDATE security_visit_requests SET status = ?, review_comment = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?',
+      [status, comment || null, req.user.sub, requestId]
+    );
+    if (!result.affectedRows) return res.status(404).json({ error: 'Visitor request not found.' });
+
+    const [visitorRows] = await pool.query('SELECT full_name AS fullName, email, language FROM security_visit_requests WHERE id = ?', [requestId]);
+    const visitor = visitorRows[0] || currentRequest;
+    const message = buildVisitorRequestMessage({ name: visitor.fullName || currentRequest.full_name, status, language: visitor.language || 'en', actorLabel });
+    if (currentRequest.email) {
+      await sendVisitorRequestNotification({ to: currentRequest.email, name: currentRequest.full_name, status, language: currentRequest.language || 'en', actorLabel }).catch(() => {});
+      await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [req.user.sub, status === 'approved' ? 'Visitor approved' : status === 'rejected' ? 'Visitor rejected' : 'Visitor exited', message]);
+    }
+
+    const [allAdmins] = await pool.query("SELECT id FROM users WHERE role IN ('admin', 'dos', 'doc')");
+    for (const admin of allAdmins) {
+      await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [admin.id, status === 'approved' ? 'Visitor approved' : status === 'rejected' ? 'Visitor rejected' : 'Visitor exited', `${currentRequest.full_name} was ${status} by ${actorLabel}.`]);
+    }
+
+    const [[updated]] = await pool.query('SELECT * FROM security_visit_requests WHERE id = ?', [requestId]);
+    return res.json({ request: { ...updated, photo: updated.photo_data || null }, message });
+  } catch (error) {
+    if (error && error.code === 'ER_NO_SUCH_TABLE') {
+      return res.status(503).json({ error: 'Security guard visitor tables are not initialized yet. Please run the database migration.' });
+    }
+    console.error('[FKAMS security guard] Failed to update visit status.', error);
+    return res.status(500).json({ error: 'Unable to update the visitor request.' });
+  }
+});
+
 app.patch('/api/users/:id', requireAuth, authorize('admin'), async (req, res) => {
-  const userId = Number(req.params.id); const roles = ['admin', 'dos', 'teacher', 'student', 'parent', 'accountant', 'librarian'];
+  const userId = Number(req.params.id); const roles = ['admin', 'dos', 'teacher', 'student', 'parent', 'accountant', 'librarian', 'security_guard'];
   if (!Number.isInteger(userId)) return res.status(400).json({ error: 'A valid user id is required.' });
   if (req.body.role !== undefined && !roles.includes(req.body.role)) return res.status(400).json({ error: 'Invalid user role.' });
   if (userId === Number(req.user.sub) && req.body.role && req.body.role !== 'admin') return res.status(400).json({ error: 'You cannot remove your own admin role.' });
+
+  const [currentUser] = await pool.query('SELECT id, email FROM users WHERE id = ?', [userId]);
+  if (!currentUser[0]) return res.status(404).json({ error: 'User not found.' });
+
   const fields = { fullName: 'full_name', email: 'email', phone: 'phone', role: 'role' }; const updates = []; const values = [];
-  Object.entries(fields).forEach(([key, column]) => { if (req.body[key] !== undefined) { if (key === 'role' && !roles.includes(req.body[key])) return; updates.push(`${column} = ?`); values.push(typeof req.body[key] === 'string' ? req.body[key].trim() : req.body[key]); } });
+  for (const [key, column] of Object.entries(fields)) {
+    if (req.body[key] === undefined) continue;
+    if (key === 'role' && !roles.includes(req.body[key])) continue;
+    const value = typeof req.body[key] === 'string' ? req.body[key].trim() : req.body[key];
+    if (key === 'email') {
+      const normalizedEmail = value.toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) return res.status(400).json({ error: 'Enter a valid email address.' });
+      if (normalizedEmail !== String(currentUser[0].email || '').toLowerCase()) {
+        const [duplicate] = await pool.query('SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1', [normalizedEmail, userId]);
+        if (duplicate[0]) return res.status(409).json({ error: 'This email is already registered to another account.' });
+      }
+      updates.push(`${column} = ?`);
+      values.push(normalizedEmail);
+      continue;
+    }
+    updates.push(`${column} = ?`);
+    values.push(value);
+  }
+
   if (req.body.password !== undefined) { if (typeof req.body.password !== 'string' || req.body.password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' }); updates.push('password_hash = ?'); values.push(await bcrypt.hash(req.body.password, 12)); }
   if (!updates.length) return res.status(400).json({ error: 'At least one user field is required.' }); values.push(userId);
   try { const [result] = await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values); if (!result.affectedRows) return res.status(404).json({ error: 'User not found.' }); res.json({ message: 'User updated.' }); } catch (error) { if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'Email is already registered.' }); throw error; }
@@ -599,7 +1112,7 @@ app.delete('/api/users/:id', requireAuth, authorize('admin'), async (req, res) =
 });
 
 app.patch('/api/users/:id/role', requireAuth, authorize('admin'), async (req, res) => {
-  const roles = ['admin', 'dos', 'teacher', 'student', 'parent', 'accountant', 'librarian'];
+  const roles = ['admin', 'dos', 'teacher', 'student', 'parent', 'accountant', 'librarian', 'security_guard'];
   const userId = Number(req.params.id);
   if (!Number.isInteger(userId) || !roles.includes(req.body?.role)) return res.status(400).json({ error: 'A valid user id and role are required.' });
   if (userId === Number(req.user.sub) && req.body.role !== 'admin') return res.status(400).json({ error: 'You cannot remove your own admin role.' });
@@ -628,13 +1141,15 @@ app.post('/api/applications', upload.fields([{ name: 'applicantPhoto', maxCount:
     return res.status(400).json({ error: 'Photo must be JPG, PNG or WEBP; report must be PDF or an image.' });
   }
   const fileUrl = (file) => file ? `${process.env.PUBLIC_API_URL || `http://localhost:${port}`}/uploads/${file.filename}` : null;
+  const reviewCode = String(crypto.randomInt(100000, 1000000));
+  const reviewCodeHash = await bcrypt.hash(reviewCode, 10);
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
     const [result] = await connection.query(`INSERT INTO applications
-    (applicant_name, applicant_photo_key, mother_name, mother_phone, father_name, father_phone, parent_phone, parent_email, province, district, sector, cell, village, desired_class, gender, birthday, previous_school, result_slip_key, report_key, academic_year)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [req.body.applicantName.trim(), fileUrl(files.applicantPhoto?.[0]), req.body.motherName?.trim() || null, req.body.motherPhone?.trim() || null, req.body.fatherName?.trim() || null, req.body.fatherPhone?.trim() || null, parentPhone || '', parentEmail, req.body.province?.trim() || null, req.body.district?.trim() || null, req.body.sector?.trim() || null, req.body.cell?.trim() || null, req.body.village?.trim() || null, req.body.desiredClass.trim(), req.body.gender || null, req.body.birthday || null, req.body.previousSchool?.trim() || null, req.body.resultSlipKey?.trim() || null, fileUrl(files.report?.[0]), currentYear.name]);
-    const notification = await deliverApplicationReceived({ destination: parentEmail, name: req.body.applicantName.trim() });
+    (applicant_name, applicant_photo_key, mother_name, mother_phone, father_name, father_phone, parent_phone, parent_email, review_code_hash, province, district, sector, cell, village, desired_class, gender, birthday, previous_school, result_slip_key, report_key, academic_year)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [req.body.applicantName.trim(), fileUrl(files.applicantPhoto?.[0]), req.body.motherName?.trim() || null, req.body.motherPhone?.trim() || null, req.body.fatherName?.trim() || null, req.body.fatherPhone?.trim() || null, parentPhone || '', parentEmail, reviewCodeHash, req.body.province?.trim() || null, req.body.district?.trim() || null, req.body.sector?.trim() || null, req.body.cell?.trim() || null, req.body.village?.trim() || null, req.body.desiredClass.trim(), req.body.gender || null, req.body.birthday || null, req.body.previousSchool?.trim() || null, req.body.resultSlipKey?.trim() || null, fileUrl(files.report?.[0]), currentYear.name]);
+    const notification = await deliverApplicationReceived({ destination: parentEmail, name: req.body.applicantName.trim(), applicationId: result.insertId, reviewCode });
     await connection.commit();
     res.status(201).json({ id: result.insertId, status: 'pending', notification, message: 'Application submitted. A confirmation email was sent to the parent.' });
   } catch (submitError) {
@@ -661,6 +1176,56 @@ app.get('/api/public/academic-years/current', async (_req, res) => {
   res.json(year || null);
 });
 
+app.post('/api/public/parent-register', async (req, res) => {
+  const fullName = String(req.body?.fullName || '').trim();
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const phone = String(req.body?.phone || '').trim();
+  const gender = ['male', 'female', 'other'].includes(req.body?.gender) ? req.body.gender : null;
+  const admissionNumber = String(req.body?.admissionNumber || '').trim();
+  const password = String(req.body?.password || '');
+  if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.length < 7 || !gender || !admissionNumber || password.length < 8) return res.status(400).json({ error: 'Full name, valid email, phone, gender, student admission number and a password of at least 8 characters are required.' });
+  const [[student]] = await pool.query('SELECT id, user_id AS userId, full_name AS fullName, admission_number AS admissionNumber FROM students WHERE admission_number = ? LIMIT 1', [admissionNumber]);
+  if (!student) return res.status(404).json({ error: 'No student was found with that admission number.' });
+  const [[existingLink]] = await pool.query('SELECT parent_id AS parentId FROM parent_students WHERE student_id = ? LIMIT 1', [student.id]);
+  if (existingLink) return res.status(409).json({ error: 'This student already has a registered parent account. Contact administration if the link needs correction.' });
+  const [[existingUser]] = await pool.query('SELECT id FROM users WHERE email = ? OR phone = ? LIMIT 1', [email, phone]);
+  if (existingUser) return res.status(409).json({ error: 'This email or phone number is already registered.' });
+  const username = `parent-${crypto.randomInt(100000, 1000000)}`;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const passwordHash = await bcrypt.hash(password, 12);
+    const [userResult] = await connection.query('INSERT INTO users (full_name, username, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?, \'parent\')', [fullName, username, email, phone, passwordHash]);
+    await connection.query('INSERT INTO parent_profiles (user_id, gender, province, district, sector, cell, village) VALUES (?, ?, ?, ?, ?, ?, ?)', [userResult.insertId, gender, req.body.province || null, req.body.district || null, req.body.sector || null, req.body.cell || null, req.body.village || null]);
+    await connection.query('INSERT INTO parent_students (parent_id, student_id, relationship) VALUES (?, ?, \'parent\')', [userResult.insertId, student.id]);
+    await connection.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [userResult.insertId, 'Parent registration complete', `Dear ${fullName}, you are now linked to ${student.fullName}. Your username is ${username}.`]);
+    await connection.commit();
+    const message = `Dear ${fullName}, registration is complete for ${student.fullName}. Username: ${username}. Use your password to log in and follow your child's progress.`;
+    try { await sendPermissionEmail({ to: email, subject: 'FKAMS parent registration complete', text: message, html: `<div style="font-family:Arial,sans-serif;color:#17333d"><h2>Parent registration complete</h2><p>${escapeHtml(message)}</p><p><a href="${escapeHtml(allowedOrigin)}">Login now</a></p></div>` }); } catch (error) { console.error(`[FKAMS parent email] ${error.message}`); }
+    console.log(`[FKAMS WhatsApp] Parent registration: ${message}`);
+    const auth = await signUser({ id: userResult.insertId, full_name: fullName, email, phone, role: 'parent' });
+    res.status(201).json({ message: 'Parent registered and linked to the student.', username, studentName: student.fullName, ...auth });
+  } catch (error) { await connection.rollback(); if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'This parent account or student link already exists.' }); throw error; } finally { connection.release(); }
+});
+
+app.post('/api/public/applications/review', async (req, res) => {
+  const applicationId = Number(req.body?.applicationId);
+  const reviewCode = String(req.body?.reviewCode || '').trim();
+  if (!Number.isInteger(applicationId) || applicationId < 1 || !/^\d{6}$/.test(reviewCode)) return res.status(400).json({ error: 'Enter the application number and the 6-digit review code from the email.' });
+  const [[application]] = await pool.query(`SELECT a.id, a.applicant_name AS applicantName, a.desired_class AS desiredClass, a.status,
+    a.reviewer_comment AS reviewerComment, a.created_at AS createdAt, a.review_code_hash AS reviewCodeHash,
+    a.temporary_password AS temporaryPassword, s.admission_number AS admissionNumber, u.username
+    FROM applications a LEFT JOIN students s ON s.id = a.approved_student_id LEFT JOIN users u ON u.id = s.user_id
+    WHERE a.id = ? AND a.review_code_hash IS NOT NULL LIMIT 1`, [applicationId]);
+  if (!application || !(await bcrypt.compare(reviewCode, application.reviewCodeHash || ''))) return res.status(404).json({ error: 'The application number or review code is incorrect.' });
+  const { reviewCodeHash, ...safeApplication } = application;
+  const status = application.status === 'rejected' ? 'rejected' : application.status === 'approved' ? 'approved' : 'pending';
+  const reviewMessage = status === 'approved'
+    ? `Admission number: ${application.admissionNumber || '-'} | Login username: ${application.username || '-'} | Default password: ${application.temporaryPassword || '-'} | Please change the password after your first login.`
+    : safeApplication.reviewerComment;
+  res.json({ application: { ...safeApplication, reviewerComment: reviewMessage, status } });
+});
+
 app.patch('/api/applications/:id/status', requireAuth, authorize('admin', 'dos'), async (req, res) => {
   const status = ['approved', 'rejected'].includes(req.body?.status) ? req.body.status : null;
   if (!status) return res.status(400).json({ error: 'Status must be approved or rejected.' });
@@ -671,9 +1236,17 @@ app.patch('/api/applications/:id/status', requireAuth, authorize('admin', 'dos')
       const [[application]] = await connection.query('SELECT * FROM applications WHERE id = ? AND status = \'pending\' FOR UPDATE', [req.params.id]);
       if (!application) { await connection.rollback(); return res.status(404).json({ error: 'Pending application not found.' }); }
       await connection.query('UPDATE applications SET status = ?, reviewer_comment = ? WHERE id = ? AND status = \'pending\'', [status, req.body.comment?.trim() || null, req.params.id]);
-      const notification = await notifyAdmission({ application, status });
       await connection.commit();
-      return res.json({ message: 'Application rejected and parent notified.', notification });
+      let notification = 'Application rejected and added to system notifications.';
+      try {
+        await notifyAdmission({ application, status });
+        await notifyAdmissionInSystem({ application: { ...application, reviewer_comment: req.body.comment?.trim() || null }, status });
+        notification = 'Application rejected and parent notified by email and system notification.';
+      } catch (notificationError) {
+        console.error(`[FKAMS admission notification] ${notificationError.message}`);
+        notification = 'Application rejected and added to system notifications, but the email could not be sent.';
+      }
+      return res.json({ message: notification });
     } catch (error) { await connection.rollback(); if (error.statusCode) return res.status(error.statusCode).json({ error: error.message }); throw error; } finally { connection.release(); }
   }
   const connection = await pool.getConnection();
@@ -682,9 +1255,20 @@ app.patch('/api/applications/:id/status', requireAuth, authorize('admin', 'dos')
     const [applications] = await connection.query('SELECT * FROM applications WHERE id = ? AND status = \'pending\' FOR UPDATE', [req.params.id]);
     const application = applications[0];
     if (!application) { await connection.rollback(); return res.status(404).json({ error: 'Pending application not found.' }); }
-    await connection.query('UPDATE applications SET status = \'approved\', approved_at = NOW(), reviewer_comment = ? WHERE id = ?', [req.body.comment?.trim() || null, application.id]);
+    const reviewerComment = req.body.comment?.trim() || null;
+    await connection.query('UPDATE applications SET status = \'approved\', approved_at = NOW(), reviewer_comment = ? WHERE id = ?', [reviewerComment, application.id]);
+    const student = await createStudentForApplication(connection, application);
     await connection.commit();
-    res.json({ message: 'Application approved. Student enrollment is scheduled after 24 hours.', enrollmentAfterHours: 24 });
+    let notification = 'Application approved and credentials were added to system notifications.';
+    try {
+      await notifyAdmission({ application, status: 'approved', admissionNumber: student.admissionNumber, username: student.username, temporaryPassword: student.temporaryPassword });
+      await notifyAdmissionInSystem({ application: { ...application, reviewer_comment: reviewerComment }, status: 'approved', admissionNumber: student.admissionNumber, username: student.username, temporaryPassword: student.temporaryPassword, studentUserId: student.userId });
+      notification = 'Application approved. Credentials were sent by email and added to system notifications.';
+    } catch (notificationError) {
+      console.error(`[FKAMS admission notification] ${notificationError.message}`);
+      notification = 'Application approved and credentials were added to system notifications, but the email could not be sent.';
+    }
+    res.json({ message: notification, admissionNumber: student.admissionNumber, username: student.username });
   } catch (error) { await connection.rollback(); if (error.statusCode) return res.status(error.statusCode).json({ error: error.message }); if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'A student account for this application already exists.' }); throw error; } finally { connection.release(); }
 });
 
@@ -1558,6 +2142,113 @@ app.post('/api/notices', requireAuth, authorize('admin', 'dos'), async (req, res
   res.status(201).json({ id: result.insertId, message: 'Notice published.' });
 });
 
+app.post('/api/school-messages', requireAuth, authorize('admin', 'dos', 'doc'), upload.single('file'), async (req, res) => {
+  const title = String(req.body?.title || '').trim(); const body = String(req.body?.body || '').trim();
+  const messageType = ['announcement', 'meeting'].includes(req.body?.messageType) ? req.body.messageType : null;
+  const audienceRole = ['parent', 'teacher', 'doc', 'librarian', 'student', 'accountant', 'all'].includes(req.body?.audienceRole) ? req.body.audienceRole : null;
+  const audienceScope = ['all', 'class', 'selected'].includes(req.body?.audienceScope) ? req.body.audienceScope : 'all';
+  const selectedUserId = Number(req.body?.selectedUserId);
+  if (!title || !body || !messageType || !audienceRole || (audienceScope === 'class' && !req.body.className) || (audienceScope === 'selected' && !Number.isInteger(selectedUserId))) {
+    if (req.file) fs.rmSync(req.file.path, { force: true });
+    return res.status(400).json({ error: 'Title, type, audience, message, and a valid selection are required.' });
+  }
+  if (req.user.role === 'doc' && !['parent', 'teacher', 'student'].includes(audienceRole)) return res.status(403).json({ error: 'DOC may notify parents, teachers, and students only.' });
+  const fileUrl = req.file ? `/uploads/${req.file.filename}` : null;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [result] = await connection.query('INSERT INTO school_messages (title, message_type, audience_role, audience_scope, class_name, body, file_url, starts_at, ends_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [title, messageType, audienceRole, audienceScope, req.body.className || null, body, fileUrl, req.body.startsAt || null, req.body.endsAt || null, req.user.sub]);
+    let recipientQuery = 'SELECT DISTINCT u.id, u.email, u.full_name AS fullName FROM users u';
+    const params = [];
+    if (audienceScope === 'selected') {
+      recipientQuery += ' WHERE u.is_active = TRUE AND u.id = ?';
+      params.push(selectedUserId);
+      if (audienceRole !== 'all') {
+        recipientQuery += ' AND u.role = ?';
+        params.push(audienceRole);
+      }
+    } else {
+      if (audienceRole === 'parent' || audienceScope === 'class') {
+        recipientQuery += ' JOIN parent_students ps ON ps.parent_id = u.id JOIN students s ON s.id = ps.student_id';
+      } else if (audienceRole === 'student') {
+        recipientQuery += ' JOIN students s ON s.user_id = u.id';
+      }
+      recipientQuery += ' WHERE u.is_active = TRUE';
+      if (audienceRole !== 'all') {
+        recipientQuery += ' AND u.role = ?';
+        params.push(audienceRole);
+      }
+      if (audienceScope === 'class') {
+        recipientQuery += ' AND s.class_name = ?';
+        params.push(req.body.className);
+      }
+    }
+    const [recipients] = await connection.query(recipientQuery, params);
+    for (const recipient of recipients) {
+      await connection.query('INSERT INTO school_message_recipients (message_id, user_id) VALUES (?, ?)', [result.insertId, recipient.id]);
+      await connection.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [recipient.id, title, body]);
+      if (recipient.email) sendPermissionEmail({ to: recipient.email, subject: title, text: body, html: `<div style="font-family:Arial,sans-serif"><h2>${escapeHtml(title)}</h2><p>${escapeHtml(body)}</p></div>` }).catch((error) => console.error(`[FKAMS communication email] ${error.message}`));
+    }
+    await connection.commit(); res.status(201).json({ id: result.insertId, recipients: recipients.length, message: `${messageType} created and sent to ${recipients.length} recipient(s).` });
+  } catch (error) { await connection.rollback(); if (req.file) fs.rmSync(req.file.path, { force: true }); throw error; } finally { connection.release(); }
+});
+
+app.get('/api/school-messages', requireAuth, async (req, res) => {
+  const isManager = ['admin', 'dos', 'doc'].includes(req.user.role);
+  const [rows] = await pool.query(`SELECT sm.id, sm.title, sm.message_type AS messageType, sm.audience_role AS audienceRole, sm.audience_scope AS audienceScope, sm.class_name AS className, sm.body, sm.file_url AS fileUrl, sm.starts_at AS startsAt, sm.ends_at AS endsAt, sm.ended_at AS endedAt, sm.created_at AS createdAt, COUNT(smr.user_id) AS recipientCount, SUM(smr.viewed_at IS NOT NULL) AS viewedCount, SUM(smr.present_at IS NOT NULL) AS presentCount, MAX(smr.viewed_at) AS viewedAt, MAX(smr.present_at) AS presentAt FROM school_messages sm LEFT JOIN school_message_recipients smr ON smr.message_id = sm.id ${isManager ? '' : 'JOIN school_message_recipients own ON own.message_id = sm.id AND own.user_id = ?'} GROUP BY sm.id ORDER BY sm.created_at DESC`, isManager ? [] : [req.user.sub]);
+  res.json({ messages: rows });
+});
+
+app.patch('/api/school-messages/:id/view', requireAuth, async (req, res) => {
+  const [result] = await pool.query('UPDATE school_message_recipients SET viewed_at = COALESCE(viewed_at, NOW()) WHERE message_id = ? AND user_id = ?', [req.params.id, req.user.sub]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Message not found for this user.' }); res.json({ message: 'Message marked as viewed.' });
+});
+
+app.patch('/api/school-messages/:id/present', requireAuth, async (req, res) => {
+  const [result] = await pool.query('UPDATE school_message_recipients SET present_at = COALESCE(present_at, NOW()), viewed_at = COALESCE(viewed_at, NOW()) WHERE message_id = ? AND user_id = ?', [req.params.id, req.user.sub]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Meeting invitation not found.' }); res.json({ message: 'Meeting attendance recorded.' });
+});
+
+app.get('/api/school-messages/:id/recipients', requireAuth, authorize('admin', 'dos', 'doc'), async (req, res) => {
+  const [rows] = await pool.query(`SELECT smr.user_id AS userId, u.full_name AS fullName, u.role, u.email,
+    smr.viewed_at AS viewedAt, smr.present_at AS presentAt
+    FROM school_message_recipients smr JOIN users u ON u.id = smr.user_id
+    WHERE smr.message_id = ? ORDER BY u.full_name`, [req.params.id]);
+  const [[message]] = await pool.query('SELECT id, title, message_type AS messageType, notes_html AS notesHtml FROM school_messages WHERE id = ?', [req.params.id]);
+  if (!message) return res.status(404).json({ error: 'Communication not found.' });
+  res.json({ message, recipients: rows });
+});
+
+app.patch('/api/school-messages/:id/recipients/:userId/present', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const [result] = await pool.query('UPDATE school_message_recipients SET present_at = COALESCE(present_at, NOW()), viewed_at = COALESCE(viewed_at, NOW()) WHERE message_id = ? AND user_id = ?', [req.params.id, req.params.userId]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Invited person not found.' });
+  res.json({ message: 'Presence marked.' });
+});
+
+app.patch('/api/school-messages/:id/notes', requireAuth, authorize('admin', 'dos'), upload.single('file'), async (req, res) => {
+  const notesHtml = String(req.body?.notesHtml || '').trim();
+  const fileUrl = req.file ? `/uploads/${req.file.filename}` : null;
+  const [result] = await pool.query("UPDATE school_messages SET notes_html = ?, file_url = COALESCE(?, file_url) WHERE id = ? AND message_type = 'meeting'", [notesHtml || null, fileUrl, req.params.id]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Meeting not found.' });
+  res.json({ message: 'Meeting notes saved.' });
+});
+
+app.patch('/api/school-messages/:id/end', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const [result] = await pool.query('UPDATE school_messages SET ended_at = NOW() WHERE id = ? AND message_type = \'meeting\'', [req.params.id]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Meeting not found.' });
+  const [[meeting]] = await pool.query('SELECT title FROM school_messages WHERE id = ?', [req.params.id]);
+  const [absent] = await pool.query('SELECT smr.user_id AS userId, u.email FROM school_message_recipients smr JOIN users u ON u.id = smr.user_id WHERE smr.message_id = ? AND smr.present_at IS NULL', [req.params.id]);
+  for (const person of absent) { await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [person.userId, 'Meeting absence notice', `You were invited to ${meeting.title} but did not attend. Please review the meeting decisions.`]); }
+  res.json({ message: 'Meeting closed.', absent: absent.length });
+});
+
+app.post('/api/school-messages/:id/resend-unviewed', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const [[message]] = await pool.query('SELECT title, body FROM school_messages WHERE id = ?', [req.params.id]); if (!message) return res.status(404).json({ error: 'Message not found.' });
+  const [unviewed] = await pool.query('SELECT smr.user_id AS userId, u.email FROM school_message_recipients smr JOIN users u ON u.id = smr.user_id WHERE smr.message_id = ? AND smr.viewed_at IS NULL', [req.params.id]);
+  for (const person of unviewed) { await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [person.userId, message.title, message.body]); if (person.email) sendPermissionEmail({ to: person.email, subject: message.title, text: message.body, html: `<p>${escapeHtml(message.body)}</p>` }).catch(() => {}); }
+  res.json({ message: `Resent to ${unviewed.length} unviewed recipient(s).` });
+});
+
 app.get('/api/notices', requireAuth, async (req, res) => {
   const audience = ['all', req.user.role === 'teacher' ? 'teachers' : req.user.role === 'parent' ? 'parents' : 'students'];
   const [rows] = await pool.query('SELECT id, title, body, category, audience, published_at AS publishedAt FROM notices WHERE audience IN (?, ?) ORDER BY published_at DESC', audience);
@@ -1676,9 +2367,304 @@ app.post('/api/staff-attendance', requireAuth, authorize('admin', 'dos'), async 
   await pool.query('INSERT INTO staff_attendance (user_id, attendance_date, status, marked_by) VALUES (?, COALESCE(?, CURRENT_DATE), ?, ?) ON DUPLICATE KEY UPDATE status = VALUES(status), marked_by = VALUES(marked_by)', [userId, req.body.date || null, req.body.status, req.user.sub]);
   res.status(201).json({ message: 'Staff attendance saved.' });
 });
+
+const departmentAttendanceRoles = ['teacher', 'dos', 'doc', 'accountant', 'librarian', 'security_guard'];
+function isWeekend(date = new Date()) { const day = new Date(date).getDay(); return day === 0 || day === 6; }
+function todayDate() { return new Date().toISOString().slice(0, 10); }
+function currentTime() { return new Date().toTimeString().slice(0, 8); }
+function timeToMinutes(value) { const [hours, minutes] = String(value || '00:00').slice(0, 5).split(':').map(Number); return (hours * 60) + minutes; }
+function minutesUntil(target, now = currentTime()) { return timeToMinutes(target) - timeToMinutes(now); }
+function departmentAttendanceScore(morningStatus, afternoonStatus) {
+  return (morningStatus === 'late' ? 1 : 0) + (afternoonStatus === 'before_time' ? 1 : 0) + (morningStatus === 'inactive' ? 1.5 : 0) + (afternoonStatus === 'inactive' ? 1.5 : 0);
+}
+
+async function applyDepartmentScore(connection, userId, difference) {
+  await connection.query('INSERT INTO department_attendance_scores (user_id, score) VALUES (?, GREATEST(100 - ?, 0)) ON DUPLICATE KEY UPDATE score = GREATEST(score - ?, 0)', [userId, Math.max(0, difference), Math.max(0, difference)]);
+}
+
+app.get('/api/department-attendance/settings', requireAuth, authorize('admin', 'dos', ...departmentAttendanceRoles), async (req, res) => {
+  const [[settings]] = await pool.query('SELECT id, location_name AS locationName, latitude, longitude, radius_meters AS radiusMeters, morning_cutoff AS morningCutoff, afternoon_time AS afternoonTime, updated_at AS updatedAt FROM department_attendance_settings WHERE id = 1 LIMIT 1');
+  if (settings && departmentAttendanceRoles.includes(req.user.role) && !isWeekend()) {
+    const date = todayDate();
+    const warningSession = minutesUntil(settings.morningCutoff) >= 0 && minutesUntil(settings.morningCutoff) <= 2
+      ? { key: 'morning_warning_sent_date', title: 'Morning attendance deadline warning', message: 'Ihutire gukora attendance kuko igihe cyenda kugera.' }
+      : minutesUntil(settings.afternoonTime) >= 0 && minutesUntil(settings.afternoonTime) <= 2
+        ? { key: 'afternoon_warning_sent_date', title: 'Afternoon attendance deadline warning', message: 'Ihutire gukora attendance kuko igihe cyenda kugera.' }
+        : null;
+    if (warningSession) {
+      const [[record]] = await pool.query(`SELECT id, ${warningSession.key} AS warningSentDate FROM department_attendance WHERE user_id = ? AND attendance_date = ? LIMIT 1`, [req.user.sub, date]);
+      if (record?.warningSentDate !== date) {
+        await pool.query(`INSERT INTO department_attendance (user_id, attendance_date, ${warningSession.key}) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE ${warningSession.key} = VALUES(${warningSession.key})`, [req.user.sub, date, date]);
+        const [[staffUser]] = await pool.query('SELECT email, full_name AS fullName FROM users WHERE id = ? LIMIT 1', [req.user.sub]);
+        await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [req.user.sub, warningSession.title, warningSession.message]);
+        await sendPermissionEmail({ to: staffUser?.email, subject: 'FKAMS attendance reminder', text: `Dear ${staffUser?.fullName || req.user.role}, ${warningSession.message}`, html: `<p>Dear ${escapeHtml(staffUser?.fullName || req.user.role)},</p><p>${escapeHtml(warningSession.message)}</p>` });
+      }
+    }
+  }
+  res.json({ settings: settings ? { ...settings, morningCutoff: String(settings.morningCutoff).slice(0, 8), afternoonTime: String(settings.afternoonTime).slice(0, 8) } : null });
+});
+
+app.put('/api/department-attendance/settings', requireAuth, authorize('admin'), async (req, res) => {
+  const locationName = String(req.body?.locationName || '').trim();
+  const latitude = Number(req.body?.latitude);
+  const longitude = Number(req.body?.longitude);
+  const radiusMeters = Number(req.body?.radiusMeters || 5);
+  const morningCutoff = String(req.body?.morningCutoff || '').trim();
+  const afternoonTime = String(req.body?.afternoonTime || '').trim();
+  if (!locationName || !Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isFinite(radiusMeters) || radiusMeters < 5 || !/^\d{2}:\d{2}(:\d{2})?$/.test(morningCutoff) || !/^\d{2}:\d{2}(:\d{2})?$/.test(afternoonTime)) return res.status(400).json({ error: 'Location, coordinates, radius (at least 5m), and valid morning/afternoon times are required.' });
+  await pool.query('INSERT INTO department_attendance_settings (id, location_name, latitude, longitude, radius_meters, morning_cutoff, afternoon_time, updated_by) VALUES (1, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE location_name = VALUES(location_name), latitude = VALUES(latitude), longitude = VALUES(longitude), radius_meters = VALUES(radius_meters), morning_cutoff = VALUES(morning_cutoff), afternoon_time = VALUES(afternoon_time), updated_by = VALUES(updated_by)', [locationName, latitude, longitude, radiusMeters, morningCutoff, afternoonTime, req.user.sub]);
+  res.json({ message: 'Department attendance location and times saved.' });
+});
+
+app.get('/api/department-attendance', requireAuth, authorize('admin', 'dos', ...departmentAttendanceRoles), async (req, res) => {
+  const month = /^\d{4}-\d{2}$/.test(req.query.month || '') ? req.query.month : todayDate().slice(0, 7);
+  const params = [month];
+  if (month === todayDate().slice(0, 7) && !isWeekend()) {
+    const [[settings]] = await pool.query('SELECT morning_cutoff, afternoon_time AS afternoonTime FROM department_attendance_settings WHERE id = 1 LIMIT 1');
+    const targetRoles = req.user.role === 'admin' ? departmentAttendanceRoles : req.user.role === 'dos' ? ['teacher'] : [req.user.role];
+    const [staff] = await pool.query('SELECT id FROM users WHERE is_active = TRUE AND role IN (?)', [targetRoles]);
+    if (settings && currentTime() > String(settings.morning_cutoff)) {
+      for (const person of staff) {
+        const [[existingAttendance]] = await pool.query('SELECT morning_status AS morningStatus, score_deduction AS scoreDeduction FROM department_attendance WHERE user_id = ? AND attendance_date = CURRENT_DATE LIMIT 1', [person.id]);
+        await pool.query("INSERT INTO department_attendance (user_id, attendance_date, morning_status, score_deduction) VALUES (?, CURRENT_DATE, 'inactive', 1.5) ON DUPLICATE KEY UPDATE morning_status = COALESCE(morning_status, 'inactive'), score_deduction = GREATEST(score_deduction, 1.5)", [person.id]);
+        if (!existingAttendance) await applyDepartmentScore(pool, person.id, 1.5);
+      }
+    }
+    const afternoonMinutes = String(settings?.afternoonTime || '13:00:00').slice(0, 5).split(':').map(Number);
+    const currentMinutes = String(currentTime()).slice(0, 5).split(':').map(Number);
+    if (settings && currentMinutes[0] * 60 + currentMinutes[1] >= afternoonMinutes[0] * 60 + afternoonMinutes[1] + 10) {
+      for (const person of staff) {
+        const [[existingAfternoon]] = await pool.query('SELECT afternoon_status AS afternoonStatus, score_deduction AS scoreDeduction, morning_status AS morningStatus FROM department_attendance WHERE user_id = ? AND attendance_date = CURRENT_DATE LIMIT 1', [person.id]);
+        const nextDeduction = departmentAttendanceScore(existingAfternoon?.morningStatus, 'inactive');
+        if (!existingAfternoon) {
+          await pool.query("INSERT INTO department_attendance (user_id, attendance_date, afternoon_status, score_deduction) VALUES (?, CURRENT_DATE, 'inactive', ?)", [person.id, nextDeduction]);
+          await applyDepartmentScore(pool, person.id, nextDeduction);
+        } else if (!existingAfternoon.afternoonStatus) {
+          await pool.query("UPDATE department_attendance SET afternoon_status = 'inactive', score_deduction = ? WHERE user_id = ? AND attendance_date = CURRENT_DATE", [nextDeduction, person.id]);
+          await applyDepartmentScore(pool, person.id, Math.max(0, nextDeduction - Number(existingAfternoon.scoreDeduction || 0)));
+        }
+      }
+    }
+  }
+  let query = `SELECT da.id, da.user_id AS userId, u.full_name AS fullName, u.role, da.attendance_date AS attendanceDate,
+    da.morning_status AS morningStatus, da.afternoon_status AS afternoonStatus, da.morning_at AS morningAt, da.afternoon_at AS afternoonAt,
+    da.latitude, da.longitude, da.distance_meters AS distanceMeters, da.morning_photo_path AS morningPhotoPath,
+    da.afternoon_photo_path AS afternoonPhotoPath, da.score_deduction AS scoreDeduction, da.outside_location_attempts AS outsideLocationAttempts,
+    da.attendance_settings_updated_at AS attendanceSettingsUpdatedAt,
+    COALESCE(das.score, 100) AS scoreRemaining
+    FROM department_attendance da JOIN users u ON u.id = da.user_id LEFT JOIN department_attendance_scores das ON das.user_id = da.user_id WHERE DATE_FORMAT(da.attendance_date, '%Y-%m') = ?`;
+  if (req.user.role === 'dos') query += " AND u.role = 'teacher'";
+  else if (departmentAttendanceRoles.includes(req.user.role)) { query += ' AND da.user_id = ?'; params.push(req.user.sub); }
+  query += ' ORDER BY da.attendance_date DESC, u.full_name';
+  const [rows] = await pool.query(query, params);
+  const memberRoles = req.user.role === 'admin' ? departmentAttendanceRoles : req.user.role === 'dos' ? ['teacher'] : [req.user.role];
+  const [members] = await pool.query('SELECT u.id AS userId, u.full_name AS fullName, u.role, COALESCE(das.score, 100) AS scoreRemaining FROM users u LEFT JOIN department_attendance_scores das ON das.user_id = u.id WHERE u.is_active = TRUE AND u.role IN (?) ORDER BY u.full_name', [memberRoles]);
+  res.json({ month, records: rows.filter((row) => !isWeekend(row.attendanceDate)), members });
+});
+
+app.patch('/api/department-attendance/:id', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const [rows] = await pool.query('SELECT da.*, u.role FROM department_attendance da JOIN users u ON u.id = da.user_id WHERE da.id = ? LIMIT 1', [req.params.id]);
+  const record = rows[0];
+  if (!record || (req.user.role === 'dos' && record.role !== 'teacher')) return res.status(404).json({ error: 'Teacher attendance record not found.' });
+  const morningStatus = req.body?.morningStatus === null ? null : ['present', 'late', 'inactive', 'outside_location'].includes(req.body?.morningStatus) ? req.body.morningStatus : record.morning_status;
+  const afternoonStatus = req.body?.afternoonStatus === null ? null : ['on_time', 'before_time', 'inactive', 'outside_location'].includes(req.body?.afternoonStatus) ? req.body.afternoonStatus : record.afternoon_status;
+  const nextDeduction = departmentAttendanceScore(morningStatus, afternoonStatus);
+  const difference = nextDeduction - Number(record.score_deduction || 0);
+  await pool.query('UPDATE department_attendance SET morning_status = ?, afternoon_status = ?, score_deduction = ? WHERE id = ?', [morningStatus, afternoonStatus, nextDeduction, req.params.id]);
+  if (difference > 0) await applyDepartmentScore(pool, record.user_id, difference);
+  if (difference < 0) await pool.query('INSERT INTO department_attendance_scores (user_id, score) VALUES (?, ?) ON DUPLICATE KEY UPDATE score = LEAST(score + ?, 100)', [record.user_id, 100, Math.abs(difference)]);
+  res.json({ message: 'Attendance record updated.' });
+});
+
+app.delete('/api/department-attendance/:id', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const [rows] = await pool.query('SELECT da.score_deduction AS scoreDeduction, da.user_id AS userId, u.role FROM department_attendance da JOIN users u ON u.id = da.user_id WHERE da.id = ? LIMIT 1', [req.params.id]);
+  const record = rows[0];
+  if (!record || (req.user.role === 'dos' && record.role !== 'teacher')) return res.status(404).json({ error: 'Teacher attendance record not found.' });
+  await pool.query('DELETE FROM department_attendance WHERE id = ?', [req.params.id]);
+  if (Number(record.scoreDeduction) > 0) await pool.query('INSERT INTO department_attendance_scores (user_id, score) VALUES (?, ?) ON DUPLICATE KEY UPDATE score = LEAST(score + ?, 100)', [record.userId, 100, record.scoreDeduction]);
+  res.json({ message: 'Attendance record deleted.' });
+});
+
+app.post('/api/department-attendance/check-in', requireAuth, (req, res, next) => {
+  if (!departmentAttendanceRoles.includes(req.user.role)) return res.status(403).json({ code: 'ROLE_NOT_ALLOWED', role: req.user.role, error: `Role '${req.user.role}' cannot record department attendance. Use a teacher, DOC/DOS, accountant, or librarian account.` });
+  next();
+}, upload.single('photo'), async (req, res) => {
+  const session = req.body?.session === 'afternoon' ? 'afternoon' : 'morning';
+  const latitude = Number(req.body?.latitude);
+  const longitude = Number(req.body?.longitude);
+  const gpsAccuracy = Math.min(50, Math.max(0, Number(req.body?.accuracy || 0)));
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return res.status(400).json({ error: 'Device location is required before taking attendance.' });
+  const now = new Date();
+  if (isWeekend(now)) return res.status(400).json({ error: 'Department attendance is not recorded on Saturday or Sunday.' });
+  const [[settings]] = await pool.query('SELECT *, updated_at AS settingsUpdatedAt FROM department_attendance_settings WHERE id = 1 LIMIT 1');
+  if (!settings) return res.status(409).json({ error: 'Admin has not configured the department attendance location and times.' });
+  const [[staffUser]] = await pool.query('SELECT email, full_name AS fullName FROM users WHERE id = ? LIMIT 1', [req.user.sub]);
+  const distanceMeters = distanceInMeters(latitude, longitude, settings.latitude, settings.longitude);
+  const allowedDistance = Number(settings.radius_meters) + gpsAccuracy;
+  if (distanceMeters > allowedDistance) {
+    const [outside] = await pool.query('INSERT INTO department_attendance (user_id, attendance_date, latitude, longitude, distance_meters, outside_location_attempts) VALUES (?, ?, ?, ?, ?, 1) ON DUPLICATE KEY UPDATE latitude = VALUES(latitude), longitude = VALUES(longitude), distance_meters = VALUES(distance_meters), outside_location_attempts = outside_location_attempts + 1', [req.user.sub, todayDate(), latitude, longitude, distanceMeters]);
+    const [[attempt]] = await pool.query('SELECT outside_location_attempts AS attempts FROM department_attendance WHERE user_id = ? AND attendance_date = ?', [req.user.sub, todayDate()]);
+    if (Number(attempt?.attempts) >= 2) {
+      const [admins] = await pool.query("SELECT id FROM users WHERE role IN ('admin', 'dos') AND is_active = TRUE");
+      for (const admin of admins) await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [admin.id, 'Outside-location attendance attempt', `${req.user.full_name || 'A staff member'} attempted department attendance outside ${settings.location_name}.`]);
+    }
+    if (req.file) fs.rmSync(req.file.path, { force: true });
+    return res.status(403).json({ code: 'OUTSIDE_ATTENDANCE_LOCATION', distanceMeters: Math.round(distanceMeters), allowedRadiusMeters: Number(settings.radius_meters), gpsAccuracyMeters: Math.round(gpsAccuracy), locationName: settings.location_name, error: `You are ${Math.round(distanceMeters)}m from ${settings.location_name}; the allowed radius is ${Number(settings.radius_meters)}m plus GPS accuracy of about ${Math.round(gpsAccuracy)}m. Move inside the configured attendance location and try again.` });
+  }
+
+  const date = todayDate();
+  const time = currentTime();
+  const connection = await pool.getConnection();
+  let existing;
+  try {
+    await connection.beginTransaction();
+    const [[lockedAttendance]] = await connection.query('SELECT * FROM department_attendance WHERE user_id = ? AND attendance_date = ? FOR UPDATE', [req.user.sub, date]);
+    existing = lockedAttendance;
+    const sameSettings = existing?.attendance_settings_updated_at && new Date(existing.attendance_settings_updated_at).getTime() === new Date(settings.settingsUpdatedAt).getTime();
+    const sessionStatus = session === 'morning' ? existing?.morning_status : existing?.afternoon_status;
+    if (sameSettings && sessionStatus) {
+      await connection.rollback();
+      return res.status(409).json({ code: 'ATTENDANCE_ALREADY_RECORDED', error: `${session} attendance has already been recorded. Ask admin to change the attendance time setting before recording again.` });
+    }
+  const morningStatus = session === 'morning' ? (time <= String(settings.morning_cutoff) ? 'present' : 'late') : (existing?.morning_status || (time > String(settings.morning_cutoff) ? 'inactive' : null));
+  const afternoonStatus = session === 'afternoon'
+    ? (timeToMinutes(time) > timeToMinutes(settings.afternoon_time) + 10 ? 'inactive' : time >= String(settings.afternoon_time) ? 'on_time' : 'before_time')
+    : (existing?.afternoon_status || null);
+  const previousDeduction = Number(existing?.score_deduction || 0);
+  const scoreDeduction = departmentAttendanceScore(morningStatus, afternoonStatus);
+  const scoreDifference = scoreDeduction - previousDeduction;
+  let photoPath = null;
+  if (req.file) {
+    const photoName = `${req.file.filename}.jpg`;
+    fs.renameSync(req.file.path, path.join(uploadDirectory, photoName));
+    photoPath = `/uploads/${photoName}`;
+  }
+    await connection.query('INSERT INTO department_attendance (user_id, attendance_date, morning_status, afternoon_status, morning_at, afternoon_at, latitude, longitude, distance_meters, morning_photo_path, afternoon_photo_path, score_deduction, outside_location_attempts, attendance_settings_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?) ON DUPLICATE KEY UPDATE morning_status = VALUES(morning_status), afternoon_status = VALUES(afternoon_status), morning_at = COALESCE(VALUES(morning_at), morning_at), afternoon_at = COALESCE(VALUES(afternoon_at), afternoon_at), latitude = VALUES(latitude), longitude = VALUES(longitude), distance_meters = VALUES(distance_meters), morning_photo_path = COALESCE(VALUES(morning_photo_path), morning_photo_path), afternoon_photo_path = COALESCE(VALUES(afternoon_photo_path), afternoon_photo_path), score_deduction = VALUES(score_deduction), attendance_settings_updated_at = VALUES(attendance_settings_updated_at)', [req.user.sub, date, morningStatus, afternoonStatus, session === 'morning' ? now : null, session === 'afternoon' ? now : null, latitude, longitude, distanceMeters, session === 'morning' ? photoPath : null, session === 'afternoon' ? photoPath : null, scoreDeduction, settings.settingsUpdatedAt]);
+    if (scoreDifference > 0) await applyDepartmentScore(connection, req.user.sub, scoreDifference);
+    if (scoreDifference < 0) await connection.query('INSERT INTO department_attendance_scores (user_id, score) VALUES (?, 100) ON DUPLICATE KEY UPDATE score = LEAST(score + ?, 100)', [req.user.sub, Math.abs(scoreDifference)]);
+    await connection.commit();
+  } catch (error) { await connection.rollback(); throw error; } finally { connection.release(); }
+  const [[scoreRecord]] = await pool.query('SELECT COALESCE(score, 100) AS scoreRemaining FROM department_attendance_scores WHERE user_id = ? LIMIT 1', [req.user.sub]);
+  const scoreRemaining = Number(scoreRecord?.scoreRemaining ?? 100);
+  if (scoreDifference > 0) {
+    const subject = morningStatus === 'late' ? 'late morning attendance' : afternoonStatus === 'before_time' ? 'before afternoon time' : 'inactive attendance';
+    const scoreMessage = `${scoreDifference} mark(s) were removed because of ${subject}. Remaining score: ${scoreRemaining}/100.`;
+    await sendPermissionEmail({ to: staffUser?.email, subject: 'FKAMS department attendance score notice', text: `Dear ${staffUser?.fullName || req.user.role}, ${scoreMessage}`, html: `<p>Dear ${escapeHtml(staffUser?.fullName || req.user.role)},</p><p>${escapeHtml(scoreMessage)}</p>` });
+    await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [req.user.sub, 'Department attendance score notice', scoreMessage]);
+    console.log(`[FKAMS WhatsApp] ${staffUser?.fullName || req.user.role}: ${scoreMessage}`);
+  }
+  res.status(201).json({ message: `${session} attendance recorded.`, status: session === 'morning' ? morningStatus : afternoonStatus, scoreDeduction, scoreRemaining, distanceMeters, photoPath });
+});
 app.post('/api/hr/leave', requireAuth, async (req, res) => { const types = ['annual', 'sick', 'maternity', 'personal', 'other']; const error = bodyErrors(req.body, [['reason', 'Reason', 2000]]); if (error || !types.includes(req.body.leaveType) || !req.body.startsOn || !req.body.endsOn) return res.status(400).json({ error: error || 'Leave type, dates and reason are required.' }); const [result] = await pool.query('INSERT INTO leave_requests (user_id, leave_type, starts_on, ends_on, reason) VALUES (?, ?, ?, ?, ?)', [req.user.sub, req.body.leaveType, req.body.startsOn, req.body.endsOn, req.body.reason.trim()]); res.status(201).json({ id: result.insertId, status: 'pending', message: 'Leave request submitted.' }); });
 app.get('/api/hr/leave', requireAuth, authorize('admin', 'dos'), async (_req, res) => { const [rows] = await pool.query('SELECT l.id, l.user_id AS userId, u.full_name AS fullName, l.leave_type AS leaveType, l.starts_on AS startsOn, l.ends_on AS endsOn, l.reason, l.status FROM leave_requests l JOIN users u ON u.id = l.user_id ORDER BY l.id DESC'); res.json({ requests: rows }); });
 app.patch('/api/hr/leave/:id', requireAuth, authorize('admin', 'dos'), async (req, res) => { if (!['approved', 'rejected'].includes(req.body?.status)) return res.status(400).json({ error: 'Status must be approved or rejected.' }); const [result] = await pool.query('UPDATE leave_requests SET status = ?, reviewed_by = ? WHERE id = ?', [req.body.status, req.user.sub, req.params.id]); if (!result.affectedRows) return res.status(404).json({ error: 'Leave request not found.' }); res.json({ message: 'Leave request updated.' }); });
+
+app.post('/api/permission-requests', requireAuth, upload.single('attachment'), async (req, res) => {
+  const allowedRoles = ['teacher', 'accountant', 'librarian', 'admin', 'dos', 'parent', 'student'];
+  if (!allowedRoles.includes(req.user.role)) return res.status(403).json({ error: 'This role cannot create a permission request.' });
+  const title = String(req.body?.title || '').trim();
+  const reason = String(req.body?.reason || '').trim();
+  const description = String(req.body?.description || '').trim();
+  const permissionStart = req.body?.permissionStart || null;
+  const permissionEnd = req.body?.permissionEnd || null;
+  const studentId = Number(req.body?.studentId || req.body?.student_id || 0);
+
+  if (!title || !reason) return res.status(400).json({ error: 'Title and reason are required.' });
+  if (req.user.role === 'parent' && !Number.isInteger(studentId)) return res.status(400).json({ error: 'Select a child before submitting the permission request.' });
+  if (req.user.role === 'student') {
+    const [[student]] = await pool.query('SELECT id FROM students WHERE user_id = ? LIMIT 1', [req.user.sub]);
+    if (!student) return res.status(400).json({ error: 'Student profile is not available for permission requests.' });
+  }
+
+  const requestStudentId = req.user.role === 'student'
+    ? (await pool.query('SELECT id FROM students WHERE user_id = ? LIMIT 1', [req.user.sub]))[0][0]?.id || null
+    : req.user.role === 'parent'
+      ? studentId
+      : Number(req.body?.studentId) || null;
+
+  const attachmentPath = req.file ? `/uploads/${req.file.filename}` : null;
+  const qrToken = crypto.randomUUID();
+  const [result] = await pool.query(
+    'INSERT INTO permission_requests (requester_id, requester_role, student_id, title, reason, description, attachment_path, permission_start, permission_end, qr_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [req.user.sub, req.user.role, requestStudentId, title, reason, description || null, attachmentPath, permissionStart || null, permissionEnd || null, qrToken],
+  );
+
+  const [admins] = await pool.query("SELECT id FROM users WHERE role IN ('admin', 'dos') AND is_active = TRUE");
+  for (const admin of admins) {
+    await pool.query("INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, 'in_app', ?, ?, NOW())", [admin.id, 'Permission request submitted', `${req.user.full_name || 'A user'} requested permission: ${title}`]);
+  }
+
+  const request = { id: result.insertId, title, reason, description, permissionStart, permissionEnd, status: 'pending', requesterRole: req.user.role, studentId: requestStudentId, qrToken };
+  res.status(201).json({ message: 'Permission request submitted successfully.', request });
+});
+
+app.get('/api/permission-requests', requireAuth, async (req, res) => {
+  const canViewAll = ['admin', 'dos'].includes(req.user.role);
+  let query = `
+    SELECT pr.id, pr.requester_id AS requesterId, pr.requester_role AS requesterRole, pr.student_id AS studentId,
+           pr.title, pr.reason, pr.description, pr.attachment_path AS attachmentPath,
+           pr.status, pr.permission_start AS permissionStart, pr.permission_end AS permissionEnd,
+           pr.decision_note AS decisionNote, pr.created_at AS createdAt, pr.updated_at AS updatedAt,
+           requester.full_name AS requesterName, requester.email AS requesterEmail,
+           student.full_name AS studentName, student.admission_number AS admissionNumber
+    FROM permission_requests pr
+    LEFT JOIN users requester ON requester.id = pr.requester_id
+    LEFT JOIN students student ON student.id = pr.student_id`;
+  const params = [];
+
+  if (!canViewAll) {
+    if (req.user.role === 'parent') {
+      query += ' WHERE (pr.requester_id = ? OR pr.student_id IN (SELECT student_id FROM parent_students WHERE parent_id = ?))';
+      params.push(req.user.sub, req.user.sub);
+    } else if (req.user.role === 'student') {
+      query += ' WHERE pr.student_id IN (SELECT id FROM students WHERE user_id = ?)';
+      params.push(req.user.sub);
+    } else {
+      query += ' WHERE pr.requester_id = ?';
+      params.push(req.user.sub);
+    }
+  }
+
+  query += ' ORDER BY pr.created_at DESC';
+  const [rows] = await pool.query(query, params);
+  res.json({ requests: rows });
+});
+
+app.patch('/api/permission-requests/:id/decision', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const decision = String(req.body?.status || '').trim();
+  const decisionNote = String(req.body?.decisionNote || req.body?.comment || '').trim();
+  const permissionStart = req.body?.permissionStart || null;
+  const permissionEnd = req.body?.permissionEnd || null;
+
+  if (!['approved', 'denied'].includes(decision)) return res.status(400).json({ error: 'Status must be approved or denied.' });
+
+  const [requestRows] = await pool.query('SELECT * FROM permission_requests WHERE id = ? LIMIT 1', [req.params.id]);
+  const request = requestRows[0];
+  if (!request) return res.status(404).json({ error: 'Permission request not found.' });
+
+  const approvedDateStart = permissionStart || request.permission_start || new Date().toISOString().slice(0, 10);
+  const approvedDateEnd = permissionEnd || request.permission_end || new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+
+  const [result] = await pool.query(
+    'UPDATE permission_requests SET status = ?, permission_start = ?, permission_end = ?, approved_by = ?, decision_note = ? WHERE id = ?',
+    [decision, approvedDateStart, approvedDateEnd, req.user.sub, decisionNote || null, req.params.id],
+  );
+
+  if (!result.affectedRows) return res.status(404).json({ error: 'Permission request could not be updated.' });
+
+  const detailedRequest = { ...request, status: decision, permission_start: approvedDateStart, permission_end: approvedDateEnd, decision_note: decisionNote || null };
+
+  await notifyPermissionDecision({ request: detailedRequest, recipientId: request.requester_id, status: decision });
+
+  if (request.student_id) {
+    const [[student]] = await pool.query('SELECT user_id FROM students WHERE id = ? LIMIT 1', [request.student_id]);
+    if (student?.user_id && student.user_id !== request.requester_id) {
+      await notifyPermissionDecision({ request: detailedRequest, recipientId: student.user_id, status: decision });
+    }
+  }
+
+  res.json({ message: 'Permission request updated.', request: detailedRequest });
+});
 
 app.get('/api/academic-years', requireAuth, authorize('admin', 'dos', 'accountant'), async (_req, res) => {
   const [rows] = await pool.query('SELECT id, name, start_date AS startDate, end_date AS endDate, status, is_current AS isCurrent FROM academic_years ORDER BY start_date DESC');
@@ -1885,7 +2871,7 @@ app.post('/api/homework', requireAuth, authorize('admin', 'dos', 'teacher'), asy
 
 app.get('/api/notifications', requireAuth, async (req, res) => { const [rows] = await pool.query('SELECT id, channel, title, message, sent_at AS sentAt, read_at AS readAt, created_at AS createdAt FROM notifications WHERE recipient_id = ? ORDER BY created_at DESC LIMIT 100', [req.user.sub]); res.json({ notifications: rows }); });
 app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => { const [result] = await pool.query('UPDATE notifications SET read_at = NOW() WHERE id = ? AND recipient_id = ?', [req.params.id, req.user.sub]); if (!result.affectedRows) return res.status(404).json({ error: 'Notification not found.' }); res.json({ message: 'Notification marked as read.' }); });
-app.post('/api/notifications', requireAuth, authorize('admin', 'dos'), async (req, res) => { const recipientId = Number(req.body?.recipientId); const error = bodyErrors(req.body, [['title', 'Title', 180], ['message', 'Message', 5000]]); const channels = ['in_app', 'email', 'sms', 'whatsapp']; if (error || !Number.isInteger(recipientId) || !channels.includes(req.body.channel)) return res.status(400).json({ error: error || 'Recipient, channel, title and message are required.' }); const [result] = await pool.query('INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, ?, ?, ?, NOW())', [recipientId, req.body.channel, req.body.title.trim(), req.body.message.trim()]); res.status(201).json({ id: result.insertId, message: 'Notification queued.' }); });
+app.post('/api/notifications', requireAuth, authorize('admin', 'dos'), async (req, res) => { const recipientId = Number(req.body?.recipientId); const error = bodyErrors(req.body, [['title', 'Title', 180], ['message', 'Message', 5000]]); const channels = ['in_app', 'email', 'sms', 'whatsapp']; if (error || !Number.isInteger(recipientId) || !channels.includes(req.body.channel)) return res.status(400).json({ error: error || 'Recipient, channel, title and message are required.' }); const [result] = await pool.query('INSERT INTO notifications (recipient_id, channel, title, message, sent_at) VALUES (?, ?, ?, ?, NOW())', [recipientId, req.body.channel, req.body.title.trim(), req.body.message.trim()]); if (req.body.channel === 'whatsapp') { const [userRows] = await pool.query('SELECT full_name AS fullName, phone FROM users WHERE id = ? LIMIT 1', [recipientId]); const user = userRows[0]; if (user?.phone) { await sendWhatsAppNotification({ to: user.phone, name: user.fullName || 'Customer', message: req.body.message.trim() }).catch(() => {}); } } res.status(201).json({ id: result.insertId, message: 'Notification queued.' }); });
 
 require('./test-builder-endpoints')({ app, pool, requireAuth, authorize, bodyErrors, positiveNumber });
 require('./announcements-endpoints')({ app, pool, requireAuth });
@@ -2118,6 +3104,43 @@ app.get('/api/behavior', requireAuth, async (req, res) => { const studentId = Nu
 app.get('/api/students/:id/report', requireAuth, async (req, res) => { const studentId = Number(req.params.id); if (!Number.isInteger(studentId)) return res.status(400).json({ error: 'A valid student id is required.' }); if (req.user.role === 'teacher' && !(await teacherCanAccessStudent(req.user.sub, studentId))) return res.status(403).json({ error: 'This student is outside your assignment.' }); if (req.user.role === 'student' && (await getStudentForUser(req.user)) !== studentId) return res.status(403).json({ error: 'You can only view your own report.' }); if (req.user.role === 'parent') { const [linked] = await pool.query('SELECT 1 FROM parent_students WHERE parent_id = ? AND student_id = ?', [req.user.sub, studentId]); if (!linked.length) return res.status(403).json({ error: 'This student is not linked to your account.' }); } const [[student]] = await pool.query('SELECT id, admission_number AS admissionNumber, full_name AS fullName, class_name AS className, status FROM students WHERE id = ?', [studentId]); if (!student) return res.status(404).json({ error: 'Student not found.' }); const [grades] = await pool.query('SELECT s.name AS subject, SUM(g.score) AS score, SUM(g.max_score) AS maxScore FROM grades g JOIN subjects s ON s.id = g.subject_id WHERE g.student_id = ? GROUP BY g.subject_id, s.name ORDER BY s.name', [studentId]); const [attendance] = await pool.query("SELECT status, COUNT(*) AS total FROM attendance WHERE student_id = ? GROUP BY status", [studentId]); const [behavior] = await pool.query('SELECT category, note, created_at AS createdAt FROM behavior_records WHERE student_id = ? ORDER BY created_at DESC LIMIT 20', [studentId]); res.json({ student, grades, attendance, behavior }); });
 
 app.get('/api/parent/summary', requireAuth, authorize('parent'), async (req, res) => { const [rows] = await pool.query(`SELECT s.id, s.full_name AS fullName, s.admission_number AS admissionNumber, s.class_name AS className, s.conduct_score AS conductScore, COALESCE((SELECT SUM(f.amount) FROM fees f WHERE f.student_id = s.id), 0) AS feesPaid, (SELECT COUNT(*) FROM attendance a WHERE a.student_id = s.id AND a.status = 'absent') AS absences FROM students s JOIN parent_students ps ON ps.student_id = s.id WHERE ps.parent_id = ?`, [req.user.sub]); res.json({ children: rows }); });
+
+app.get('/api/parents', requireAuth, authorize('admin', 'dos', 'accountant'), async (_req, res) => {
+  const [rows] = await pool.query(`SELECT u.id, u.full_name AS fullName, u.email, u.phone, u.username, u.is_active AS isActive,
+    pp.gender, pp.province, pp.district, pp.sector, pp.cell, pp.village,
+    GROUP_CONCAT(DISTINCT CONCAT(s.full_name, ' (', s.admission_number, ')') ORDER BY s.full_name SEPARATOR ', ') AS children,
+    COALESCE(SUM(DISTINCT paid.totalPaid), 0) AS totalPaid,
+    (SELECT COUNT(*) FROM school_message_recipients smr JOIN school_messages sm ON sm.id = smr.message_id WHERE smr.user_id = u.id AND sm.message_type = 'meeting') AS meetingInvites,
+    (SELECT COUNT(*) FROM school_message_recipients smr JOIN school_messages sm ON sm.id = smr.message_id WHERE smr.user_id = u.id AND sm.message_type = 'meeting' AND smr.present_at IS NOT NULL) AS meetingsAttended
+    FROM users u JOIN parent_students ps ON ps.parent_id = u.id JOIN students s ON s.id = ps.student_id
+    LEFT JOIN parent_profiles pp ON pp.user_id = u.id
+    LEFT JOIN (SELECT student_id, SUM(amount) AS totalPaid FROM fees GROUP BY student_id) paid ON paid.student_id = s.id
+    WHERE u.role = 'parent' GROUP BY u.id, pp.user_id ORDER BY u.full_name`);
+  res.json({ parents: rows });
+});
+
+app.patch('/api/parents/:id', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const parentId = Number(req.params.id);
+  if (!Number.isInteger(parentId)) return res.status(400).json({ error: 'A valid parent id is required.' });
+  const updates = []; const values = [];
+  if (req.body.fullName !== undefined) { updates.push('full_name = ?'); values.push(String(req.body.fullName).trim()); }
+  if (req.body.email !== undefined) { updates.push('email = ?'); values.push(String(req.body.email).trim().toLowerCase()); }
+  if (req.body.phone !== undefined) { updates.push('phone = ?'); values.push(String(req.body.phone).trim()); }
+  if (req.body.password) { updates.push('password_hash = ?'); values.push(await bcrypt.hash(String(req.body.password), 12)); }
+  if (!updates.length) return res.status(400).json({ error: 'At least one parent field is required.' });
+  values.push(parentId);
+  const [result] = await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ? AND role = 'parent'`, values);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Parent not found.' });
+  res.json({ message: 'Parent updated.' });
+});
+
+app.delete('/api/parents/:id', requireAuth, authorize('admin', 'dos'), async (req, res) => {
+  const parentId = Number(req.params.id);
+  if (!Number.isInteger(parentId)) return res.status(400).json({ error: 'A valid parent id is required.' });
+  const [result] = await pool.query("DELETE FROM users WHERE id = ? AND role = 'parent'", [parentId]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'Parent not found.' });
+  res.json({ message: 'Parent deleted.' });
+});
 
 app.get('/api/parent/learning-summary', requireAuth, authorize('parent'), async (req, res) => {
   const [children] = await pool.query(`SELECT s.id, s.full_name AS fullName, s.admission_number AS admissionNumber, s.class_name AS className

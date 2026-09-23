@@ -29,6 +29,25 @@ mysql -u root -p fkams < migrations/009_complete_test_questions.sql
 
 3. Copy `.env.example` to `.env` and set a long random `JWT_SECRET` plus the MySQL credentials.
 
+For public applications, configure Gmail SMTP in `backend/.env`. Use a Google App Password, not the normal Gmail password:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then edit these values in `.env`:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-gmail-address@gmail.com
+SMTP_PASSWORD=your-16-character-google-app-password
+SMTP_FROM=your-gmail-address@gmail.com
+```
+
+The Gmail account must have two-step verification enabled before an App Password can be created. Restart `npm start` after changing `.env`. If SMTP is missing or Gmail rejects the login, the application is deliberately not saved because the parent confirmation email cannot be delivered.
+
 4. Create the default administrator account:
 
 ```powershell

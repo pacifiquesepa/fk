@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS parent_profiles (
+  user_id INT UNSIGNED PRIMARY KEY,
+  gender ENUM('male','female','other') NOT NULL DEFAULT 'other',
+  province VARCHAR(80) NULL,
+  district VARCHAR(80) NULL,
+  sector VARCHAR(80) NULL,
+  cell VARCHAR(80) NULL,
+  village VARCHAR(80) NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

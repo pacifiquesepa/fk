@@ -9,9 +9,45 @@ CREATE TABLE users (
   phone VARCHAR(30) NULL,
   photo_key VARCHAR(255) NULL,
   password_hash VARCHAR(255) NOT NULL,
-  role ENUM('admin','dos','teacher','student','parent','accountant','librarian') NOT NULL,
+  role ENUM('admin','dos','teacher','student','parent','accountant','librarian','security_guard') NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE security_guard_permissions (
+  id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(180) NOT NULL,
+  description TEXT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  granted_by INT UNSIGNED NOT NULL,
+  granted_to INT UNSIGNED NULL,
+  permission_start DATETIME NULL,
+  permission_end DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (granted_to) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE security_visit_requests (
+  id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  visitor_type ENUM('guest','parent') NOT NULL,
+  full_name VARCHAR(120) NOT NULL,
+  email VARCHAR(190) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  purpose VARCHAR(60) NOT NULL DEFAULT 'visit',
+  arrival_time DATETIME NOT NULL,
+  description TEXT NULL,
+  student_name VARCHAR(120) NULL,
+  photo_data MEDIUMTEXT NULL,
+  status ENUM('pending','approved','rejected','out') NOT NULL DEFAULT 'pending',
+  review_comment TEXT NULL,
+  reviewed_by INT UNSIGNED NULL,
+  reviewed_at DATETIME NULL,
+  created_by INT UNSIGNED NULL,
+  language ENUM('en','fr','rw') NOT NULL DEFAULT 'en',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE otp_challenges (

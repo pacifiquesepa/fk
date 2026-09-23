@@ -3,7 +3,7 @@ import { CheckCircle2, Eye, Pencil, Printer, Search, ShieldCheck, Trash2, UserPl
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../lib/api';
 
-const roles = ['admin', 'dos', 'teacher', 'parent', 'student', 'accountant', 'librarian'];
+const roles = ['admin', 'dos', 'teacher', 'parent', 'student', 'accountant', 'librarian', 'security_guard'];
 const viewRoles = roles;
 const roleMeta = {
     admin: { label: 'View administrators', tone: 'bg-slate-100 text-slate-700' },
@@ -13,6 +13,7 @@ const roleMeta = {
     student: { label: 'View students on school', tone: 'bg-cyan-50 text-cyan-700' },
     accountant: { label: 'View accountant staff', tone: 'bg-orange-50 text-orange-700' },
     librarian: { label: 'View librarian staff', tone: 'bg-blue-50 text-blue-700' },
+    security_guard: { label: 'View security guard staff', tone: 'bg-teal-50 text-teal-700' },
 };
 const emptyForm = { role: 'dos', fullName: '', username: '', email: '', phone: '', password: '', repassword: '', admissionNumber: '', className: '', parentPhone: '', gender: 'other', birthday: '', dateOfBirth: '', academicYear: '', classOptions: [], photoKey: '', employeeNumber: '', subjectOrModule: '', diplomaKey: '' };
 

@@ -72,6 +72,31 @@ input {
     font: inherit;
 }
 
+.security-input {
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid #dfe7ea;
+    border-radius: 1rem;
+    background: #f8fafc;
+    color: #0f172a;
+    padding: 0.8rem 0.95rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.security-input:focus {
+    border-color: #22c5d4;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(34, 197, 212, 0.12);
+}
+
+.security-textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
 #department-directory section.grid>button {
     min-height: 12rem;
     padding: 1.75rem;

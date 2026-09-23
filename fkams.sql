@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 14, 2026 at 07:57 PM
+-- Generation Time: Sep 19, 2026 at 07:58 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -78,7 +78,7 @@ INSERT INTO `academic_year_terms` (`id`, `academic_year_id`, `term_number`, `nam
 (7, 10, 1, 'Term 1', '2028-09-01', '2028-12-15', 'ended'),
 (8, 10, 2, 'Term 2', '2029-01-10', '2029-03-30', 'ended'),
 (9, 10, 3, 'Term 3', '2029-04-15', '2029-07-15', 'ended'),
-(10, 11, 1, 'Term 1', '2029-09-01', '2029-12-15', 'upcoming'),
+(10, 11, 1, 'Term 1', '2029-09-01', '2029-12-15', 'ended'),
 (11, 11, 2, 'Term 2', '2030-01-10', '2030-03-30', 'upcoming'),
 (12, 11, 3, 'Term 3', '2030-04-15', '2030-07-15', 'upcoming');
 
@@ -156,6 +156,8 @@ CREATE TABLE `applications` (
   `father_phone` varchar(30) DEFAULT NULL,
   `parent_phone` varchar(190) NOT NULL,
   `parent_email` varchar(190) DEFAULT NULL,
+  `review_code_hash` varchar(255) DEFAULT NULL,
+  `temporary_password` varchar(255) DEFAULT NULL,
   `province` varchar(80) DEFAULT NULL,
   `district` varchar(80) DEFAULT NULL,
   `sector` varchar(80) DEFAULT NULL,
@@ -179,21 +181,25 @@ CREATE TABLE `applications` (
 -- Dumping data for table `applications`
 --
 
-INSERT INTO `applications` (`id`, `applicant_name`, `applicant_photo_key`, `mother_name`, `mother_phone`, `father_name`, `father_phone`, `parent_phone`, `parent_email`, `province`, `district`, `sector`, `cell`, `village`, `desired_class`, `gender`, `birthday`, `previous_school`, `result_slip_key`, `report_key`, `academic_year`, `status`, `approved_at`, `reviewer_comment`, `approved_student_id`, `created_at`) VALUES
-(1, 'nshizirungiusepa', NULL, 'sepa', '0793360920', 'nshizirungu', '0793360920', '0793360920', NULL, 'east', 'nyagatare', 'rukomo', 'nyakagarama', NULL, 'p4', 'female', '2026-08-26', 'g.s rurenge', NULL, NULL, '2028', 'approved', NULL, 'iam still  jujement', 6, '2026-08-26 16:45:10'),
-(2, 'iturihafi', NULL, 'iturihafi', 'pacifiquesepa@gmail.com', 'turikumwe', 'pacifiquesepa@gmail.com', '', 'pacifiquesepa@gmail.com', 'east', 'nyagatare', 'rukomo', 'nyakagarama', NULL, 'p5', 'male', '2026-08-26', 'gs rurenge', NULL, NULL, '2029-2030', 'approved', NULL, 'yes you allowed to do', 7, '2026-08-26 21:48:34'),
-(3, 'akingeneye', NULL, 'nyirabagenzi', '0793360920', 'gadi', '079336092', '', 'pacifiquesepa@gmail.com', 'kigari', 'kicukiro', 'remera', 'remera', NULL, 'p5', 'female', '2026-08-27', 'gs remera', NULL, NULL, '2029-2030', 'approved', NULL, NULL, 8, '2026-08-26 23:31:56'),
-(4, 'iradukunda', NULL, 'well', '0793360920', 'well2', '0793360920', '', 'pacifiquesepa@gmail.com', 'eastern', 'nyagatare', 'rukomo', 'rekomo', NULL, 'p5', 'female', '2026-07-29', 'rukomo', NULL, NULL, '2029-2030', 'approved', NULL, NULL, 9, '2026-08-26 23:46:11'),
-(5, 'iyakaremye', NULL, 'sjdhjshj ciskdo', '07934343434', 'jfdhwsdjwkol', '079434334222', '', 'pacifiquesepa@gmail.com', 'ksndjs', 'sdjshd', 'sdhd', 'njsdjiw', NULL, 'p5', 'female', '2026-08-05', 'skdhsijd', NULL, NULL, '2029-2030', 'approved', NULL, NULL, 10, '2026-08-26 23:59:23'),
-(6, 'eizeye', NULL, 'shdhcjiskdw', 'pacifiquesepa@gmail.com', 'shxusjhxjsijijsi', 'pacifiquesepa@gmail.com', '', 'pacifiquesepa@gmail.com', 'chbhsjkudueiuddjuuji', 'efrg', 'defeg', 'r4ty45', NULL, 'p5', 'female', '2026-08-27', 'fegef', NULL, NULL, '2029-2030', 'approved', NULL, 'dgth', 11, '2026-08-27 00:12:01'),
-(7, 'iturihafi rene', NULL, 'nyirabagenzi dota', '0793360920', 'manishimwe gadi', '0793360920', '', 'pacifiquesepa@gmail.com', 'kigari', 'kicukiro', 'remera', 'remera', NULL, 'p5', 'female', '2026-08-27', 'gs remera', NULL, NULL, '2029-2030', 'approved', NULL, NULL, 12, '2026-08-27 00:31:32'),
-(8, 'nshizirungu pacifique', NULL, 'xjnsjdjdiksjdisidwsd', 'sjnxjaxkckmsk', 'cksdjjcskjskx', 'jsdhusjjixs', '', 'pacifiquesepa@gmail.com', 'snbsjssik', 'sjxxnsjkkd', 'sjdjsjik', 'sjnxsj', NULL, 'p5', 'female', '2026-07-28', 'jshhsj', NULL, NULL, '2029-2030', 'rejected', NULL, NULL, NULL, '2026-08-27 00:39:11'),
-(9, 'uwineza keza', NULL, 'sbhdhusjsksokso', 'sjdjsiskx', 'sjcisdjio', 'sdhwsijidwj', '', 'pacifiquesepa@gmail.com', 'hxsxhxusjijcisjx', 'jxjcdk', 'jdhucjsijcij', 'jsjjsikjc', NULL, 'p5', 'male', '2026-08-13', 'jshjsij', NULL, NULL, '2029-2030', 'rejected', NULL, NULL, NULL, '2026-08-27 00:40:32'),
-(10, 'iyakaremwe app', 'http://localhost:4000/uploads/6dbbb1a6c4d89ee6d51ce6ccf5cef5e5', 'nyirabagenzi', 'keza pacy', 'hhdujdiwdijdiw', NULL, '', 'pacifiquesepa3@gmail.com', 'Kigali', 'Kicukiro', 'Niboye', 'Kagarama', 'dcdkcdkd', 'p5', 'female', '2026-08-05', 'jsdcdjsdks', NULL, 'http://localhost:4000/uploads/4b81fa2286aaa49d120200cc5f4fd876', '2029-2030', 'approved', NULL, 'caming my deal', 13, '2026-08-27 01:31:54'),
-(11, 'abayisenga', NULL, 'smnjsnkslcdx', '0793360920', 'skxjsok', '0793360920', '', 'pacifiquesepa3@gmail.com', '5', '502', '050211', '5021103', '502110311', 'p5', 'female', '2026-08-19', NULL, NULL, NULL, '2029-2030', 'approved', '2026-09-14 10:57:08', NULL, NULL, '2026-08-27 02:23:34'),
-(12, 'akingeneye', NULL, 'nyirabagenze', '0793360920', 'manishimwe', '0793360920', '', 'pacifiquesepa@gmail.com', '3', '302', '030210', '3021002', '302100204', 'p5', 'female', '2026-08-12', NULL, NULL, NULL, '2029-2030', 'approved', '2026-08-27 04:50:37', NULL, 14, '2026-08-27 02:37:44'),
-(13, 'pacifiqueann', NULL, 'ddhdjhdkdjsid', '0793360902', 'heheuje', '0793360910', '', 'pacifiquesepa25@gmail.com', '1', '102', '010211', '1021103', '102110310', 'p3a', 'male', '2026-08-11', 'g.s rurenge', NULL, NULL, '2029-2030', 'approved', '2026-08-31 11:29:48', 'it good things', 16, '2026-08-31 09:28:27'),
-(14, 'ilphotex', 'http://localhost:4000/uploads/5f4ca1309677b3aaca1ecdc67c5cf2b3', 'keza anee', 'pacifiquesepa3@gmail.com', 'welll', 'pacifiquesepa3@gmail.com', '', 'pacifiquesepa3@gmail.com', '1', '101', '010104', '1010401', '101040110', 'p3a', 'male', '2026-09-01', 'gs kagitumba', NULL, 'http://localhost:4000/uploads/a9849efe498e8edbdd6faca5ded2ec4a', '2029-2030', 'approved', '2026-09-14 11:40:35', 'mwemerewe kwiga muri eav', NULL, '2026-09-14 09:34:09');
+INSERT INTO `applications` (`id`, `applicant_name`, `applicant_photo_key`, `mother_name`, `mother_phone`, `father_name`, `father_phone`, `parent_phone`, `parent_email`, `review_code_hash`, `temporary_password`, `province`, `district`, `sector`, `cell`, `village`, `desired_class`, `gender`, `birthday`, `previous_school`, `result_slip_key`, `report_key`, `academic_year`, `status`, `approved_at`, `reviewer_comment`, `approved_student_id`, `created_at`) VALUES
+(1, 'nshizirungiusepa', NULL, 'sepa', '0793360920', 'nshizirungu', '0793360920', '0793360920', NULL, NULL, NULL, 'east', 'nyagatare', 'rukomo', 'nyakagarama', NULL, 'p4', 'female', '2026-08-26', 'g.s rurenge', NULL, NULL, '2028', 'approved', NULL, 'iam still  jujement', 6, '2026-08-26 16:45:10'),
+(2, 'iturihafi', NULL, 'iturihafi', 'pacifiquesepa@gmail.com', 'turikumwe', 'pacifiquesepa@gmail.com', '', 'pacifiquesepa@gmail.com', NULL, NULL, 'east', 'nyagatare', 'rukomo', 'nyakagarama', NULL, 'p5', 'male', '2026-08-26', 'gs rurenge', NULL, NULL, '2029-2030', 'approved', NULL, 'yes you allowed to do', 7, '2026-08-26 21:48:34'),
+(3, 'akingeneye', NULL, 'nyirabagenzi', '0793360920', 'gadi', '079336092', '', 'pacifiquesepa@gmail.com', NULL, NULL, 'kigari', 'kicukiro', 'remera', 'remera', NULL, 'p5', 'female', '2026-08-27', 'gs remera', NULL, NULL, '2029-2030', 'approved', NULL, NULL, 8, '2026-08-26 23:31:56'),
+(4, 'iradukunda', NULL, 'well', '0793360920', 'well2', '0793360920', '', 'pacifiquesepa@gmail.com', NULL, NULL, 'eastern', 'nyagatare', 'rukomo', 'rekomo', NULL, 'p5', 'female', '2026-07-29', 'rukomo', NULL, NULL, '2029-2030', 'approved', NULL, NULL, 9, '2026-08-26 23:46:11'),
+(5, 'iyakaremye', NULL, 'sjdhjshj ciskdo', '07934343434', 'jfdhwsdjwkol', '079434334222', '', 'pacifiquesepa@gmail.com', NULL, NULL, 'ksndjs', 'sdjshd', 'sdhd', 'njsdjiw', NULL, 'p5', 'female', '2026-08-05', 'skdhsijd', NULL, NULL, '2029-2030', 'approved', NULL, NULL, 10, '2026-08-26 23:59:23'),
+(6, 'eizeye', NULL, 'shdhcjiskdw', 'pacifiquesepa@gmail.com', 'shxusjhxjsijijsi', 'pacifiquesepa@gmail.com', '', 'pacifiquesepa@gmail.com', NULL, NULL, 'chbhsjkudueiuddjuuji', 'efrg', 'defeg', 'r4ty45', NULL, 'p5', 'female', '2026-08-27', 'fegef', NULL, NULL, '2029-2030', 'approved', NULL, 'dgth', 11, '2026-08-27 00:12:01'),
+(7, 'iturihafi rene', NULL, 'nyirabagenzi dota', '0793360920', 'manishimwe gadi', '0793360920', '', 'pacifiquesepa@gmail.com', NULL, NULL, 'kigari', 'kicukiro', 'remera', 'remera', NULL, 'p5', 'female', '2026-08-27', 'gs remera', NULL, NULL, '2029-2030', 'approved', NULL, NULL, 12, '2026-08-27 00:31:32'),
+(8, 'nshizirungu pacifique', NULL, 'xjnsjdjdiksjdisidwsd', 'sjnxjaxkckmsk', 'cksdjjcskjskx', 'jsdhusjjixs', '', 'pacifiquesepa@gmail.com', NULL, NULL, 'snbsjssik', 'sjxxnsjkkd', 'sjdjsjik', 'sjnxsj', NULL, 'p5', 'female', '2026-07-28', 'jshhsj', NULL, NULL, '2029-2030', 'rejected', NULL, NULL, NULL, '2026-08-27 00:39:11'),
+(9, 'uwineza keza', NULL, 'sbhdhusjsksokso', 'sjdjsiskx', 'sjcisdjio', 'sdhwsijidwj', '', 'pacifiquesepa@gmail.com', NULL, NULL, 'hxsxhxusjijcisjx', 'jxjcdk', 'jdhucjsijcij', 'jsjjsikjc', NULL, 'p5', 'male', '2026-08-13', 'jshjsij', NULL, NULL, '2029-2030', 'rejected', NULL, NULL, NULL, '2026-08-27 00:40:32'),
+(10, 'iyakaremwe app', 'http://localhost:4000/uploads/6dbbb1a6c4d89ee6d51ce6ccf5cef5e5', 'nyirabagenzi', 'keza pacy', 'hhdujdiwdijdiw', NULL, '', 'pacifiquesepa3@gmail.com', NULL, NULL, 'Kigali', 'Kicukiro', 'Niboye', 'Kagarama', 'dcdkcdkd', 'p5', 'female', '2026-08-05', 'jsdcdjsdks', NULL, 'http://localhost:4000/uploads/4b81fa2286aaa49d120200cc5f4fd876', '2029-2030', 'approved', NULL, 'caming my deal', 13, '2026-08-27 01:31:54'),
+(11, 'abayisenga', NULL, 'smnjsnkslcdx', '0793360920', 'skxjsok', '0793360920', '', 'pacifiquesepa3@gmail.com', NULL, NULL, '5', '502', '050211', '5021103', '502110311', 'p5', 'female', '2026-08-19', NULL, NULL, NULL, '2029-2030', 'approved', '2026-09-14 10:57:08', NULL, 94, '2026-08-27 02:23:34'),
+(12, 'akingeneye', NULL, 'nyirabagenze', '0793360920', 'manishimwe', '0793360920', '', 'pacifiquesepa@gmail.com', NULL, NULL, '3', '302', '030210', '3021002', '302100204', 'p5', 'female', '2026-08-12', NULL, NULL, NULL, '2029-2030', 'approved', '2026-08-27 04:50:37', NULL, 14, '2026-08-27 02:37:44'),
+(13, 'pacifiqueann', NULL, 'ddhdjhdkdjsid', '0793360902', 'heheuje', '0793360910', '', 'pacifiquesepa25@gmail.com', NULL, NULL, '1', '102', '010211', '1021103', '102110310', 'p3a', 'male', '2026-08-11', 'g.s rurenge', NULL, NULL, '2029-2030', 'approved', '2026-08-31 11:29:48', 'it good things', 16, '2026-08-31 09:28:27'),
+(14, 'ilphotex', 'http://localhost:4000/uploads/5f4ca1309677b3aaca1ecdc67c5cf2b3', 'keza anee', 'pacifiquesepa3@gmail.com', 'welll', 'pacifiquesepa3@gmail.com', '', 'pacifiquesepa3@gmail.com', NULL, NULL, '1', '101', '010104', '1010401', '101040110', 'p3a', 'male', '2026-09-01', 'gs kagitumba', NULL, 'http://localhost:4000/uploads/a9849efe498e8edbdd6faca5ded2ec4a', '2029-2030', 'approved', '2026-09-14 11:40:35', 'mwemerewe kwiga muri eav', 95, '2026-09-14 09:34:09'),
+(16, 'nshizirungu pacifique', NULL, 'webhhb', 'aminadabstudent@gmail.com', 'wekkkk', 'aminadabstudent@gmail.com', '', 'pacifiquesepa@gmail.com', NULL, NULL, 'Kigali', 'Kigali-1', 'Kigali-1-S1', 'Kigali-1-S1-C2', 'Kigali-1-S1-C2-V2', 'p3a', 'female', '2026-09-10', 'gs kimisagara', NULL, NULL, '2029-2030', 'approved', '2026-09-15 18:06:45', 'rttyuiop', 309, '2026-09-16 00:31:42'),
+(17, 'keza', NULL, 'parrent', 'aminadabstudent@gmail.com', 'ajaja', 'aminadabstudent@gmail.com', '', 'aminadabstudent@gmail.com', '$2b$10$qcFOxuJyOzfcVtfGcexojuFo8tefu6A/IuTh7I74kq0aQAm8UgwlO', NULL, 'Northern Province', 'Musanze', 'Musanze Sector 2', 'Musanze Sector 2 Cell 2', 'Musanze Sector 2 Cell 2 Village 2', 'primary1', 'female', '2026-09-15', NULL, NULL, NULL, '2029-2030', 'approved', '2026-09-18 07:30:48', NULL, NULL, '2026-09-18 14:22:29'),
+(18, 'akingeneye', NULL, 'akingeneye', 'masezerano904@gmail.com', 'akaremye', 'masezerano904@gmail.com', '', 'masezerano904@gmail.com', '$2b$10$ykuEaFRdbC2u956HtpjtG.FhAh/zOcqmtSEsGYWItgRyPRvBnkFsq', NULL, 'Southern Province', 'Nyaruguru', 'Nyaruguru Sector 2', 'Nyaruguru Sector 2 Cell 2', 'Nyaruguru Sector 2 Cell 2 Village 2', 'primary1', 'female', '2026-09-23', NULL, NULL, NULL, '2029-2030', 'approved', '2026-09-18 07:58:15', NULL, NULL, '2026-09-18 14:49:29'),
+(19, 'akeza anne', NULL, 'whdwhduj', 'masezerano904@gmail.com', 'jhdj', 'masezerano904@gmail.com', '', 'masezerano904@gmail.com', '$2b$10$RN2ZMs5EI3o6v/FP6NzEiePkYcUTFRQ3f6HmO4Y54shL0Uu02sQuG', 'FK470259!', 'Southern Province', 'Huye', 'Huye Sector 1', 'Huye Sector 1 Cell 2', 'Huye Sector 1 Cell 2 Village 2', 'p6a', 'female', '2026-09-10', 'gs gaseke', NULL, NULL, '2029-2030', 'approved', '2026-09-18 08:20:41', NULL, 311, '2026-09-18 15:09:42');
 
 -- --------------------------------------------------------
 
@@ -247,7 +253,9 @@ INSERT INTO `attendance` (`id`, `student_id`, `attendance_date`, `status`, `mark
 (29, 7, '2026-09-01', 'present', 1, NULL, 0),
 (30, 9, '2026-09-01', 'present', 1, NULL, 0),
 (31, 13, '2026-09-01', 'present', 1, NULL, 0),
-(32, 10, '2026-09-01', 'present', 1, NULL, 0);
+(32, 10, '2026-09-01', 'present', 1, NULL, 0),
+(33, 95, '2026-09-16', 'excused', 1, 'sdfg', 0),
+(34, 17, '2026-09-18', 'absent', 42, NULL, 2);
 
 -- --------------------------------------------------------
 
@@ -268,7 +276,28 @@ CREATE TABLE `audit_sessions` (
 --
 
 INSERT INTO `audit_sessions` (`id`, `user_id`, `login_at`, `last_seen_at`, `logout_at`) VALUES
-('7ee17594-88bf-4b33-a574-cdfcd3bb7a52', 1, '2026-09-14 19:50:13', '2026-09-14 19:56:45', NULL);
+('02b76259-92b9-45f2-9dcb-1cf150714830', 1, '2026-09-16 09:09:29', '2026-09-16 11:44:34', NULL),
+('04288a59-a3de-4d5f-a24b-a7ef3e6925da', 49, '2026-09-15 19:45:37', '2026-09-15 19:59:37', NULL),
+('07ed69fe-2f3c-46f6-b4f4-87498e0fee74', 12, '2026-09-15 20:08:32', '2026-09-15 20:12:32', NULL),
+('0a38d85d-72a0-410b-940a-e1221221988d', 1, '2026-09-17 22:54:34', '2026-09-18 06:53:35', NULL),
+('51ed9aac-b20c-4b3a-bf80-cf8703d6d4cd', 42, '2026-09-17 22:58:44', '2026-09-18 06:57:43', NULL),
+('5a303a8b-b1b7-4bd3-96e0-d6651953ad06', 1, '2026-09-15 20:23:56', '2026-09-15 20:35:02', NULL),
+('5bf160dc-5050-49fb-8881-3bb86c607ea0', 344, '2026-09-18 10:59:00', '2026-09-18 13:14:28', NULL),
+('5f489fd9-9c63-4d19-a150-02b50e1e2b3f', 42, '2026-09-17 08:19:23', '2026-09-17 08:53:37', NULL),
+('67d6a5d1-eef5-4cb1-8695-c6c293cdabd9', 1, '2026-09-15 20:01:03', '2026-09-15 20:05:04', NULL),
+('68db0ba3-4fde-4e14-95f5-b6ed079468f8', 1, '2026-09-17 08:15:51', '2026-09-17 10:57:51', NULL),
+('6ae60ff1-8317-4ed7-83f8-f7a1507bfbf8', 42, '2026-09-16 09:12:27', '2026-09-16 09:54:31', NULL),
+('7ee17594-88bf-4b33-a574-cdfcd3bb7a52', 1, '2026-09-14 19:50:13', '2026-09-14 19:56:45', NULL),
+('7fb014c7-7f72-4265-80a6-773c05e13b0e', 1, '2026-09-15 18:55:54', '2026-09-15 19:45:04', NULL),
+('85ac4fb5-8999-478f-a213-0ada015d658e', 39, '2026-09-17 08:59:46', '2026-09-17 10:57:22', NULL),
+('87ea4dea-488b-4fde-8c11-dcd8e86e56a6', 1, '2026-09-18 07:30:13', '2026-09-18 12:30:20', NULL),
+('88588f72-7b59-48ba-94e0-d6261552102d', 1, '2026-09-15 17:20:56', '2026-09-15 18:37:21', NULL),
+('974a6f87-da11-46ea-a330-d3c887066085', 39, '2026-09-16 09:59:15', '2026-09-16 13:43:59', NULL),
+('9b0b1865-2310-4609-9991-0404a5dc5c3b', 16, '2026-09-17 23:36:06', '2026-09-18 07:35:35', NULL),
+('a067e7ce-0db2-4fae-9d59-1f37b7c4378d', 39, '2026-09-15 19:06:57', '2026-09-15 19:21:46', NULL),
+('bbb4bdef-0007-4c3f-b249-a0406f172662', 12, '2026-09-15 20:28:13', '2026-09-15 20:30:13', NULL),
+('e65ac069-7828-480c-a3e9-dd3b73225cfe', 39, '2026-09-18 10:57:08', '2026-09-18 13:14:28', NULL),
+('ed419ef3-39d4-44a2-ae42-59bbcd0de6fc', 42, '2026-09-15 19:25:28', '2026-09-15 19:59:21', NULL);
 
 -- --------------------------------------------------------
 
@@ -300,7 +329,9 @@ INSERT INTO `behavior_records` (`id`, `student_id`, `category`, `note`, `recorde
 (12, 10, 'needs_improvement', 'hsxushidjic oskoqk', 1, '2026-08-28 11:03:52', 2, 94, NULL),
 (13, 10, 'discipline', 'Absent on 2026-08-28. 2 marks deducted.', 1, '2026-08-28 11:04:53', 2, 94, 12),
 (14, 15, 'discipline', 'kdjckdjdksodlspd', 42, '2026-08-31 20:31:48', 2, 96, NULL),
-(15, 15, 'discipline', 'Absent on 2026-08-31. 2 marks deducted.', 42, '2026-08-31 20:34:49', 2, 96, 24);
+(15, 15, 'discipline', 'Absent on 2026-08-31. 2 marks deducted.', 42, '2026-08-31 20:34:49', 2, 96, 24),
+(16, 8, 'discipline', 'zsdfghjik', 1, '2026-09-16 01:09:15', 2, 98, NULL),
+(17, 17, 'discipline', 'Absent on 2026-09-18. 2 marks deducted.', 42, '2026-09-18 13:22:18', 2, 98, 34);
 
 -- --------------------------------------------------------
 
@@ -359,7 +390,8 @@ INSERT INTO `classes` (`id`, `name`, `academic_year`, `is_active`) VALUES
 (21, 'p6a', '2029-2030', 1),
 (23, 's2b', '2029-2030', 1),
 (25, 's3c', '2029-2030', 1),
-(26, 'primary1', '2029-2030', 1);
+(26, 'primary1', '2029-2030', 1),
+(30, 'top', '2029-2030', 1);
 
 -- --------------------------------------------------------
 
@@ -393,7 +425,58 @@ INSERT INTO `class_subjects` (`class_id`, `subject_id`) VALUES
 (25, 21),
 (25, 22),
 (26, 23),
-(26, 24);
+(26, 24),
+(30, 25);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `communication_items`
+--
+
+CREATE TABLE `communication_items` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `kind` enum('announcement','meeting') NOT NULL,
+  `title` varchar(180) NOT NULL,
+  `body` text NOT NULL,
+  `audience_role` enum('parent','teacher','doc','librarian','accountant','student','all') NOT NULL,
+  `scope_type` enum('all','class') NOT NULL DEFAULT 'all',
+  `class_id` int(10) UNSIGNED DEFAULT NULL,
+  `starts_at` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `attachment_path` varchar(255) DEFAULT NULL,
+  `created_by` int(10) UNSIGNED NOT NULL,
+  `closed_at` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `communication_items`
+--
+
+INSERT INTO `communication_items` (`id`, `kind`, `title`, `body`, `audience_role`, `scope_type`, `class_id`, `starts_at`, `ends_at`, `attachment_path`, `created_by`, `closed_at`, `created_at`) VALUES
+(1, 'meeting', 'kwiga kumutsindire yabana', 'muramenyeshwa kuza icyogihe', 'parent', 'all', NULL, '2026-09-19 19:30:00', '2026-09-28 19:30:00', NULL, 1, NULL, '2026-09-18 17:31:24');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `communication_recipients`
+--
+
+CREATE TABLE `communication_recipients` (
+  `communication_id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `delivered_at` datetime DEFAULT NULL,
+  `viewed_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `communication_recipients`
+--
+
+INSERT INTO `communication_recipients` (`communication_id`, `user_id`, `delivered_at`, `viewed_at`) VALUES
+(1, 12, '2026-09-18 10:31:24', NULL),
+(1, 344, '2026-09-18 10:31:24', NULL);
 
 -- --------------------------------------------------------
 
@@ -418,6 +501,103 @@ CREATE TABLE `curriculum_items` (
 
 INSERT INTO `curriculum_items` (`id`, `year_name`, `title`, `description`, `file_url`, `subject_name`, `created_by`, `created_at`) VALUES
 (1, 'year4', 'win are became', 'more you view it  and read more that subject it good thing fot win', NULL, 'math', 1, '2026-08-20 23:01:44');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `department_attendance`
+--
+
+CREATE TABLE `department_attendance` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `attendance_date` date NOT NULL,
+  `morning_status` enum('present','late','inactive','outside_location') DEFAULT NULL,
+  `afternoon_status` enum('on_time','before_time','inactive','outside_location') DEFAULT NULL,
+  `morning_at` datetime DEFAULT NULL,
+  `afternoon_at` datetime DEFAULT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  `distance_meters` decimal(8,2) DEFAULT NULL,
+  `morning_photo_path` varchar(255) DEFAULT NULL,
+  `afternoon_photo_path` varchar(255) DEFAULT NULL,
+  `score_deduction` decimal(5,2) UNSIGNED NOT NULL DEFAULT 0.00,
+  `outside_location_attempts` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `morning_warning_sent_date` date DEFAULT NULL,
+  `afternoon_warning_sent_date` date DEFAULT NULL,
+  `morning_schedule_version` int(10) UNSIGNED DEFAULT NULL,
+  `afternoon_schedule_version` int(10) UNSIGNED DEFAULT NULL,
+  `attendance_settings_updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `department_attendance`
+--
+
+INSERT INTO `department_attendance` (`id`, `user_id`, `attendance_date`, `morning_status`, `afternoon_status`, `morning_at`, `afternoon_at`, `latitude`, `longitude`, `distance_meters`, `morning_photo_path`, `afternoon_photo_path`, `score_deduction`, `outside_location_attempts`, `created_at`, `updated_at`, `morning_warning_sent_date`, `afternoon_warning_sent_date`, `morning_schedule_version`, `afternoon_schedule_version`, `attendance_settings_updated_at`) VALUES
+(1, 42, '2026-09-16', 'late', 'before_time', '2026-09-16 09:51:48', '2026-09-16 09:49:40', -1.9477880, 30.0506330, 0.00, NULL, NULL, 4.00, 0, '2026-09-16 16:46:29', '2026-09-16 16:52:07', NULL, NULL, NULL, NULL, NULL),
+(14, 39, '2026-09-16', 'late', 'before_time', '2026-09-16 09:59:35', '2026-09-16 10:05:37', -1.9477880, 30.0506330, 0.00, NULL, NULL, 4.00, 0, '2026-09-16 16:59:26', '2026-09-16 17:05:43', NULL, NULL, NULL, NULL, NULL),
+(28, 42, '2026-09-17', 'late', 'on_time', '2026-09-17 17:28:24', '2026-09-17 17:53:47', -1.9478201, 30.0506334, 3.57, '/uploads/13bc192af997a44a692ff585e4a24aca', '/uploads/7ff8951ab25cdeb31e08ab3cae76ddac', 4.00, 1, '2026-09-17 15:19:47', '2026-09-17 15:53:57', NULL, NULL, NULL, NULL, NULL),
+(53, 39, '2026-09-17', 'inactive', 'on_time', NULL, '2026-09-17 18:00:30', -1.9477858, 30.0506269, 0.72, NULL, '/uploads/2395298bcfe06c83e19905f90ac60818', 4.00, 0, '2026-09-17 15:59:52', '2026-09-17 16:00:30', NULL, NULL, NULL, NULL, NULL),
+(63, 16, '2026-09-17', 'inactive', 'inactive', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 6.00, 0, '2026-09-17 16:47:30', '2026-09-17 16:47:30', NULL, NULL, NULL, NULL, NULL),
+(79, 9, '2026-09-17', 'inactive', 'inactive', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 6.00, 0, '2026-09-17 17:47:12', '2026-09-17 17:47:12', NULL, NULL, NULL, NULL, NULL),
+(83, 48, '2026-09-17', 'inactive', 'inactive', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3.00, 0, '2026-09-17 17:47:12', '2026-09-18 10:40:25', NULL, NULL, NULL, NULL, NULL),
+(88, 42, '2026-09-18', 'late', 'on_time', '2026-09-18 15:43:09', NULL, -1.9478049, 30.0508178, 31.89, '/uploads/c28c02623688e0f3013e11e683c3aff4.jpg', NULL, 1.50, 10, '2026-09-18 05:58:53', '2026-09-18 13:46:12', '2026-09-18', NULL, NULL, NULL, '2026-09-17 23:42:16'),
+(191, 16, '2026-09-18', 'late', 'inactive', '2026-09-18 15:46:26', NULL, -1.9477876, 30.0508027, 30.02, '/uploads/6a613a4a44c4e023d417d526d37559c0.jpg', NULL, 2.50, 3, '2026-09-18 06:36:51', '2026-09-18 17:40:09', '2026-09-18', NULL, NULL, NULL, '2026-09-17 23:42:16'),
+(278, 9, '2026-09-18', 'inactive', 'inactive', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3.00, 0, '2026-09-18 10:25:12', '2026-09-18 17:40:08', NULL, NULL, NULL, NULL, NULL),
+(280, 39, '2026-09-18', 'inactive', 'inactive', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3.00, 0, '2026-09-18 10:25:12', '2026-09-18 17:40:10', NULL, NULL, NULL, NULL, NULL),
+(282, 48, '2026-09-18', 'inactive', 'inactive', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3.00, 0, '2026-09-18 10:25:12', '2026-09-18 17:40:10', NULL, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `department_attendance_scores`
+--
+
+CREATE TABLE `department_attendance_scores` (
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `score` decimal(6,2) NOT NULL DEFAULT 100.00,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `department_attendance_scores`
+--
+
+INSERT INTO `department_attendance_scores` (`user_id`, `score`, `updated_at`) VALUES
+(9, 91.00, '2026-09-18 17:40:09'),
+(16, 93.50, '2026-09-18 17:40:09'),
+(39, 97.00, '2026-09-18 17:40:10'),
+(42, 100.00, '2026-09-18 13:17:57'),
+(48, 94.00, '2026-09-18 17:40:11');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `department_attendance_settings`
+--
+
+CREATE TABLE `department_attendance_settings` (
+  `id` tinyint(3) UNSIGNED NOT NULL,
+  `location_name` varchar(160) NOT NULL,
+  `latitude` decimal(10,7) NOT NULL,
+  `longitude` decimal(10,7) NOT NULL,
+  `radius_meters` decimal(8,2) NOT NULL DEFAULT 5.00,
+  `morning_cutoff` time NOT NULL DEFAULT '08:00:00',
+  `afternoon_time` time NOT NULL DEFAULT '13:00:00',
+  `updated_by` int(10) UNSIGNED NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `schedule_version` int(10) UNSIGNED NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `department_attendance_settings`
+--
+
+INSERT INTO `department_attendance_settings` (`id`, `location_name`, `latitude`, `longitude`, `radius_meters`, `morning_cutoff`, `afternoon_time`, `updated_by`, `updated_at`, `schedule_version`) VALUES
+(1, 'kimisagara', -1.9475182, 30.0508215, 15.00, '08:45:00', '17:40:00', 1, '2026-09-18 06:42:16', 1);
 
 -- --------------------------------------------------------
 
@@ -556,7 +736,9 @@ CREATE TABLE `grades` (
 
 INSERT INTO `grades` (`id`, `student_id`, `subject_id`, `assessment_name`, `score`, `max_score`, `recorded_by`, `academic_year_id`, `term_id`, `created_at`) VALUES
 (1, 17, 23, 'english Unit 2: Classroom objects Test', 4.00, 18.00, 39, NULL, NULL, '2026-09-14 16:08:31'),
-(5, 15, 4, 'Term 1 report', 60.00, 100.00, 39, NULL, NULL, '2026-09-14 17:12:04');
+(5, 15, 4, 'Term 1 report', 60.00, 100.00, 39, NULL, NULL, '2026-09-14 17:12:04'),
+(6, 17, 23, 'english Unit 5: Likes and dislikes Test', 9.00, 48.00, 42, NULL, NULL, '2026-09-16 02:43:58'),
+(7, 17, 23, 'english Unit 3: People at home Test', 8.00, 19.00, 42, NULL, NULL, '2026-09-18 13:22:44');
 
 -- --------------------------------------------------------
 
@@ -719,6 +901,42 @@ CREATE TABLE `library_loans` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `meeting_attendees`
+--
+
+CREATE TABLE `meeting_attendees` (
+  `meeting_id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `present_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `meeting_notes`
+--
+
+CREATE TABLE `meeting_notes` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `meeting_id` bigint(20) UNSIGNED NOT NULL,
+  `writer_name` varchar(160) NOT NULL,
+  `body` longtext NOT NULL,
+  `starts_at` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `created_by` int(10) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `meeting_notes`
+--
+
+INSERT INTO `meeting_notes` (`id`, `meeting_id`, `writer_name`, `body`, `starts_at`, `ends_at`, `created_by`, `created_at`) VALUES
+(1, 1, 'Pacifique Sepa', 'dxcvhjkhj;lukyuzxiroctvyi;ghjlcxujcuvlibjnkv', NULL, NULL, 1, '2026-09-18 17:31:59');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `news_posts`
 --
 
@@ -790,7 +1008,95 @@ INSERT INTO `notifications` (`id`, `recipient_id`, `channel`, `title`, `message`
 (2, 23, 'in_app', 'Conduct score updated', 'Your conduct score changed by -2. Current score: 98/100.', '2026-08-26 14:54:43', NULL, '2026-08-26 14:54:43'),
 (3, 31, 'in_app', 'Conduct score updated', 'Your conduct score changed by -2. Current score: 98/100.', '2026-08-28 11:02:57', NULL, '2026-08-28 11:02:57'),
 (4, 31, 'in_app', 'Conduct score updated', 'Your conduct score changed by -2. Current score: 96/100.', '2026-08-28 11:03:52', NULL, '2026-08-28 11:03:52'),
-(5, 46, 'in_app', 'Conduct score updated', 'Your conduct score changed by -2. Current score: 98/100.', '2026-08-31 20:31:49', NULL, '2026-08-31 20:31:49');
+(5, 46, 'in_app', 'Conduct score updated', 'Your conduct score changed by -2. Current score: 98/100.', '2026-08-31 20:31:49', NULL, '2026-08-31 20:31:49'),
+(6, 29, 'in_app', 'Conduct score updated', 'Your conduct score changed by - 2. Current score: 98/100.', '2026-09-16 01:09:15', NULL, '2026-09-16 01:09:15'),
+(7, 1, 'in_app', 'Permission request submitted', 'A user requested permission: kwivuza amaso', '2026-09-16 16:13:58', NULL, '2026-09-16 16:13:58'),
+(8, 39, 'in_app', 'Permission request submitted', 'A user requested permission: kwivuza amaso', '2026-09-16 16:13:58', NULL, '2026-09-16 16:13:58'),
+(9, 42, 'in_app', 'Permission request approved', 'kwivuza amaso: your requested permission was approved. welcome', '2026-09-16 16:15:02', NULL, '2026-09-16 16:15:02'),
+(10, 42, 'in_app', 'Permission request denied', 'kwivuza amaso: your requested permission was denied. Please review the decision in the system.', '2026-09-16 16:15:31', NULL, '2026-09-16 16:15:31'),
+(11, 42, 'in_app', 'Permission request approved', 'kwivuza amaso: your requested permission was approved. Please review the decision in the system.', '2026-09-16 16:15:41', NULL, '2026-09-16 16:15:41'),
+(12, 42, 'in_app', 'Department attendance score notice', '1 mark(s) were removed because of late morning attendance.', '2026-09-16 16:47:51', NULL, '2026-09-16 16:47:51'),
+(13, 42, 'in_app', 'Department attendance score notice', '2 mark(s) were removed because of late morning attendance.', '2026-09-16 16:49:45', NULL, '2026-09-16 16:49:45'),
+(14, 42, 'in_app', 'Department attendance score notice', '2 mark(s) were removed because of late morning attendance.', '2026-09-16 16:51:41', NULL, '2026-09-16 16:51:41'),
+(15, 42, 'in_app', 'Department attendance score notice', '2 mark(s) were removed because of late morning attendance.', '2026-09-16 16:52:07', NULL, '2026-09-16 16:52:07'),
+(16, 39, 'in_app', 'Department attendance score notice', '1 mark(s) were removed because of late morning attendance.', '2026-09-16 16:59:40', NULL, '2026-09-16 16:59:40'),
+(17, 39, 'in_app', 'Department attendance score notice', '2 mark(s) were removed because of late morning attendance.', '2026-09-16 17:03:32', NULL, '2026-09-16 17:03:32'),
+(18, 39, 'in_app', 'Department attendance score notice', '2 mark(s) were removed because of late morning attendance.', '2026-09-16 17:05:42', NULL, '2026-09-16 17:05:42'),
+(19, 42, 'in_app', 'Department attendance score notice', '1 mark(s) were removed because of late morning attendance.', '2026-09-17 15:28:28', NULL, '2026-09-17 15:28:28'),
+(20, 42, 'in_app', 'Department attendance score notice', '2 mark(s) were removed because of late morning attendance.', '2026-09-17 15:29:12', NULL, '2026-09-17 15:29:12'),
+(21, 42, 'in_app', 'Department attendance score notice', '1 mark(s) were removed because of late morning attendance.', '2026-09-17 15:53:57', NULL, '2026-09-17 15:53:57'),
+(22, 39, 'in_app', 'Department attendance score notice', '4 mark(s) were removed because of inactive attendance.', '2026-09-17 16:01:05', NULL, '2026-09-17 16:01:05'),
+(23, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 05:58:53', NULL, '2026-09-18 05:58:53'),
+(24, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 05:58:57', NULL, '2026-09-18 05:58:57'),
+(25, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 05:59:23', NULL, '2026-09-18 05:59:23'),
+(26, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 05:59:28', NULL, '2026-09-18 05:59:28'),
+(27, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 05:59:28', NULL, '2026-09-18 05:59:28'),
+(28, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 05:59:53', NULL, '2026-09-18 05:59:53'),
+(29, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 05:59:57', NULL, '2026-09-18 05:59:57'),
+(30, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 05:59:57', NULL, '2026-09-18 05:59:57'),
+(31, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:00:23', NULL, '2026-09-18 06:00:23'),
+(32, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:00:53', NULL, '2026-09-18 06:00:53'),
+(33, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:06:40', NULL, '2026-09-18 06:06:40'),
+(34, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:06:40', NULL, '2026-09-18 06:06:40'),
+(35, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:06:49', NULL, '2026-09-18 06:06:49'),
+(36, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:06:49', NULL, '2026-09-18 06:06:49'),
+(37, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:13:12', NULL, '2026-09-18 06:13:12'),
+(38, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:13:42', NULL, '2026-09-18 06:13:42'),
+(39, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:14:05', NULL, '2026-09-18 06:14:05'),
+(40, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:14:05', NULL, '2026-09-18 06:14:05'),
+(41, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:14:11', NULL, '2026-09-18 06:14:11'),
+(42, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:14:33', NULL, '2026-09-18 06:14:33'),
+(43, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:14:33', NULL, '2026-09-18 06:14:33'),
+(44, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:14:42', NULL, '2026-09-18 06:14:42'),
+(45, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:14:43', NULL, '2026-09-18 06:14:43'),
+(46, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:14:48', NULL, '2026-09-18 06:14:48'),
+(47, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:15:14', NULL, '2026-09-18 06:15:14'),
+(48, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:15:47', NULL, '2026-09-18 06:15:47'),
+(49, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:15:57', NULL, '2026-09-18 06:15:57'),
+(50, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:22:25', NULL, '2026-09-18 06:22:25'),
+(51, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:22:25', NULL, '2026-09-18 06:22:25'),
+(52, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:29:47', NULL, '2026-09-18 06:29:47'),
+(53, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:29:50', NULL, '2026-09-18 06:29:50'),
+(54, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:30:10', NULL, '2026-09-18 06:30:10'),
+(55, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:30:10', NULL, '2026-09-18 06:30:10'),
+(56, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:30:16', NULL, '2026-09-18 06:30:16'),
+(57, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:30:47', NULL, '2026-09-18 06:30:47'),
+(58, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:31:16', NULL, '2026-09-18 06:31:16'),
+(59, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:31:46', NULL, '2026-09-18 06:31:46'),
+(60, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:31:55', NULL, '2026-09-18 06:31:55'),
+(61, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:31:55', NULL, '2026-09-18 06:31:55'),
+(62, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:37:10', NULL, '2026-09-18 06:37:10'),
+(63, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:37:10', NULL, '2026-09-18 06:37:10'),
+(64, 1, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:37:59', NULL, '2026-09-18 06:37:59'),
+(65, 39, 'in_app', 'Outside-location attendance attempt', 'A staff member attempted department attendance outside kimisagara.', '2026-09-18 06:37:59', NULL, '2026-09-18 06:37:59'),
+(66, 16, 'in_app', 'Department attendance score notice', '1 mark(s) were removed because of late morning attendance.', '2026-09-18 06:41:40', NULL, '2026-09-18 06:41:40'),
+(67, 16, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:43:20', NULL, '2026-09-18 06:43:20'),
+(68, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:43:23', NULL, '2026-09-18 06:43:23'),
+(69, 16, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:43:24', NULL, '2026-09-18 06:43:24'),
+(70, 16, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:43:42', NULL, '2026-09-18 06:43:42'),
+(71, 16, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:43:50', NULL, '2026-09-18 06:43:50'),
+(72, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:43:53', NULL, '2026-09-18 06:43:53'),
+(73, 16, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:44:20', NULL, '2026-09-18 06:44:20'),
+(74, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:44:23', NULL, '2026-09-18 06:44:23'),
+(75, 16, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:44:50', NULL, '2026-09-18 06:44:50'),
+(76, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:44:53', NULL, '2026-09-18 06:44:53'),
+(77, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:45:23', NULL, '2026-09-18 06:45:23'),
+(78, 16, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:45:45', NULL, '2026-09-18 06:45:45'),
+(79, 42, 'in_app', 'Morning attendance deadline warning', 'Ihutire gukora attendance kuko igihe cyenda kugera.', '2026-09-18 06:45:56', NULL, '2026-09-18 06:45:56'),
+(80, 42, 'in_app', 'Department attendance score notice', '1 mark(s) were removed because of late morning attendance.', '2026-09-18 06:46:22', NULL, '2026-09-18 06:46:22'),
+(82, 343, 'in_app', 'Admission approved', 'Application approved. Admission number: FK-2026-00019. Login username: fk-2026-00019. Default password: FK470259!. Please change the password after first login.', '2026-09-18 15:20:48', NULL, '2026-09-18 15:20:48'),
+(83, 39, 'in_app', 'Admission approved', 'Application approved. Admission number: FK-2026-00019. Login username: fk-2026-00019. Default password: FK470259!. Please change the password after first login.', '2026-09-18 15:20:48', NULL, '2026-09-18 15:20:48'),
+(84, 344, 'in_app', 'Parent registration complete', 'Dear amina dab, you are now linked to irene. Your username is parent-987373.', '2026-09-18 17:07:42', NULL, '2026-09-18 17:07:42'),
+(85, 12, 'in_app', 'kwiga kumutsindire yabana', 'muramenyeshwa kuza icyogihe', '2026-09-18 17:31:24', NULL, '2026-09-18 17:31:24'),
+(86, 344, 'in_app', 'kwiga kumutsindire yabana', 'muramenyeshwa kuza icyogihe', '2026-09-18 17:31:24', NULL, '2026-09-18 17:31:24'),
+(87, 12, 'in_app', 'kwiga kumutsindire yabana', 'muramenyeshwa kuza icyogihe', '2026-09-18 17:32:09', NULL, '2026-09-18 17:32:09'),
+(88, 344, 'in_app', 'kwiga kumutsindire yabana', 'muramenyeshwa kuza icyogihe', '2026-09-18 17:32:09', NULL, '2026-09-18 17:32:09'),
+(89, 16, 'in_app', 'kwiga kuminsindire', 'bv bnbjhujkikokohugyu', '2026-09-18 17:55:35', NULL, '2026-09-18 17:55:35'),
+(90, 42, 'in_app', 'kwiga kuminsindire', 'bv bnbjhujkikokohugyu', '2026-09-18 17:55:35', NULL, '2026-09-18 17:55:35'),
+(91, 1, 'in_app', 'Permission request submitted', 'A user requested permission: ko arwaye', '2026-09-18 18:02:02', NULL, '2026-09-18 18:02:02'),
+(92, 39, 'in_app', 'Permission request submitted', 'A user requested permission: ko arwaye', '2026-09-18 18:02:02', NULL, '2026-09-18 18:02:02'),
+(93, 16, 'in_app', 'Meeting absence notice', 'You were invited to kwiga kuminsindire but did not attend. Please review the meeting decisions.', '2026-09-18 18:12:15', NULL, '2026-09-18 18:12:15'),
+(94, 42, 'in_app', 'Meeting absence notice', 'You were invited to kwiga kuminsindire but did not attend. Please review the meeting decisions.', '2026-09-18 18:12:15', NULL, '2026-09-18 18:12:15');
 
 -- --------------------------------------------------------
 
@@ -817,22 +1123,32 @@ CREATE TABLE `otp_challenges` (
 --
 
 INSERT INTO `otp_challenges` (`id`, `user_id`, `purpose`, `code_hash`, `channel`, `destination_mask`, `expires_at`, `attempts`, `consumed_at`, `reset_verified_at`, `created_at`) VALUES
+('001d13e5-d3c3-473e-a521-cf486783dba1', 42, 'login', '2850183cb6c5e733549a39bfd56c2bb458d1d0ea6c5a2050dc6801e4c8cd4a96', 'email', 'ns***@gmail.com', '2026-09-15 19:27:21', 0, '2026-09-15 19:23:51', NULL, '2026-09-16 02:22:21'),
 ('04b76e44-6ebb-4475-a895-b6ae400d8382', 1, 'login', 'f8cc0f5cf34279da7c2910bf8c3e22f10d1e8b7b38bd1c08e9611ef03204662b', 'email', 'pa***@gmail.com', '2026-08-31 09:43:28', 0, '2026-08-31 09:39:53', NULL, '2026-08-31 07:38:28'),
 ('05774ed8-8954-4412-9757-45628658a0b1', 48, 'login', '05371f4e3d3b86b3e9bd1fc1918373e5dc9a8dd1e9cfdbdabae40d38fb422656', 'email', 'ns***@gmail.com', '2026-09-14 12:09:50', 0, '2026-09-14 12:06:04', NULL, '2026-09-14 10:04:50'),
 ('074a737d-3c0c-455d-b04b-45fae539e98e', 1, 'login', '406e82c77cdb0becc8f58840ddcc7c8c480be1b0df47b38eb9570e84a72fcfe8', 'email', 'pa***@gmail.com', '2026-09-04 20:59:14', 0, '2026-09-04 20:54:46', NULL, '2026-09-04 18:54:14'),
-('0822219c-71ec-4f8f-a0f0-df0b6684e154', 48, 'login', '77bb80fd23bc69f8902511a6f7f586cb3927509614283d8265732808374ca9f9', 'email', 'ns***@gmail.com', '2026-09-14 12:16:20', 0, NULL, NULL, '2026-09-14 10:11:20'),
+('0822219c-71ec-4f8f-a0f0-df0b6684e154', 48, 'login', '77bb80fd23bc69f8902511a6f7f586cb3927509614283d8265732808374ca9f9', 'email', 'ns***@gmail.com', '2026-09-14 12:16:20', 0, '2026-09-15 20:05:19', NULL, '2026-09-14 10:11:20'),
 ('0830b582-64b2-4ceb-8482-4ec95450225f', 12, 'login', '8191f5f6ec82916af63574adf4c5b4e563265e9f9fbb09c8262bf063f284bf0f', 'email', 'pa***@gmail.com', '2026-09-02 20:19:48', 0, '2026-09-02 20:20:36', NULL, '2026-09-02 18:14:48'),
 ('08c65f51-ab72-4be5-91cb-cefb8f7e55c2', 1, 'login', 'cdd305a5e45ba331daeee170a97cf932d8b621724574ef21070685c97dff7ee7', 'email', 'pa***@gmail.com', '2026-09-09 19:37:57', 0, '2026-09-09 19:34:35', NULL, '2026-09-09 17:32:57'),
+('0b242032-5ff2-47a5-b981-cb04b9cf1fb8', 1, 'login', '83cf7c11c206fcee5ff67f517758d26cdb26ff2966f195efa8ec1d151a3ec919', 'email', 'pa***@gmail.com', '2026-09-15 17:25:20', 0, '2026-09-15 17:20:56', NULL, '2026-09-16 00:20:20'),
 ('0fbc38ed-ae8a-4c81-ae58-7f93cec18498', 1, 'login', '080d2122905260ba34e5c496d9a44d027ea3c98eb48ca4e8e2142f52b50af235', 'email', 'pa***@gmail.com', '2026-09-11 13:56:34', 0, '2026-09-11 14:23:59', NULL, '2026-09-11 11:51:35'),
+('118096ef-6bb4-407c-bd2b-cb31b1678f79', 12, 'login', '61a5d1c21adaa0b6ea7a99af84c48365eae84eba0385078d746a14444ae4db29', 'email', 'pa***@gmail.com', '2026-09-15 20:32:19', 0, '2026-09-15 20:28:13', NULL, '2026-09-16 03:27:19'),
+('13039340-ecd8-453f-9937-7a09daddd141', 48, 'login', 'd44a47d92b8059a5cdd4a0a54a8e832a4b152c8a5043300bae0ee167866ae007', 'email', 'ns***@gmail.com', '2026-09-15 20:10:19', 0, '2026-09-15 20:12:52', NULL, '2026-09-16 03:05:19'),
+('134e90b3-3d30-4f03-8a84-220dc3cfc65d', 39, 'login', 'e7300ec66af245f6aad73ac6f2da3666544ca5996e2f75080678fb7b1ff3cf10', 'email', 'ma***@gmail.com', '2026-09-15 19:11:24', 0, '2026-09-15 19:06:57', NULL, '2026-09-16 02:06:24'),
 ('1381b828-a3d8-4a89-8e93-e765104486a2', 12, 'login', '20432acb1efe4ea171a7343ff42f1ea7a16c73ae5a25fdfdd9437af06b237687', 'email', 'pa***@gmail.com', '2026-09-02 20:25:36', 0, '2026-09-02 20:21:37', NULL, '2026-09-02 18:20:36'),
+('15a3fe9b-3497-42d9-92e8-1e6ab7fe23fe', 48, 'login', 'bde81ea454ab0afdfaa29ea9b571d15fef64525e8ff1fcadcb04523c5e463ebd', 'email', 'ns***@gmail.com', '2026-09-15 20:24:06', 0, '2026-09-15 20:24:24', NULL, '2026-09-16 03:19:06'),
 ('166bba39-c079-477b-8871-648ff55f4426', 42, 'login', '00ce5327eb8f3aa7015efbff5de5aee2bc2ed3bc054c314d08ae852bbe3db5d1', 'email', 'ns***@gmail.com', '2026-08-31 09:48:11', 0, '2026-08-31 09:44:25', NULL, '2026-08-31 07:43:11'),
+('187ab59d-934d-4fb1-82b7-7312d635eb00', 42, 'login', 'b0fdc155a3a4f1c3e1c1b12e1429a33391fe6507132c2fb8c85b82f64d179dd6', 'email', 'ns***@gmail.com', '2026-09-17 17:22:43', 0, '2026-09-17 08:19:23', NULL, '2026-09-17 15:17:43'),
+('1a32151f-3288-435e-822d-a523c2397abd', 12, 'login', '5bfa6175be92712ad3aaf31a4b08527319321b8a72e6f03a6d0d070378438672', 'email', 'pa***@gmail.com', '2026-09-15 20:12:06', 0, '2026-09-15 20:08:06', NULL, '2026-09-16 03:07:06'),
 ('1b633218-a278-42ad-ba9b-cce2c5fe22cb', 9, 'login', '8ef35f8d8c33c36cdd944293b14e61b9c8253c6186a1893fff4eb96c9a762e90', 'email', 'se***@gmail.com', '2026-08-24 13:35:09', 0, '2026-08-24 13:30:28', NULL, '2026-08-24 11:30:09'),
+('1f40386c-147c-441f-b5f7-c7cbd2fbbbee', 1, 'login', '5481e9518ee8d4b1d125cb72ea687ecd9cd54914b5743b15e1344b34366b6908', 'email', 'pa***@gmail.com', '2026-09-15 18:55:09', 0, '2026-09-15 18:55:21', NULL, '2026-09-16 01:50:09'),
 ('212984b2-42d2-4da2-90dc-cf92abc18951', 42, 'login', '0d12a3ff1097fa447b147f1b952b850761ef18faa8e2ea3c3b96b8a737bc0e0b', 'email', 'ns***@gmail.com', '2026-09-11 14:39:25', 0, '2026-09-11 14:36:38', NULL, '2026-09-11 12:34:25'),
 ('2607aa44-8d6f-40fc-96b2-3689992ecfb4', 16, 'login', 'afc1beed480773337096ca608d443ca4f1c9776a1bf61254cbbac1ae834ff72a', 'email', 'ka***@gmail.com', '2026-08-24 15:31:21', 0, '2026-08-24 15:26:51', NULL, '2026-08-24 13:26:21'),
 ('2608538e-9b00-4654-bc18-5126bdfc9880', 12, 'login', '552334fe65ad50640ac25db07f75718d96dcf9c868b7c6acae6eeceb32d5932b', 'email', 'pa***@gmail.com', '2026-09-04 10:37:12', 0, '2026-09-04 10:33:07', NULL, '2026-09-04 08:32:12'),
 ('26e3ab35-ce66-45df-8e92-e782e7e80216', 1, 'login', 'b84b4a1b1422e1b6f5e1833cef9716727fcaccb77e9d102f3c326a9554752684', 'email', 'pa***@gmail.com', '2026-08-28 13:25:46', 0, '2026-08-31 09:38:28', NULL, '2026-08-28 11:20:46'),
 ('28aef1d3-cc36-4acf-9ad8-52715cbb703d', 42, 'login', '78b22a508dc9da090a7b0175a22fd487fa60fccfd03eaa39ae7214989f839207', 'email', 'ns***@gmail.com', '2026-08-31 22:13:49', 0, '2026-08-31 22:09:16', NULL, '2026-08-31 20:08:49'),
 ('2bebcb63-480e-4f18-b9d1-ff7de1d59a40', 9, 'login', '8adada7d08db828a15111911355e8a8eef9698aa2751930483b6290e71042b7a', 'email', 'se***@gmail.com', '2026-08-25 09:37:45', 0, '2026-08-25 09:33:01', NULL, '2026-08-25 07:32:45'),
+('2faee5ea-2ef2-41f4-9a8c-0627e57cb632', 48, 'login', 'a273c8cbd3c7eb9a4b1fd5b3e1f7920ffa848ef49270ae201f60980381029ccc', 'email', 'ns***@gmail.com', '2026-09-15 20:17:52', 0, '2026-09-15 20:15:40', NULL, '2026-09-16 03:12:52'),
 ('35bc95a1-f36f-47b7-86c0-e6ba2a479864', 39, 'login', '70db5745f74d593a83fcea13efa5b466c163b6c41266207be7faa66a16c961a6', 'email', 'ma***@gmail.com', '2026-08-31 19:37:19', 0, '2026-08-31 19:33:37', NULL, '2026-08-31 17:32:19'),
 ('35cbc0b9-61d4-410c-aa6c-a3e882cb3592', 1, 'login', '54e03e9d25106a40b52074e63db571e12f83601642d7443c4d43e7407c763c3f', 'email', 'pa***@gmail.com', '2026-09-14 19:54:44', 0, '2026-09-14 19:50:13', NULL, '2026-09-14 17:49:44'),
 ('3891eb44-52d5-4656-b0ef-f9eed1f4cad7', 9, 'login', '3618e89902312a0d604ead12bcb68e03a401ae1c8a7161ed90a2e59c96653122', 'email', 'se***@gmail.com', '2026-08-26 14:04:48', 0, '2026-08-26 14:00:26', NULL, '2026-08-26 11:59:48'),
@@ -842,6 +1158,9 @@ INSERT INTO `otp_challenges` (`id`, `user_id`, `purpose`, `code_hash`, `channel`
 ('3cd8c6ab-a1d1-4c3d-959e-dc4433a477fc', 39, 'login', '199b15a7be389fb633cd156e7e3e2d11d7e81792e32dbc0e4afc10a9b969be39', 'email', 'ma***@gmail.com', '2026-08-28 13:37:45', 0, '2026-08-28 13:33:45', NULL, '2026-08-28 11:32:45'),
 ('402e3089-ef6f-462c-8736-9fbfb6a8fae3', 1, 'login', 'ddbdcae6bf4303763ad655f2ee01c63883d29934864d53381a7566da454dd238', 'email', 'pa***@gmail.com', '2026-08-24 13:32:35', 0, '2026-08-24 13:28:12', NULL, '2026-08-24 11:27:35'),
 ('40417222-8a5b-4000-9bed-5434e6304dd2', 42, 'login', '0d8db0ef28c953311a8261b774316e34cb52c2ec2007318fc1a94ddbacf5e040', 'email', 'ns***@gmail.com', '2026-09-14 11:11:35', 0, '2026-09-14 11:19:12', NULL, '2026-09-14 09:06:35'),
+('412f9352-74e3-4cea-b1af-04cc95542beb', 1, 'login', 'e6472f581ceef629b84191d576c428d9aa19706ed1edc70b751e0c522c73c41a', 'email', 'pa***@gmail.com', '2026-09-15 20:05:39', 0, '2026-09-15 20:01:03', NULL, '2026-09-16 03:00:39'),
+('43d67ec7-0707-4aed-a361-3a9c01bfb2aa', 1, 'login', '0061899c892a61932afe0f279b4c25548e95032d73e81f84b44b98c817456e8a', 'email', 'pa***@gmail.com', '2026-09-16 09:14:03', 0, '2026-09-16 09:09:29', NULL, '2026-09-16 16:09:03'),
+('471a45a5-c5e1-4b6d-a055-826c58790bde', 1, 'login', '84ea34b08bf4d400e84d0e90b9668875b713c76866995447c8e22613302c3f5a', 'email', 'pa***@gmail.com', '2026-09-18 16:34:11', 0, '2026-09-18 07:30:13', NULL, '2026-09-18 14:29:11'),
 ('47e8031f-da73-4e93-999c-97dd7fe4af34', 42, 'login', '5e36056e0beb37596a9d63bc681cdd0ff3670f2367fed6d03c98f960115352ba', 'email', 'ns***@gmail.com', '2026-08-31 09:49:25', 0, '2026-08-31 09:47:52', NULL, '2026-08-31 07:44:25'),
 ('4cdec73c-527d-4f5b-a22d-5f291166e5b2', 42, 'login', 'dde39dcb87603fdbee4ca7fa8567ccacce34dde85e6b5e724e8497bf47422de3', 'email', 'ns***@gmail.com', '2026-08-31 19:28:38', 0, '2026-08-31 19:24:39', NULL, '2026-08-31 17:23:38'),
 ('4d5b344d-5a67-495d-8be2-a0fe6cd2e176', 48, 'login', '3f86c0a18116bf5e95d9a3ec72841377d9660ace507c5b9104bdfe877da37d1b', 'email', 'ns***@gmail.com', '2026-09-02 20:30:14', 0, '2026-09-02 20:25:35', NULL, '2026-09-02 18:25:14'),
@@ -850,33 +1169,44 @@ INSERT INTO `otp_challenges` (`id`, `user_id`, `purpose`, `code_hash`, `channel`
 ('5424ce20-b7d2-49a9-967f-1b418cb0b3e9', 39, 'login', '28d3457935812827392d04f5141610670af58df8fbbd2b0b16d4eddcd81cdea1', 'email', 'ma***@gmail.com', '2026-08-31 10:53:56', 0, '2026-08-31 10:50:00', NULL, '2026-08-31 08:48:56'),
 ('553946a2-c7c7-4f41-adc8-ed96e357c761', 42, 'login', '27922223eba7141265dfab517b10515775f533b98668ca7edc0dfba891b6fd51', 'email', 'ns***@gmail.com', '2026-09-01 12:15:14', 0, '2026-09-01 12:10:52', NULL, '2026-09-01 10:10:14'),
 ('5c40624c-0235-4d25-bfa0-89f856eba320', 1, 'login', '4fba9d827e3c2736a17108b78869ed96db93165a4d603689a0d6d58d5287ca39', 'email', 'pa***@gmail.com', '2026-09-04 10:35:01', 0, '2026-09-04 10:30:56', NULL, '2026-09-04 08:30:01'),
+('5cc50194-9121-42fd-903d-18bf7ae20bfe', 42, 'login', '196fc84f54b8105537fbb2a1807f1b2b72aacef02c80cb0b6401a42221b78f29', 'email', 'ns***@gmail.com', '2026-09-18 08:00:51', 0, '2026-09-17 22:58:44', NULL, '2026-09-18 05:55:51'),
+('5d37656b-ec67-44a1-8286-4efd392eacbf', 42, 'login', 'b72284862e24030001f1144a3a66fc32f0afb9f1f7e69af19710a3c75fed3ad7', 'email', 'ns***@gmail.com', '2026-09-15 19:30:04', 0, '2026-09-15 19:25:28', NULL, '2026-09-16 02:25:04'),
 ('5d9ac9e3-9ff8-479c-a04c-bbbf32a4ca32', 42, 'login', '874e5800fcdaa6b91d4b20ef3ab480e55bdecf4020fbadc10ea46a14682d45ca', 'email', 'ns***@gmail.com', '2026-08-31 22:35:47', 0, '2026-08-31 22:31:27', NULL, '2026-08-31 20:30:47'),
+('5daa0974-6d2f-44bc-a1d4-a7f3a2219eb0', 48, 'login', '9130f3371fb2bf290d722f6bcb44cccc24058bc6d811acb0393542eea59b28ae', 'email', 'ns***@gmail.com', '2026-09-17 17:59:45', 0, NULL, NULL, '2026-09-17 15:54:45'),
+('5ed11761-967e-4e8a-a9ad-7cccc88533eb', 39, 'login', 'ff1e4aa959c5e796c3596749f4a2dbec92533abcbe339604afb1671d65cc213d', 'email', 'ma***@gmail.com', '2026-09-15 19:01:22', 0, '2026-09-15 19:06:24', NULL, '2026-09-16 01:56:22'),
 ('5f69ca85-3e26-4761-94fe-318a15029231', 1, 'login', 'ad7efa1291cf99a46384a79a3f1d5a0a367eec17685c1db1afefee2267312aa4', 'email', 'pa***@gmail.com', '2026-09-11 14:28:59', 0, '2026-09-11 14:31:12', NULL, '2026-09-11 12:24:00'),
 ('5fc16af2-6917-41d0-9bc8-a542b046400e', 39, 'login', '3e7276aa5f27fb9db4440978e5d26bfd484db70723512863ca617b0c82813ec7', 'email', 'ma***@gmail.com', '2026-08-31 20:58:22', 0, '2026-08-31 20:57:10', NULL, '2026-08-31 18:53:22'),
 ('5fe936b3-1712-41ea-91ce-4733abb1793b', 1, 'login', '0e6946298bbc372bcfa729ad0eca09808ee146d2c00c52bf436ce1415b741e1e', 'email', 'pa***@gmail.com', '2026-09-07 11:26:24', 0, '2026-09-07 11:22:16', NULL, '2026-09-07 09:21:24'),
 ('6121efd3-7c89-483a-a1b5-cc618e56fd31', 9, 'login', 'ee09b9b7ac227ce451a060967399d1c943371c4942f612a18d764581bca5b48f', 'email', 'se***@gmail.com', '2026-08-21 02:04:05', 0, '2026-08-21 02:01:19', NULL, '2026-08-20 23:59:05'),
 ('630feedc-5001-47ec-b0a9-bea3ee21046b', 1, 'login', '4369119051e5d614818e219081c9d322c102e75bf518fc68361d97363c2bb121', 'email', 'pa***@gmail.com', '2026-08-26 17:30:55', 0, '2026-08-26 17:26:26', NULL, '2026-08-26 15:25:55'),
+('6b7c4f6b-aed9-43e1-8f47-7e86b0804119', 1, 'login', '120442c07394c97fba17212b7e6031fc136466857ac3d4d5561db312a4f467f9', 'email', 'pa***@gmail.com', '2026-09-15 18:54:24', 0, '2026-09-15 18:50:09', NULL, '2026-09-16 01:49:24'),
 ('6b8ad85b-c04f-4689-8304-fd297bc9fe56', 1, 'login', '55dd5cf7966c2544e06e32c1f17ad4b93d6daaaf135d2ec241c9fd1becfec6c2', 'email', 'pa***@gmail.com', '2026-09-05 14:39:03', 0, '2026-09-05 14:36:30', NULL, '2026-09-05 12:34:03'),
 ('6db01b6c-0cb6-48ac-9130-6c77e0c9cd31', 1, 'login', 'e062d37385bfc3e355d720cbe0651f1fdf701eb1ee78ec80c477d4782f6fd63e', 'email', 'pa***@gmail.com', '2026-08-28 12:38:17', 0, '2026-08-28 12:34:43', NULL, '2026-08-28 10:33:17'),
+('70f142fe-143f-48c6-a869-5c3bba485821', 48, 'login', 'b0f13bc66c4aeaa2597f777dbeb69d15369205ae8cba3b38aea90ff4072cd7df', 'email', 'ns***@gmail.com', '2026-09-15 20:20:40', 0, '2026-09-15 20:16:54', NULL, '2026-09-16 03:15:40'),
 ('71f22ed5-ce57-4f8a-91ab-37bcb485afbe', 1, 'login', 'fcbd7d32b7eecabdeaac91f6ffef795489fd463072188704d17d9e6c98e69724', 'email', 'pa***@gmail.com', '2026-09-01 13:06:01', 0, '2026-09-01 13:02:19', NULL, '2026-09-01 11:01:01'),
 ('74b961f1-24eb-46bc-b955-7ffdc1a52a3c', 1, 'login', '9309918667f078dd1ae9a3d0d651cce72f6739c59bee638f90fb2746d463caf9', 'email', 'pa***@gmail.com', '2026-09-14 09:50:57', 0, '2026-09-14 09:46:33', NULL, '2026-09-14 07:45:57'),
 ('75fea9c5-1e23-4880-a225-4fb71de1a811', 12, 'login', 'dd56b551b38fa128a47c4de9ef597adc59ce5544e743fd45590a3e92d29f2b4d', 'email', 'pa***@gmail.com', '2026-09-02 10:47:44', 1, '2026-09-02 10:44:50', NULL, '2026-09-02 08:42:44'),
+('77f0ad38-5570-4fa3-88af-e306bc726c94', 48, 'login', '9ad9d67ae33abb06bdbb61515a899ff9413dd73f56dbb763982e81c3b2937dd6', 'email', 'ns***@gmail.com', '2026-09-15 20:21:54', 0, '2026-09-15 20:18:16', NULL, '2026-09-16 03:16:54'),
 ('783ca1a6-84b5-41cf-8133-c1ebe1235ef8', 1, 'login', 'edf2a3849ffbb4dcc78af9154510f330b55999852bec9ade295d1195f6adafae', 'email', 'pa***@gmail.com', '2026-09-02 20:20:18', 0, '2026-09-02 20:10:42', NULL, '2026-09-02 18:15:18'),
 ('7b642852-664c-4a71-89f6-03351608f1cb', 1, 'login', '1e4ed45d2b245d4bf6a239cb3806ce858a6d25b73c1d6124d14d95a91f3cd388', 'email', 'pa***@gmail.com', '2026-09-11 14:36:12', 0, '2026-09-11 14:32:32', NULL, '2026-09-11 12:31:12'),
 ('7ffea9c4-4ea6-4a6e-8ab1-563f3fb164c2', 1, 'login', '2d9aac008aa4bd221752b3aeac2441db6d92ffd4479cf3850717d9a70ba59064', 'email', 'pa***@gmail.com', '2026-08-22 11:48:00', 0, '2026-08-22 11:43:29', NULL, '2026-08-22 09:43:00'),
 ('844af494-2bfd-4c6d-ae3c-0e7e5756a6c3', 1, 'login', '1ec1c1bb66e87647977efadf4bebf168addb591d06703919dad8649c0b049d6f', 'email', 'pa***@gmail.com', '2026-09-14 09:47:44', 0, '2026-09-14 09:45:57', NULL, '2026-09-14 07:42:44'),
+('8840f113-d012-49a0-950c-83cd6c22cfda', 1, 'login', 'bf84d15ee53796c6fcb3868f0a1388cafb88f7990e8e3628446d0e1b8c5400aa', 'email', 'pa***@gmail.com', '2026-09-17 17:17:17', 0, '2026-09-17 08:15:51', NULL, '2026-09-17 15:12:17'),
 ('89c2b4cb-b523-4359-8552-8742aa0f4b37', 1, 'login', '03edef67feb2b29c915819f40a0085792a4050467ccfa361e7783bcf49e92776', 'email', 'pa***@gmail.com', '2026-08-31 20:56:02', 0, '2026-08-31 20:51:34', NULL, '2026-08-31 18:51:02'),
-('8f9c9daa-47ff-4f25-88e0-a021992067bb', 16, 'login', '000ea71c717db95925e0b5d03d5b94c8034ef0d98b203090c9792577f8ae99fe', 'email', 'ka***@gmail.com', '2026-08-28 13:17:29', 0, NULL, NULL, '2026-08-28 11:12:30'),
+('8ac612df-0705-4c14-8003-184a1a85690e', 344, 'login', '78a9d0ad1084dd552916284ccd2730e5a43836fd323981ae22fe84065da041a8', 'email', 'am***@gmail.com', '2026-09-18 20:03:03', 0, '2026-09-18 10:59:00', NULL, '2026-09-18 17:58:03'),
+('8f9c9daa-47ff-4f25-88e0-a021992067bb', 16, 'login', '000ea71c717db95925e0b5d03d5b94c8034ef0d98b203090c9792577f8ae99fe', 'email', 'ka***@gmail.com', '2026-08-28 13:17:29', 0, '2026-09-17 23:35:31', NULL, '2026-08-28 11:12:30'),
 ('90309324-1575-4e74-8e9a-338c6a0c0e17', 48, 'login', 'fda65f35e1627841f3141652758a61ac562286d778187ea6f4be697af8e27759', 'email', 'ns***@gmail.com', '2026-09-14 12:11:04', 0, '2026-09-14 12:08:24', NULL, '2026-09-14 10:06:04'),
 ('9190bfbc-3d35-4f4b-ab42-4f2f4c13de0d', 1, 'login', '2f9d1cbd7db056f80f649e26b00ffd63dc4d7628f4c7ecc39ce737338f27f057', 'email', 'pa***@gmail.com', '2026-09-05 13:37:50', 0, '2026-09-05 13:33:01', NULL, '2026-09-05 11:32:50'),
 ('9863cc1e-8e14-4d13-8b05-b5cad1e2841a', 1, 'login', 'e3a332b5d6697b33d61784e9ccb809ce7c3f5b368497071d3ad8f7457b03c165', 'email', 'pa***@gmail.com', '2026-09-01 18:14:51', 0, '2026-09-01 18:12:11', NULL, '2026-09-01 16:09:51'),
 ('991177f7-d95c-4ba2-9a66-51aab0096f32', 1, 'login', '0f9a4b9d3695f6d891d0e99709d6727e5da88117547cd82a3f2d4131d977e6db', 'email', 'pa***@gmail.com', '2026-08-26 12:23:21', 0, '2026-08-26 12:18:47', NULL, '2026-08-26 10:18:21'),
 ('994edaba-ec9f-4b8d-aca8-a65997193687', 42, 'login', '5b8787951835a2b51ec5bca513762c4cd5e9d466be8053b51b2cd8c9e1b9e722', 'email', 'ns***@gmail.com', '2026-08-31 09:52:52', 0, '2026-08-31 09:51:24', NULL, '2026-08-31 07:47:52'),
+('9a024a4a-6e6e-4da1-9e94-ad49e9f18b25', 39, 'login', '416e843117a6be18bab7be00655bff6193f9f10bbc7306df694f6470c76d8dbb', 'email', 'ma***@gmail.com', '2026-09-17 18:04:00', 0, '2026-09-17 08:59:46', NULL, '2026-09-17 15:59:00'),
 ('9c9dba87-d824-4794-9374-23e0ae9947c6', 1, 'login', '8d079405031abaf37ede3ee3459cae9db1b3694b5fa22ff546fa08d98f001cb7', 'email', 'pa***@gmail.com', '2026-09-01 12:12:28', 0, '2026-09-01 12:08:30', NULL, '2026-09-01 10:07:28'),
 ('9e3a0fcd-522a-439c-821b-dd1a6c50e70c', 1, 'login', 'fb208bcea5aaacc83542dbbba4c69014f0925c976e5980e5e6bdc0cefc60a71b', 'email', 'pa***@gmail.com', '2026-08-21 01:03:34', 0, '2026-08-21 00:58:48', NULL, '2026-08-20 22:58:34'),
 ('9eaed316-5338-482e-b951-e0fd4e37d16b', 1, 'login', 'caf05c9ca3ea75f6a1d128aef1625d46ff2e61ec812836402685aaa16623502c', 'email', 'pa***@gmail.com', '2026-09-04 20:17:11', 0, '2026-09-04 20:12:53', NULL, '2026-09-04 18:12:11'),
 ('9f80b376-ccef-4f06-b755-65bb90d2ff13', 9, 'login', 'ea50727180245570cdf58d0b602871976591f0c014b0a8d49c3947cf99112e59', 'email', 'se***@gmail.com', '2026-08-21 02:01:54', 0, '2026-08-21 01:57:59', NULL, '2026-08-20 23:56:54'),
 ('9ff8f540-12a9-4f4b-b434-2384d50a10fe', 1, 'login', '5ef0d614f7589444731922bbb0a7dcbc1b836fec193c5733895002e3db125f2d', 'email', 'pa***@gmail.com', '2026-09-01 12:07:01', 0, '2026-09-01 12:07:28', NULL, '2026-09-01 10:02:01'),
+('a02130ed-d9d2-41cc-8b96-fa8b79c85ed1', 42, 'login', '9eb299f5b9d499d697c500a193e5598c8bb38d4588d1781be3a1662c625c96a1', 'email', 'ns***@gmail.com', '2026-09-16 09:16:08', 0, '2026-09-16 09:12:27', NULL, '2026-09-16 16:11:08'),
 ('a17aa1d4-84ff-4a14-b6e2-b5beda332197', 1, 'login', '54cfd6223e9598525f500a426e5b0d909832887f5cef8fe40d8670f31ed29379', 'email', 'pa***@gmail.com', '2026-08-26 17:48:53', 0, '2026-08-26 17:44:19', NULL, '2026-08-26 15:43:53'),
 ('a3db5a5e-8735-4897-b7db-a59fd02b9e36', 1, 'login', 'd502fc307322ace236c6c7a1c29b44a4c8034628d571e05cf235ac4494a0691e', 'email', 'pa***@gmail.com', '2026-08-26 17:09:32', 0, '2026-08-26 17:04:58', NULL, '2026-08-26 15:04:32'),
 ('a48707fb-9be5-4410-8b84-d69ba4759191', 16, 'login', 'c72aac2c395130e216545238e723f4c1dbc64f4610fba93f43ab995d3ac5dc80', 'email', 'ka***@gmail.com', '2026-08-25 10:23:23', 0, '2026-08-25 10:18:45', NULL, '2026-08-25 08:18:23'),
@@ -887,26 +1217,61 @@ INSERT INTO `otp_challenges` (`id`, `user_id`, `purpose`, `code_hash`, `channel`
 ('a9b57a65-6019-48e6-8ca5-5642a5c5aa47', 1, 'login', '8e1fba2f4ed2c68f3488c5bcdce578ef131da0be4dd3303bd7a3be7bf9ddc159', 'email', 'pa***@gmail.com', '2026-09-05 13:38:01', 0, '2026-09-05 14:34:03', NULL, '2026-09-05 11:33:01'),
 ('aa279ab6-3ca7-4b82-9996-7e8ad6d96480', 1, 'login', '4d7ba71e21ff6709741dbb1d5c6ae6e6f4b5beba3f376a76ee879cbff281181e', 'email', 'pa***@gmail.com', '2026-09-02 20:15:42', 0, '2026-09-02 20:12:55', NULL, '2026-09-02 18:10:42'),
 ('af2d80f6-32b2-4e75-bd47-918c917bb4cb', 1, 'login', 'ffea267dc98a368f01bb16ee5ff3991215a1a700a385116f733f674b9cd3a374', 'email', 'pa***@gmail.com', '2026-09-09 19:39:35', 0, '2026-09-11 13:51:34', NULL, '2026-09-09 17:34:35'),
+('b03eaf7e-ef2d-4e5e-a9df-72e72f6c3b3c', 39, 'login', 'c66148871be8d753db4666b5f9e45e717339c063a60d6b67dcb232346dc17c44', 'email', 'ma***@gmail.com', '2026-09-16 10:01:06', 0, '2026-09-16 09:59:15', NULL, '2026-09-16 16:56:06'),
 ('b3fb2294-0f12-4b49-bef5-cd679ce04f2f', 1, 'login', 'cd630eab922f4a4378c5b62a8017c7b5083782ac84f47814a6bedb8d040e4a5b', 'email', 'pa***@gmail.com', '2026-09-09 19:36:43', 0, '2026-09-09 19:32:57', NULL, '2026-09-09 17:31:43'),
 ('b5430af7-cfd3-46b8-b571-c2a3925698a2', 1, 'login', '25e4585d447fc4e233da95f309ccc5f6656b67ce45b862c720290f5677c2bcc0', 'email', 'pa***@gmail.com', '2026-08-25 10:21:17', 0, '2026-08-25 10:16:37', NULL, '2026-08-25 08:16:17'),
 ('b75eeaba-9d46-44ad-a74c-119d57f1b47c', 1, 'login', '49c15ea7a4a8adbd24aac635c47d384016df03131a5ebc1b82dd76ef73e74bd4', 'email', 'pa***@gmail.com', '2026-08-25 18:34:08', 0, '2026-08-25 18:29:32', NULL, '2026-08-25 16:29:08'),
 ('bdbff4d0-0956-4ac4-a228-c5b6315fe5d3', 42, 'login', '20fa7d64b6501f8fce426810e5cebd4e7890fde1e315d9c155d9148a5e23903a', 'email', 'ns***@gmail.com', '2026-08-31 19:22:41', 0, '2026-08-31 19:23:38', NULL, '2026-08-31 17:17:41'),
 ('bddf1bfc-c5fe-4c1b-9225-9ffcd0500223', 12, 'login', '49c75e0ed21e0b89c362f9a63c076788fb54f9ce689508dd506ea6b656f84851', 'email', 'pa***@gmail.com', '2026-08-25 11:45:08', 0, '2026-08-25 11:40:38', NULL, '2026-08-25 09:40:08'),
 ('c0291185-46eb-4f78-972c-ffb53b9edd7e', 1, 'login', '07378090354c9cc7451e7a7c656fe6b25282018d0f5370fb48b0524709a3630f', 'email', 'pa***@gmail.com', '2026-09-01 20:03:49', 0, '2026-09-01 19:59:51', NULL, '2026-09-01 17:58:49'),
+('c5a7a71e-004c-492d-85a4-0ab9fa4d913b', 1, 'login', '6ecf8c48088ddb2a863cdc369d9a94f39bb46cc55e882b2131bc5482549232f2', 'email', 'pa***@gmail.com', '2026-09-18 07:58:52', 0, '2026-09-17 22:54:34', NULL, '2026-09-18 05:53:52'),
 ('cdcad7bc-48c3-4055-a8d2-cd1fc26a2488', 1, 'login', '46aa0c25a81020d119ce5c2d59a9a2277e6230cace35f8ab819b7b9d34f2bd73', 'email', 'pa***@gmail.com', '2026-09-01 18:55:23', 0, '2026-09-01 19:58:49', NULL, '2026-09-01 16:50:25'),
+('d310e7b1-d37b-4104-bc27-c6f9542f7b40', 16, 'login', '65156927d7a6df8486f2546b48417c6b1992e6c66d769d44b4d85e89fb0cfa04', 'email', 'pa***@gmail.com', '2026-09-18 08:40:31', 0, '2026-09-17 23:36:06', NULL, '2026-09-18 06:35:31'),
+('d43465c9-85de-4688-9f60-97bca98abed6', 39, 'login', '84fab4febb4f4e68ce65006ff3938bd54c89f34086f2f1d10dafc7de1c6defbf', 'email', 'ma***@gmail.com', '2026-09-18 20:01:41', 0, '2026-09-18 10:57:08', NULL, '2026-09-18 17:56:41'),
+('d7d0443a-bb96-4737-b094-f4b33535dd40', 1, 'login', '4f85aaf0918fbc1b2fa41eac852d2bbc321678b93ada9e610e5243bd45b5cb3a', 'email', 'pa***@gmail.com', '2026-09-15 19:00:21', 0, '2026-09-15 18:55:54', NULL, '2026-09-16 01:55:21'),
 ('d95958fe-f3dd-4f9d-878f-29d6ae037cef', 48, 'login', '94b2488b76bf15d678bed1bbeefe3a4cdc334919e4b9fdbba4705cc8310b71d5', 'email', 'ns***@gmail.com', '2026-09-14 12:13:24', 1, '2026-09-14 12:11:20', NULL, '2026-09-14 10:08:24'),
 ('d9ff4e1a-0740-4e0b-8ba9-bc17cb7dbd15', 42, 'login', 'ab1e0060746fa270631559cba569de1ff079990bd21508a4f9c2826a80303c70', 'email', 'ns***@gmail.com', '2026-08-28 13:46:50', 0, '2026-08-28 13:43:10', NULL, '2026-08-28 11:41:50'),
+('e04c89ca-1558-4c0d-9964-bfc6ca0fa235', 1, 'login', '20e30c8ebcf47fed08b6777f6829c95d7480e029ef5b71119ce4bf7cb84820a1', 'email', 'pa***@gmail.com', '2026-09-15 20:28:20', 0, '2026-09-15 20:23:56', NULL, '2026-09-16 03:23:20'),
+('e1d51f57-8271-42f0-8fb9-cbeb1f81a66e', 48, 'login', '51df2ef385ca639a61c03e235c2ba6419622cd5adca912692d972d8f6b8844a7', 'email', 'ns***@gmail.com', '2026-09-15 20:29:24', 0, '2026-09-17 08:54:45', NULL, '2026-09-16 03:24:24'),
 ('e71fa7f4-c3f7-4254-b736-890b8376c652', 16, 'login', 'da21a36bc69b330d1f5a4039e9bfa2f7377dc4aa49bc326c52f2603f3292a713', 'email', 'ka***@gmail.com', '2026-08-25 17:56:29', 0, '2026-08-25 17:52:01', NULL, '2026-08-25 15:51:29'),
+('e828b536-8a30-4438-99b4-9c884bff9c88', 12, 'login', 'aef16794ba9acc7a37c6096cc81cc08249356ec2ba81e98a6d9ba3491e0d1d51', 'email', 'pa***@gmail.com', '2026-09-15 20:13:06', 0, '2026-09-15 20:08:32', NULL, '2026-09-16 03:08:06'),
 ('ee29c369-6711-4624-b90d-5947ac2d644e', 42, 'login', '7eb97e52830c1ffab1d1b4ea2f54c526a1c80cd45453f6bb33a24c55d30b6156', 'email', 'ns***@gmail.com', '2026-08-31 09:46:16', 2, '2026-08-31 09:43:11', NULL, '2026-08-31 07:41:16'),
 ('efbb7d7f-ae40-4aff-9482-3ccf105c4be9', 1, 'login', '8d159ed6eab3001fe04bb5c94b1cf77c6c87fe6d848ce728a3ccd818831d64cf', 'email', 'pa***@gmail.com', '2026-09-05 14:41:30', 0, '2026-09-05 14:38:06', NULL, '2026-09-05 12:36:30'),
 ('f08b05d2-5d21-4dd9-8d1e-f8300838275e', 42, 'login', 'e0fa1d75e5c6177d8200ceee6b80416e6a60f312a2b1b0432c848b4a71895fab', 'email', 'ns***@gmail.com', '2026-08-31 22:11:28', 3, '2026-08-31 22:08:49', NULL, '2026-08-31 20:06:29'),
+('f1ab1746-fe22-4227-a8d3-6d67c044746d', 42, 'login', '79a45dfd47f5bbc15cb6b2139596ac9603c5df15edc9134365678a27da4044ce', 'email', 'ns***@gmail.com', '2026-09-15 19:28:51', 0, '2026-09-15 19:25:04', NULL, '2026-09-16 02:23:51'),
+('f2609d96-7412-46fe-a46b-2d87085b2556', 48, 'login', '25e7aa0148df14174f3bc9b29a26e7b789079cc6c47f2e7ea514300b9fe8a1b8', 'email', 'ns***@gmail.com', '2026-09-15 20:23:16', 0, '2026-09-15 20:19:06', NULL, '2026-09-16 03:18:16'),
 ('f3331ce9-40ba-4b58-9238-b6615290649e', 1, 'login', '8878787c477ef88d0a0110810909b8b33d09d555e824b7d3be62a4d5ca0ab284', 'email', 'pa***@gmail.com', '2026-09-02 10:40:07', 0, '2026-09-02 10:35:50', NULL, '2026-09-02 08:35:07'),
 ('f5a8d686-2f46-4072-99bc-e6a7365f3da4', 9, 'login', '450cf5b86bca8710552aac3375ad885b6fee96572afe16c817512b6f577fc5ff', 'email', 'se***@gmail.com', '2026-08-21 02:02:59', 0, '2026-08-21 01:59:05', NULL, '2026-08-20 23:57:59'),
 ('f5f3a1e9-4ecf-4b0c-80ac-cf21725c754c', 1, 'login', '66c81d12da39a4fa67fb0a81a05951261ad7bd22b687d928d815bd3c069949b2', 'email', 'pa***@gmail.com', '2026-08-26 17:02:41', 0, '2026-08-26 16:58:30', NULL, '2026-08-26 14:57:41'),
 ('f7853228-0de6-4719-8c93-672dfa262fbb', 1, 'login', 'b58fe08de8d31c1210b2940372b32eaa3d552755e6ba730a448fec5bd6478f0c', 'email', 'pa***@gmail.com', '2026-08-28 12:35:06', 0, '2026-08-28 12:30:48', NULL, '2026-08-28 10:30:06'),
 ('f81b73f3-eb15-4978-9dd4-d9700db56a82', 9, 'login', '2ae602792a78689921719299a6eb8cabb15c9916f0827aa3d34d285a2c6267bc', 'email', 'se***@gmail.com', '2026-08-21 02:06:19', 0, '2026-08-21 02:01:54', NULL, '2026-08-21 00:01:19'),
+('f8a061c8-40a4-46d1-9036-4fafd709f745', 12, 'login', 'a9ccb45023e7e00646ba9952c6826128919cba02c49b26a213e9472424b0dfb2', 'email', 'pa***@gmail.com', '2026-09-15 20:09:56', 0, '2026-09-15 20:07:06', NULL, '2026-09-16 03:04:56'),
 ('fa3c60cd-df17-46f2-9644-43fb8e27115d', 1, 'login', 'd93a30fb36775cadc66c340b9ca34897d4ba2fe8c642c7086080b6d30782672b', 'email', 'pa***@gmail.com', '2026-08-26 17:25:18', 1, '2026-08-26 17:21:18', NULL, '2026-08-26 15:20:18'),
 ('fc924e73-5e12-4afd-9e6e-4029d59c0518', 9, 'login', '8590d96ca4896886179c7552bb452ff1e464d5ccf7af64ef421b89de0764b73e', 'email', 'se***@gmail.com', '2026-08-25 17:54:27', 0, '2026-08-25 17:49:45', NULL, '2026-08-25 15:49:27');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `parent_profiles`
+--
+
+CREATE TABLE `parent_profiles` (
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `gender` enum('male','female','other') NOT NULL DEFAULT 'other',
+  `province` varchar(80) DEFAULT NULL,
+  `district` varchar(80) DEFAULT NULL,
+  `sector` varchar(80) DEFAULT NULL,
+  `cell` varchar(80) DEFAULT NULL,
+  `village` varchar(80) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `parent_profiles`
+--
+
+INSERT INTO `parent_profiles` (`user_id`, `gender`, `province`, `district`, `sector`, `cell`, `village`, `updated_at`) VALUES
+(344, 'male', 'Southern Province', 'Nyamagabe', 'Nyamagabe Sector 2', 'Nyamagabe Sector 2 Cell 2', 'Nyamagabe Sector 2 Cell 2 Village 2', '2026-09-18 17:07:42');
 
 -- --------------------------------------------------------
 
@@ -919,6 +1284,13 @@ CREATE TABLE `parent_students` (
   `student_id` int(10) UNSIGNED NOT NULL,
   `relationship` varchar(40) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `parent_students`
+--
+
+INSERT INTO `parent_students` (`parent_id`, `student_id`, `relationship`) VALUES
+(344, 17, 'parent');
 
 -- --------------------------------------------------------
 
@@ -940,6 +1312,39 @@ CREATE TABLE `payroll_records` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `permission_requests`
+--
+
+CREATE TABLE `permission_requests` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `requester_id` int(10) UNSIGNED NOT NULL,
+  `requester_role` varchar(40) NOT NULL,
+  `student_id` int(10) UNSIGNED DEFAULT NULL,
+  `title` varchar(180) NOT NULL,
+  `reason` varchar(240) NOT NULL,
+  `description` text DEFAULT NULL,
+  `attachment_path` varchar(255) DEFAULT NULL,
+  `status` enum('pending','approved','denied') NOT NULL DEFAULT 'pending',
+  `permission_start` date DEFAULT NULL,
+  `permission_end` date DEFAULT NULL,
+  `approved_by` int(10) UNSIGNED DEFAULT NULL,
+  `decision_note` text DEFAULT NULL,
+  `qr_token` char(36) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `permission_requests`
+--
+
+INSERT INTO `permission_requests` (`id`, `requester_id`, `requester_role`, `student_id`, `title`, `reason`, `description`, `attachment_path`, `status`, `permission_start`, `permission_end`, `approved_by`, `decision_note`, `qr_token`, `created_at`, `updated_at`) VALUES
+(1, 42, 'teacher', NULL, 'kwivuza amaso', 'ubuvuzi', 'fasxghxjw usiodwecuwus', NULL, 'approved', '2026-09-09', '2026-09-09', 1, NULL, '66d474ea-2fcb-4a69-be12-8cde148748fb', '2026-09-16 16:13:58', '2026-09-16 16:15:41'),
+(2, 344, 'parent', 17, 'ko arwaye', 'kwivuza', 'dxfcvblnjkl;hgytfugihjk', '/uploads/eb7936c309fddeba1ee7275fbd71f81a', 'pending', '2026-09-18', '2026-09-19', NULL, NULL, 'cbf71ed0-1733-4999-beda-cc205dc79ff6', '2026-09-18 18:02:02', '2026-09-18 18:02:02');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `school_fee_settings`
 --
 
@@ -950,6 +1355,57 @@ CREATE TABLE `school_fee_settings` (
   `amount` decimal(12,2) NOT NULL,
   `updated_by` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `school_messages`
+--
+
+CREATE TABLE `school_messages` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(180) NOT NULL,
+  `message_type` enum('announcement','meeting') NOT NULL DEFAULT 'announcement',
+  `audience_role` enum('parent','teacher','doc','librarian','student','accountant','all') NOT NULL DEFAULT 'all',
+  `audience_scope` enum('all','class','role') NOT NULL DEFAULT 'all',
+  `class_name` varchar(80) DEFAULT NULL,
+  `body` text NOT NULL,
+  `file_url` varchar(255) DEFAULT NULL,
+  `starts_at` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `ended_at` datetime DEFAULT NULL,
+  `created_by` int(10) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `school_messages`
+--
+
+INSERT INTO `school_messages` (`id`, `title`, `message_type`, `audience_role`, `audience_scope`, `class_name`, `body`, `file_url`, `starts_at`, `ends_at`, `ended_at`, `created_by`, `created_at`) VALUES
+(1, 'kwiga kubana', 'meeting', 'parent', 'class', 'primary', 'ffujfvuiulbifv67uy7ub7uyb78uiu8iuoipl', '/uploads/1d4caffa06b6e607a683e57f4c6d5b19', '2026-09-24 19:52:00', '2026-09-19 19:51:00', '2026-09-18 10:54:16', 1, '2026-09-18 17:53:24'),
+(2, 'kwiga kuminsindire', 'meeting', 'teacher', 'all', NULL, 'bv bnbjhujkikokohugyu', '/uploads/5545a0eb00168b25b76d35096b70ec58', '2026-09-25 19:54:00', '2026-09-25 19:54:00', '2026-09-18 11:12:15', 1, '2026-09-18 17:55:35');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `school_message_recipients`
+--
+
+CREATE TABLE `school_message_recipients` (
+  `message_id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `viewed_at` datetime DEFAULT NULL,
+  `present_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `school_message_recipients`
+--
+
+INSERT INTO `school_message_recipients` (`message_id`, `user_id`, `viewed_at`, `present_at`) VALUES
+(2, 16, NULL, NULL),
+(2, 42, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1002,14 +1458,19 @@ INSERT INTO `students` (`id`, `user_id`, `admission_number`, `full_name`, `photo
 (3, 18, '1234567', 'pacifique', 'http://localhost:4000/uploads/d8310acc03a20ec7eba0c8668df5bcab', 'male', '2026-08-24', '2025/2026', '2025/2026', NULL, '0793360920', '88fc1cc3-1c19-4739-b8a9-f3d9158ca475', 'active', '2026-08-24 15:40:13', 98, '2026-08-28 11:03:06', NULL, NULL),
 (4, 23, '2324344', 'nyirabagenzi123', 'http://localhost:4000/uploads/09a02677bb106356ed732bdf680f9342', 'female', '2026-08-25', '2025/2026', 'p3', NULL, '0793360930', 'a3b2387d-be31-4d31-b643-8648954bd1fd', 'graduated', '2026-08-25 07:37:00', 98, '2026-08-26 14:54:43', '2026-08-26', '2027-2028'),
 (7, 28, 'FK-2026-00002', 'iturihafi', NULL, 'male', '2026-08-26', '2029-2030', 'p5', NULL, '', '7d411107-d50c-4fd9-9c6b-f2bdfe82d257', 'active', '2026-08-26 21:49:55', 100, NULL, NULL, NULL),
-(8, 29, 'FK-2026-00003', 'akingeneye', NULL, 'female', '2026-08-27', '2029-2030', 'p5', NULL, '', '6023c18a-0930-4194-ae29-670ab7c3d8af', 'active', '2026-08-26 23:32:44', 100, NULL, NULL, NULL),
+(8, 29, 'FK-2026-00003', 'akingeneye', NULL, 'female', '2026-08-27', '2029-2030', 'p5', NULL, '', '6023c18a-0930-4194-ae29-670ab7c3d8af', 'active', '2026-08-26 23:32:44', 98, '2026-09-16 01:09:15', NULL, NULL),
 (9, 30, 'FK-2026-00004', 'iradukunda', NULL, 'female', '2026-07-29', '2029-2030', 'p5', NULL, '', '777e78ab-fb43-4eb3-89fc-2e0e8805a03f', 'active', '2026-08-26 23:50:14', 100, NULL, NULL, NULL),
 (10, 31, 'FK-2026-00005', 'iyakaremye', NULL, 'female', '2026-08-05', '2029-2030', 'p5', NULL, '', '58322278-8cb0-42a2-be4c-9ed1e366ca9d', 'active', '2026-08-26 23:59:50', 94, '2026-08-28 11:03:52', NULL, NULL),
 (11, 32, 'FK-2026-00006', 'eizeye', NULL, 'female', '2026-08-27', '2029-2030', 'p5', NULL, '', '9d545e45-9806-448d-8ae2-14c9eb9d8011', 'active', '2026-08-27 00:12:43', 100, NULL, NULL, NULL),
 (12, 33, 'FK-2026-00007', 'iturihafi rene', NULL, 'female', '2026-08-27', '2029-2030', 'p5', NULL, '', '76f50198-ff46-4ebc-98c5-6afe16225e26', 'active', '2026-08-27 00:31:56', 100, NULL, NULL, NULL),
 (13, 34, 'FK-2026-00010', 'iyakaremwe app', NULL, 'female', '2026-08-05', '2029-2030', 'p5', NULL, '', '0efd3668-f93a-4499-87d2-da0356f30363', 'active', '2026-08-27 01:33:26', 100, NULL, NULL, NULL),
 (15, 46, 'FK-2026-90373', 'ayinkamiye', NULL, 'male', '2026-08-18', '2029-2030', 's3c', NULL, '', 'd89c4eb9-c96c-43ff-b036-1bf042c21e4b', 'active', '2026-08-31 09:58:11', 96, '2026-08-31 20:31:49', NULL, NULL),
-(17, 49, 'FK-2026-57016', 'irene', NULL, 'female', '2026-09-14', '2029-2030', 'primary1', NULL, '', '1cc74bb5-3fc7-40da-a35d-d07c3ed78135', 'active', '2026-09-14 11:44:17', 100, NULL, NULL, NULL);
+(17, 49, 'FK-2026-57016', 'irene', NULL, 'female', '2026-09-14', '2029-2030', 'primary1', NULL, '', '1cc74bb5-3fc7-40da-a35d-d07c3ed78135', 'active', '2026-09-14 11:44:17', 98, NULL, NULL, NULL),
+(94, 126, 'FK-2026-00011', 'abayisenga', NULL, 'female', '2026-08-19', '2029-2030', 'p5', NULL, '', '06259c24-a798-417f-bc17-ca6388fbb760', 'active', '2026-09-16 00:18:22', 100, NULL, NULL, NULL),
+(95, 127, 'FK-2026-00014', 'ilphotex', NULL, 'male', '2026-09-01', '2029-2030', 'p3a', NULL, '', 'cf467997-fdd2-4c07-bea9-09fe362da79f', 'active', '2026-09-16 00:18:28', 100, NULL, NULL, NULL),
+(96, 128, 'FK-2026-75614', 'karebwayire', NULL, 'female', '2026-09-02', '2029-2030', 'p6a', NULL, '', '468ae92d-069b-4629-8066-3a3319088fd2', 'active', '2026-09-16 02:19:36', 100, NULL, NULL, NULL),
+(309, 341, 'FK-2026-00016', 'nshizirungu pacifique', NULL, 'female', '2026-09-10', '2029-2030', 'p3a', NULL, '', '3c25b012-0af0-4e32-a948-83a84bdcdb57', 'active', '2026-09-17 15:07:54', 100, NULL, NULL, NULL),
+(311, 343, 'FK-2026-00019', 'akeza anne', NULL, 'female', '2026-09-10', '2029-2030', 'p6a', NULL, '', '9dcb6d3c-42a0-4936-ab28-365d1bfbe976', 'active', '2026-09-18 15:20:42', 100, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1031,7 +1492,12 @@ INSERT INTO `student_classes` (`student_id`, `class_id`, `enrolled_at`) VALUES
 (3, 2, '2026-08-24'),
 (4, 2, '2026-08-25'),
 (15, 25, '2026-08-31'),
-(17, 26, '2026-09-14');
+(17, 26, '2026-09-14'),
+(94, 8, '2026-09-15'),
+(95, 11, '2026-09-15'),
+(96, 21, '2026-09-15'),
+(309, 11, '2026-09-17'),
+(311, 21, '2026-09-18');
 
 -- --------------------------------------------------------
 
@@ -1114,7 +1580,8 @@ INSERT INTO `subjects` (`id`, `name`, `code`, `is_active`) VALUES
 (21, 'french', '667', 1),
 (22, 'ikinyarwanda', '5456', 1),
 (23, 'english', '12345', 1),
-(24, 'math', '5T5', 1);
+(24, 'math', '5T5', 1),
+(25, 'english', '123445', 1);
 
 -- --------------------------------------------------------
 
@@ -1209,6 +1676,7 @@ INSERT INTO `teacher_assignments` (`teacher_id`, `class_id`, `subject_id`) VALUE
 (16, 1, 1),
 (16, 2, 2),
 (16, 2, 9),
+(16, 30, 25),
 (42, 25, 20),
 (42, 25, 21),
 (42, 25, 22),
@@ -1291,7 +1759,9 @@ INSERT INTO `tests` (`id`, `title`, `class_id`, `subject_id`, `teacher_id`, `dur
 (20, 'english Unit 2: Classroom objects Test', 26, 23, 42, 60, NULL, NULL, 1, 'AI-reviewed assessment for p1.', 0, '2026-09-14 13:08:59', '2026-09-14 13:09:29'),
 (21, 'english Unit 5: Likes and dislikes Test', 26, 23, 42, 60, NULL, NULL, 1, 'AI-reviewed assessment for p1.', 0, '2026-09-14 14:55:32', '2026-09-14 14:56:11'),
 (22, 'english Unit 5: Likes and dislikes Test', 26, 23, 42, 60, NULL, NULL, 1, 'AI-reviewed assessment for p1.', 0, '2026-09-14 15:45:40', '2026-09-14 15:45:58'),
-(23, 'english Unit 5: Likes and dislikes Test', 26, 23, 42, 60, NULL, NULL, 1, 'AI-reviewed assessment for p1.', 0, '2026-09-14 15:57:39', '2026-09-14 15:57:58');
+(23, 'english Unit 5: Likes and dislikes Test', 26, 23, 42, 60, NULL, NULL, 1, 'AI-reviewed assessment for p1.', 0, '2026-09-14 15:57:39', '2026-09-14 15:57:58'),
+(24, 'english', 26, 23, 42, 60, NULL, NULL, 0, 'wrtyu', 1, '2026-09-16 02:30:38', '2026-09-16 02:30:38'),
+(25, 'english Unit 3: People at home Test', 26, 23, 42, 60, NULL, NULL, 1, 'AI-reviewed assessment for p1.', 0, '2026-09-16 02:40:26', '2026-09-16 02:41:27');
 
 -- --------------------------------------------------------
 
@@ -1330,7 +1800,8 @@ INSERT INTO `test_attempts` (`id`, `test_id`, `student_id`, `started_at`, `submi
 (13, 20, 17, '2026-09-14 15:11:10', '2026-09-14 15:14:29', 4.00, NULL, 'submitted'),
 (14, 21, 17, '2026-09-14 16:57:29', '2026-09-14 17:08:04', 9.00, NULL, 'submitted'),
 (15, 22, 17, '2026-09-14 17:47:20', '2026-09-14 17:47:50', 2.00, '{\"102\":[\"ball.\",\"book.\",\"pencil.\"],\"103\":\"e\",\"104\":\"like\"}', 'submitted'),
-(16, 23, 17, '2026-09-14 17:58:45', '2026-09-14 17:58:56', 0.00, '{\"105\":\"a\",\"106\":\"I like mangoes.\"}', 'submitted');
+(16, 23, 17, '2026-09-14 17:58:45', '2026-09-14 17:58:56', 0.00, '{\"105\":\"a\",\"106\":\"I like mangoes.\"}', 'submitted'),
+(17, 25, 17, '2026-09-15 19:48:07', '2026-09-15 19:51:52', 8.00, '{\"108\":[\"is three years old.\",\"is nine years old.\",\"is ten years old.\"],\"109\":[\"is my head teacher.\",\"is my English teacher.\"],\"110\":\"i\",\"111\":\"A woman\",\"112\":\"Mother\",\"113\":\"Sister\",\"114\":[\"Mother\",\"Sister\"],\"115\":[\"Mother and Father\",\"A very small young child\"],\"116\":{\"Grandparents (Old)\":[\"Grandfather\",\"Grandmother\"],\"Children (Young)\":[\"Baby\",\"Brother\"]},\"117\":\"a\",\"118\":\"a\"}', 'submitted');
 
 -- --------------------------------------------------------
 
@@ -1472,7 +1943,19 @@ INSERT INTO `test_questions` (`id`, `test_id`, `question_order`, `question_type`
 (103, 22, 2, 'fill', 'Complete the word from our sounds list: I have a red p__n.', '[]', '[\"e\"]', 1.00, 0),
 (104, 22, 3, 'choice', 'When you are happy with something or love it, you say: I _______ it.', '[\"like\",\"dislike\",\"hate\",\"no\"]', '[0]', 1.00, 0),
 (105, 23, 1, 'fill', 'Fill the missing question word: Do you _______ apples?', '[]', '[\"like\"]', 1.00, 0),
-(106, 23, 2, 'choice', 'Which sentence shows that a child does not like an item?', '[\"I like mangoes.\",\"I do not like mangoes.\",\"This is my mango.\",\"Yes, I have mangoes.\"]', '[1]', 1.00, 0);
+(106, 23, 2, 'choice', 'Which sentence shows that a child does not like an item?', '[\"I like mangoes.\",\"I do not like mangoes.\",\"This is my mango.\",\"Yes, I have mangoes.\"]', '[1]', 1.00, 0),
+(107, 24, 1, 'choice', 'dfghujio', '[\"dfg\",\"dfgh\"]', '[\"dfg\"]', 1.00, 0),
+(108, 25, 1, 'match', 'Match the person with their age from the story.', '{\"leftItems\":[\"My sister\",\"My brother\",\"Simbi\"],\"rightItems\":[\"is three years old.\",\"is nine years old.\",\"is ten years old.\"]}', '{\"My sister\":\"is three years old.\",\"My brother\":\"is nine years old.\",\"Simbi\":\"is ten years old.\"}', 3.00, 0),
+(109, 25, 2, 'match', 'Match the school worker with their proper name.', '{\"leftItems\":[\"Mr. Karambizi\",\"Mrs. Kalima\"],\"rightItems\":[\"is my English teacher.\",\"is my head teacher.\"]}', '{\"Mr. Karambizi\":\"is my head teacher.\",\"Mrs. Kalima\":\"is my English teacher.\"}', 2.00, 0),
+(110, 25, 3, 'fill', 'This is my brother. His name is Eg__de.', '[]', '[\"i\"]', 1.00, 0),
+(111, 25, 4, 'choice', 'Who is the mother in a family?', '[\"A woman\",\"A boy\",\"A brother\",\"A father\"]', '[0]', 1.00, 0),
+(112, 25, 5, 'choice', 'Who is the female parent at home?', '[\"Mother\",\"Father\",\"Brother\",\"Teacher\"]', '[0]', 1.00, 0),
+(113, 25, 6, 'choice', 'Who is the male parent at home?', '[\"Sister\",\"Mother\",\"Father\",\"Doctor\"]', '[2]', 1.00, 0),
+(114, 25, 7, 'match', 'Match the male family member to the female family member.', '{\"leftItems\":[\"Father\",\"Brother\"],\"rightItems\":[\"Sister\",\"Mother\"]}', '{\"Father\":\"Mother\",\"Brother\":\"Sister\"}', 2.00, 0),
+(115, 25, 8, 'match', 'Match the person to their description.', '{\"leftItems\":[\"Parents\",\"Baby\"],\"rightItems\":[\"A very small young child\",\"Mother and Father\"]}', '{\"Parents\":\"Mother and Father\",\"Baby\":\"A very small young child\"}', 2.00, 0),
+(116, 25, 9, 'drag', 'Group the family members by age.', '{\"items\":[\"Grandfather\",\"Baby\",\"Grandmother\",\"Brother\"],\"groups\":[\"Grandparents (Old)\",\"Children (Young)\"]}', '{\"Grandparents (Old)\":[\"Grandfather\",\"Grandmother\"],\"Children (Young)\":[\"Baby\",\"Brother\"]}', 4.00, 0),
+(117, 25, 10, 'fill', 'This is ______ mother. I love her.', '[]', '[\"my\"]', 1.00, 0),
+(118, 25, 11, 'fill', 'B___by (A very small young child)', '[]', '[\"a\"]', 1.00, 0);
 
 -- --------------------------------------------------------
 
@@ -1539,10 +2022,10 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `full_name`, `username`, `email`, `phone`, `photo_key`, `password_hash`, `role`, `is_active`, `created_at`) VALUES
 (1, 'System Administrator', 'Pacifiquesepa', 'pacifiquesepa@gmail.com', NULL, 'http://localhost:4000/uploads/20882eae4711c8c1d72d16244905d268', '$2b$12$F26ij4SI3v23kc4W6gNHIuk1Z5r190uXushM4jjHri0Oh0vxA504a', 'admin', 1, '2026-08-20 22:05:41'),
-(9, 'sepa', 'sepa', 'sepa@gmail.com', NULL, 'http://localhost:4000/uploads/f99b11ed3acfc771809b777ed06a3141', '$2b$12$zcuBc7rrrlBhP4CzXj/8P.AzdE29agq5wfDktJy/cI2tcnyh80pNq', 'dos', 1, '2026-08-20 23:29:19'),
+(9, 'sepa', 'sepa', 'sepa@gmail.com', NULL, 'http://localhost:4000/uploads/f99b11ed3acfc771809b777ed06a3141', '$2b$12$zcuBc7rrrlBhP4CzXj/8P.AzdE29agq5wfDktJy/cI2tcnyh80pNq', 'librarian', 1, '2026-08-20 23:29:19'),
 (10, 'keza', 'keza', 'keza@gmail.com', NULL, NULL, '$2b$12$Lmq68Y0zMiToOuuKm0Twme2pTJOeeRMaBUWR/udhWT9Qy2Nk0Gjm2', 'student', 1, '2026-08-20 23:32:30'),
-(12, 'Pacifique Sep', 'well', 'pacifiquesepa25@gmail.com', '0793360930', NULL, '$2b$12$POKQVevbvWlZMGZvVKWktuGMAl5BLo9Or6FsOI8b6ZLMJ8Esb8bii', 'accountant', 1, '2026-08-21 01:11:49'),
-(16, 'kayitesi', 'kayitesi', 'kayitesi@gmail.com', NULL, 'http://localhost:4000/uploads/348b64f7437eb2f57997c4a7b4f539c0', '$2b$12$r1uLLYvBLlyrrBAglzNH4esvJ.V71tl7TIJVvUEe4qCNrfCZOrZVe', 'teacher', 1, '2026-08-24 13:21:54'),
+(12, 'Pacifique Sep', 'well', 'pacifiquesepa25@gmail.com', '0793360930', NULL, '$2b$12$POKQVevbvWlZMGZvVKWktuGMAl5BLo9Or6FsOI8b6ZLMJ8Esb8bii', 'parent', 1, '2026-08-21 01:11:49'),
+(16, 'kayitesi', 'kayitesi', 'pacifiquesepa3@gmail.com', '0793333333', 'http://localhost:4000/uploads/348b64f7437eb2f57997c4a7b4f539c0', '$2b$12$r1uLLYvBLlyrrBAglzNH4esvJ.V71tl7TIJVvUEe4qCNrfCZOrZVe', 'teacher', 1, '2026-08-24 13:21:54'),
 (17, 'abijuri', 'abijuru', 'abijuru@fkams.local', NULL, NULL, '$2b$12$sHjXINGWGHtkizgJpGKXOOcrEla1dLHfqLzgS/1VVMB3NfAGSzymm', 'student', 1, '2026-08-24 13:24:09'),
 (18, 'pacifique', 'sbxhsxxhsh', 'sbxhsxxhsh@fkams.local', NULL, 'http://localhost:4000/uploads/d8310acc03a20ec7eba0c8668df5bcab', '$2b$12$nlGYyTwnEnzpegw08HZsr.nFxl5eabbu5Q/ReRS3AcyCz7vMSmafK', 'student', 1, '2026-08-24 15:40:13'),
 (23, 'nyirabagenzi123', 'well1', 'well1@fkams.local', NULL, NULL, '$2b$12$JhR2/G048zCTCQVJBj88WO3LMO3/PrCW/zicike.ZbC9ZDndqjbky', 'student', 1, '2026-08-25 07:37:00'),
@@ -1557,7 +2040,13 @@ INSERT INTO `users` (`id`, `full_name`, `username`, `email`, `phone`, `photo_key
 (42, 'abijuru', 'abijuru83838839', 'nshizirungupacifique0@gmail.com', NULL, 'http://localhost:4000/uploads/eefb19fdc276dbc41630a507dc00f79e', '$2b$12$UP1eTdY6eTOOGB2oA6sD5OEqKD8w8txX5fZcR2RD4KtcqC23Sk5DC', 'teacher', 1, '2026-08-28 11:41:07'),
 (46, 'ayinkamiye', 'ayinkamiye', 'ayinkamiye@fkams.local', NULL, NULL, '$2b$12$CvyNQ2bTtNSomfNbGoyVb.n9zXes9xrmtZuF4CkSdbQ0qcq121HKW', 'student', 1, '2026-08-31 09:58:11'),
 (48, 'kaboy', 'kaboy', 'nshizirungunshizirungu3@gmail.com', '0736494012', NULL, '$2b$12$cKFypp9YddBEwrJUhlbx2.LFG7wurc7HhLsS.ExwOIVNTe9DEYt/q', 'librarian', 1, '2026-09-02 18:24:26'),
-(49, 'irene', 'irene', 'irene@fkams.local', NULL, 'http://localhost:4000/uploads/b038a0018f1bd3f3215c9d25d390293a', '$2b$12$fyBG7jgHZ27TciSmN2XL9uAwWkUDTTjvBBEXJ15uMN3GloJRPfj7y', 'student', 1, '2026-09-14 11:44:17');
+(49, 'irene', 'irene', 'irene@fkams.local', NULL, 'http://localhost:4000/uploads/b038a0018f1bd3f3215c9d25d390293a', '$2b$12$fyBG7jgHZ27TciSmN2XL9uAwWkUDTTjvBBEXJ15uMN3GloJRPfj7y', 'student', 1, '2026-09-14 11:44:17'),
+(126, 'abayisenga', 'fk-2026-00011', 'student11@fkams.local', NULL, NULL, '$2b$12$fmIUQoezHjJw8Ebyp1H2oe7JSjI0k8/i16sfDHQwiHCagRAW53xFu', 'student', 1, '2026-09-16 00:18:22'),
+(127, 'ilphotex', 'fk-2026-00014', 'student14@fkams.local', NULL, NULL, '$2b$12$SDed9iOsoLcfrI6.P5LYI.aVcHGnfcDkGMUnudLqepw/wjX.MmKmu', 'student', 1, '2026-09-16 00:18:28'),
+(128, 'karebwayire', 'karebwayire', 'karebwayire@fkams.local', NULL, NULL, '$2b$12$Qf4QlvQnG4ioR8IZb.OxguQjc9AR15.0j4OOAA3ixolbG.wUviiZ2', 'student', 1, '2026-09-16 02:19:36'),
+(341, 'nshizirungu pacifique', 'fk-2026-00016', 'student16@fkams.local', NULL, NULL, '$2b$12$yBjGKY9lWv0YwMwx70SoeeM1fSd1aGnMoQej3WP5sT7EWi7O.ZhXu', 'student', 1, '2026-09-17 15:07:54'),
+(343, 'akeza anne', 'fk-2026-00019', 'student19@fkams.local', NULL, NULL, '$2b$12$9ZfbF..2tAwBTHAWqRR4zuy2eltKyGFBUfQzfdY/Gpl7Cn0hdJcYy', 'student', 1, '2026-09-18 15:20:42'),
+(344, 'amina dab', 'parent-987373', 'aminadabstudent@gmail.com', '0793360920', NULL, '$2b$12$Etn9BNk8bQHXpcKsCqESIOkJEjJ/UCwsqK.J4VasIJYkmuYWKRKPe', 'parent', 1, '2026-09-18 17:07:42');
 
 -- --------------------------------------------------------
 
@@ -1698,12 +2187,48 @@ ALTER TABLE `class_subjects`
   ADD KEY `subject_id` (`subject_id`);
 
 --
+-- Indexes for table `communication_items`
+--
+ALTER TABLE `communication_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `class_id` (`class_id`),
+  ADD KEY `created_by` (`created_by`);
+
+--
+-- Indexes for table `communication_recipients`
+--
+ALTER TABLE `communication_recipients`
+  ADD PRIMARY KEY (`communication_id`,`user_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `curriculum_items`
 --
 ALTER TABLE `curriculum_items`
   ADD PRIMARY KEY (`id`),
   ADD KEY `created_by` (`created_by`),
   ADD KEY `curriculum_year` (`year_name`);
+
+--
+-- Indexes for table `department_attendance`
+--
+ALTER TABLE `department_attendance`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `department_attendance_day` (`user_id`,`attendance_date`),
+  ADD KEY `department_attendance_date` (`attendance_date`);
+
+--
+-- Indexes for table `department_attendance_scores`
+--
+ALTER TABLE `department_attendance_scores`
+  ADD PRIMARY KEY (`user_id`);
+
+--
+-- Indexes for table `department_attendance_settings`
+--
+ALTER TABLE `department_attendance_settings`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `updated_by` (`updated_by`);
 
 --
 -- Indexes for table `documents`
@@ -1811,6 +2336,21 @@ ALTER TABLE `library_loans`
   ADD KEY `issued_by` (`issued_by`);
 
 --
+-- Indexes for table `meeting_attendees`
+--
+ALTER TABLE `meeting_attendees`
+  ADD PRIMARY KEY (`meeting_id`,`user_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `meeting_notes`
+--
+ALTER TABLE `meeting_notes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `meeting_id` (`meeting_id`),
+  ADD KEY `created_by` (`created_by`);
+
+--
 -- Indexes for table `news_posts`
 --
 ALTER TABLE `news_posts`
@@ -1841,6 +2381,12 @@ ALTER TABLE `otp_challenges`
   ADD KEY `otp_user_active` (`user_id`,`consumed_at`,`expires_at`);
 
 --
+-- Indexes for table `parent_profiles`
+--
+ALTER TABLE `parent_profiles`
+  ADD PRIMARY KEY (`user_id`);
+
+--
 -- Indexes for table `parent_students`
 --
 ALTER TABLE `parent_students`
@@ -1856,12 +2402,37 @@ ALTER TABLE `payroll_records`
   ADD KEY `approved_by` (`approved_by`);
 
 --
+-- Indexes for table `permission_requests`
+--
+ALTER TABLE `permission_requests`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_permission_qr` (`qr_token`),
+  ADD KEY `idx_permission_status` (`status`),
+  ADD KEY `idx_permission_requester` (`requester_id`),
+  ADD KEY `idx_permission_student` (`student_id`),
+  ADD KEY `fk_permission_approver` (`approved_by`);
+
+--
 -- Indexes for table `school_fee_settings`
 --
 ALTER TABLE `school_fee_settings`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `class_academic_year` (`class_name`,`academic_year`),
   ADD KEY `updated_by` (`updated_by`);
+
+--
+-- Indexes for table `school_messages`
+--
+ALTER TABLE `school_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`);
+
+--
+-- Indexes for table `school_message_recipients`
+--
+ALTER TABLE `school_message_recipients`
+  ADD PRIMARY KEY (`message_id`,`user_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `staff_attendance`
@@ -2045,7 +2616,7 @@ ALTER TABLE `announcement_recipients`
 -- AUTO_INCREMENT for table `applications`
 --
 ALTER TABLE `applications`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `assets`
@@ -2057,13 +2628,13 @@ ALTER TABLE `assets`
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `behavior_records`
 --
 ALTER TABLE `behavior_records`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `budgets`
@@ -2075,13 +2646,25 @@ ALTER TABLE `budgets`
 -- AUTO_INCREMENT for table `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT for table `communication_items`
+--
+ALTER TABLE `communication_items`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `curriculum_items`
 --
 ALTER TABLE `curriculum_items`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `department_attendance`
+--
+ALTER TABLE `department_attendance`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=502;
 
 --
 -- AUTO_INCREMENT for table `documents`
@@ -2117,7 +2700,7 @@ ALTER TABLE `fees`
 -- AUTO_INCREMENT for table `grades`
 --
 ALTER TABLE `grades`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `homework`
@@ -2162,6 +2745,12 @@ ALTER TABLE `library_loans`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `meeting_notes`
+--
+ALTER TABLE `meeting_notes`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `news_posts`
 --
 ALTER TABLE `news_posts`
@@ -2177,7 +2766,7 @@ ALTER TABLE `notices`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
 
 --
 -- AUTO_INCREMENT for table `payroll_records`
@@ -2186,10 +2775,22 @@ ALTER TABLE `payroll_records`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `permission_requests`
+--
+ALTER TABLE `permission_requests`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `school_fee_settings`
 --
 ALTER TABLE `school_fee_settings`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `school_messages`
+--
+ALTER TABLE `school_messages`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `staff_attendance`
@@ -2201,7 +2802,7 @@ ALTER TABLE `staff_attendance`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=381;
 
 --
 -- AUTO_INCREMENT for table `student_promotions`
@@ -2213,7 +2814,7 @@ ALTER TABLE `student_promotions`
 -- AUTO_INCREMENT for table `subjects`
 --
 ALTER TABLE `subjects`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `subject_modules`
@@ -2237,13 +2838,13 @@ ALTER TABLE `subject_notes`
 -- AUTO_INCREMENT for table `tests`
 --
 ALTER TABLE `tests`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `test_attempts`
 --
 ALTER TABLE `test_attempts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `test_progress`
@@ -2255,7 +2856,7 @@ ALTER TABLE `test_progress`
 -- AUTO_INCREMENT for table `test_questions`
 --
 ALTER TABLE `test_questions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT for table `timetable_entries`
@@ -2273,7 +2874,7 @@ ALTER TABLE `transport_routes`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=414;
 
 --
 -- Constraints for dumped tables
@@ -2346,10 +2947,42 @@ ALTER TABLE `class_subjects`
   ADD CONSTRAINT `class_subjects_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `communication_items`
+--
+ALTER TABLE `communication_items`
+  ADD CONSTRAINT `communication_items_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `communication_items_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `communication_recipients`
+--
+ALTER TABLE `communication_recipients`
+  ADD CONSTRAINT `communication_recipients_ibfk_1` FOREIGN KEY (`communication_id`) REFERENCES `communication_items` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `communication_recipients_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `curriculum_items`
 --
 ALTER TABLE `curriculum_items`
   ADD CONSTRAINT `curriculum_items_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `department_attendance`
+--
+ALTER TABLE `department_attendance`
+  ADD CONSTRAINT `department_attendance_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `department_attendance_scores`
+--
+ALTER TABLE `department_attendance_scores`
+  ADD CONSTRAINT `department_attendance_scores_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `department_attendance_settings`
+--
+ALTER TABLE `department_attendance_settings`
+  ADD CONSTRAINT `department_attendance_settings_ibfk_1` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `documents`
@@ -2442,6 +3075,20 @@ ALTER TABLE `library_loans`
   ADD CONSTRAINT `library_loans_ibfk_3` FOREIGN KEY (`issued_by`) REFERENCES `users` (`id`);
 
 --
+-- Constraints for table `meeting_attendees`
+--
+ALTER TABLE `meeting_attendees`
+  ADD CONSTRAINT `meeting_attendees_ibfk_1` FOREIGN KEY (`meeting_id`) REFERENCES `communication_items` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `meeting_attendees_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `meeting_notes`
+--
+ALTER TABLE `meeting_notes`
+  ADD CONSTRAINT `meeting_notes_ibfk_1` FOREIGN KEY (`meeting_id`) REFERENCES `communication_items` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `meeting_notes_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
+
+--
 -- Constraints for table `news_posts`
 --
 ALTER TABLE `news_posts`
@@ -2466,6 +3113,12 @@ ALTER TABLE `otp_challenges`
   ADD CONSTRAINT `otp_challenges_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `parent_profiles`
+--
+ALTER TABLE `parent_profiles`
+  ADD CONSTRAINT `parent_profiles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `parent_students`
 --
 ALTER TABLE `parent_students`
@@ -2480,10 +3133,31 @@ ALTER TABLE `payroll_records`
   ADD CONSTRAINT `payroll_records_ibfk_2` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`);
 
 --
+-- Constraints for table `permission_requests`
+--
+ALTER TABLE `permission_requests`
+  ADD CONSTRAINT `fk_permission_approver` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_permission_requester` FOREIGN KEY (`requester_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_permission_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE SET NULL;
+
+--
 -- Constraints for table `school_fee_settings`
 --
 ALTER TABLE `school_fee_settings`
   ADD CONSTRAINT `school_fee_settings_ibfk_1` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `school_messages`
+--
+ALTER TABLE `school_messages`
+  ADD CONSTRAINT `school_messages_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `school_message_recipients`
+--
+ALTER TABLE `school_message_recipients`
+  ADD CONSTRAINT `school_message_recipients_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `school_messages` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `school_message_recipients_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `staff_attendance`

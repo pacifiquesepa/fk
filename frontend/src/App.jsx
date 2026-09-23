@@ -23,8 +23,13 @@ import FinancePage from './pages/FinancePage';
 import LibrarianDashboardPage from './pages/LibrarianDashboardPage';
 import LoginPage from './pages/LoginPage';
 import ModulePage from './pages/ModulePage';
+import PermissionPage from './pages/PermissionPage';
+import DepartmentAttendanceOnLocation from './pages/department_attendance_on_loc';
 import OurProgramsPage from './pages/OurProgramsPage';
 import ParentDashboardPage from './pages/ParentDashboardPage';
+import ParentManagementPage from './pages/ParentManagementPage';
+import SchoolCommunicationsPage from './pages/SchoolCommunicationsPage_fixed';
+import SecurityGuardPage from './pages/SecurityGuardPage';
 import RegistrationPage from './pages/RegistrationPage';
 import RoleWorkspacePage from './pages/RoleWorkspacePage';
 import SettingsPage from './pages/SettingsPage';
@@ -155,12 +160,17 @@ export default function App() {
 		parent: <ParentDashboardPage t={t} onNavigate={setPage} />,
 		accountant: <AccountantDashboardPage t={t} onNavigate={setPage} />,
 		librarian: <LibrarianDashboardPage t={t} onNavigate={setPage} />,
+		security_guard: <SecurityGuardPage user={user} language={language} onBack={() => navigate('overview')} />,
 	};
 
 	const content = page === 'overview'
 		? dashboards[user.role] || dashboards.student
 		: page === 'add-department' && user.role === 'admin'
 			? <DepartmentDirectoryPage user={user} onBack={() => navigate('overview')} />
+			: page === 'parents' && ['admin', 'dos', 'accountant'].includes(user.role)
+				? <ParentManagementPage user={user} onBack={() => navigate('overview')} />
+				: page === 'notices' && ['admin', 'dos', 'doc', 'teacher', 'parent', 'student'].includes(user.role)
+					? <SchoolCommunicationsPage user={user} onBack={() => navigate('overview')} />
 			: page === 'registration'
 				? <RegistrationPage onBack={() => navigate('overview')} />
 				: page === 'ai-engine' && ['admin', 'dos', 'teacher'].includes(user.role)
@@ -171,7 +181,13 @@ export default function App() {
 							? <DisciplinePage user={user} t={t} onBack={() => navigate('overview')} />
 							: page === 'attendance'
 								? <AttendancePage user={user} t={t} onBack={() => navigate('overview')} />
-								: page === 'upload-test' && ['admin', 'dos', 'teacher'].includes(user.role)
+								: page === 'permission'
+									? <PermissionPage user={user} t={t} onBack={() => navigate('overview')} />
+										: (page === 'security-guard' || page === 'security') && ['admin', 'dos', 'doc', 'security_guard'].includes(user.role)
+											? <SecurityGuardPage user={user} language={language} onBack={() => navigate('overview')} />
+											: page === 'teacher_attendance' && ['admin', 'dos', 'doc', 'teacher', 'accountant', 'librarian'].includes(user.role)
+										? <DepartmentAttendanceOnLocation user={user} onBack={() => navigate('overview')} />
+										: page === 'upload-test' && ['admin', 'dos', 'teacher'].includes(user.role)
 									? <UploadTestPage t={t} onBack={() => navigate('overview')} />
 									: page === 'test-runner'
 										? <TestRunnerPage t={t} onBack={() => navigate('overview')} />

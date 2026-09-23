@@ -1,0 +1,389 @@
+{
+  "subject": "Études Sociales",
+  "class_name": "P1",
+  "unit": "Unité 1 : Membres de la famille",
+  "assessment_matrix": {
+    "easy": {
+      "multiple_choice": [
+        {
+          "prompt": "Qu'est-ce qu'une famille selon la définition de la page 1?",
+          "options": ["Un groupe de personnes qui vivent ensemble dans une maison.", "Un groupe d'amis qui jouent au football.", "Les gens qui travaillent au marché.", "Les voisins du village."],
+          "answer": 0, "points": 1,
+          "metadata": { "subtopic": "Membres de la famille", "source": "page 11", "accepted_answers": ["Un groupe de personnes qui vivent ensemble dans une maison."], "correction_engine": { "rules": "Match exact index choice.", "partial_marking": false } }
+        },
+        {
+          "prompt": "De quoi est composée une petite famille (famille nucléaire) selon la page 1?",
+          "options": ["Des grands-parents et des cousins.", "D'une mère, un père et des enfants.", "Des oncles et des tantes.", "Des voisins et des amis."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 11", "accepted_answers": ["D'une mère, un père et des enfants."] }
+        },
+        {
+          "prompt": "Quelle est la réponse correcte? 'Les pères travaillent dur pour aider leur famille' (Page 2).",
+          "options": ["Vrai", "Faux"],
+          "answer": 0, "points": 1,
+          "metadata": { "subtopic": "Membres de la famille", "source": "page 12", "accepted_answers": ["Vrai"] }
+        },
+        {
+          "prompt": "Qui sont les parents dans la famille selon la page 3?",
+          "options": ["Le frère et la sœur", "Les enfants", "La mère et le père", "Les cousins"],
+          "answer": 2, "points": 1,
+          "metadata": { "subtopic": "Membres de la famille", "source": "page 13", "accepted_answers": ["La mère et le père"] }
+        },
+        {
+          "prompt": "Selon l'histoire de la famille de Mukire, qui est la sœur de Furaha (Page 4)?",
+          "options": ["Keza", "Uwera", "Ineza", "Simbi."],
+          "answer": 2, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 14", "accepted_answers": ["Ineza"] }
+        },
+        {
+          "prompt": "Qui est la mère de Mugabo sur l'arbre généalogique de la page 4?",
+          "options": ["Uwera", "Mutima", "Keza", "Simbi"],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 14", "accepted_answers": ["Mutima"] }
+        },
+        {
+          "prompt": "Qui est le mari de Simbi selon la page 5?",
+          "options": ["Mugabo", "Jabo", "Ganza", "Shema"],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 15", "accepted_answers": ["Jabo"] }
+        },
+        {
+          "prompt": "Qui est le frère aîné de Shema selon la page 5?",
+          "options": ["Jabo", "Isaro", "Ganza", "Mugabo"],
+          "answer": 2, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 15", "accepted_answers": ["Ganza"] }
+        },
+        {
+          "prompt": "Que font le père et la mère dans la famille de Mutoni (Page 6)?",
+          "options": ["Ils dorment toute la journée.", "Ils vont travailler.", "Ils regardent la télévision.", "Ils jouent au ballon."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "accepted_answers": ["Ils vont travailler."] }
+        },
+        {
+          "prompt": "Est-il bon d'être paresseux et de ne pas aider à la maison (Page 8)?",
+          "options": ["Oui", "Non"],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 18", "accepted_answers": ["Non"] }
+        }
+      ],
+      "match": [
+        {
+          "prompt": "Associez les parents de la famille de Mukire à leurs rôles respectifs (Page 4).",
+          "options": ["Mutima", "Mukire"],
+          "answer": { "Mutima": "La mère de Mugabo", "Mukire": "Le père de Mugabo" },
+          "points": 2,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 14", "grading_method": "partial_match", "marking_scheme": { "each_correct_match": 1 } }
+        },
+        {
+          "prompt": "Associez les membres de la famille de Jabo et Simbi (Page 5).",
+          "options": ["Jabo et Simbi", "Ganza, Shema, Keza et Isaro"],
+          "answer": { "Jabo et Simbi": "les parents", "Ganza, Shema, Keza et Isaro": "les enfants" },
+          "points": 2,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 15", "grading_method": "partial_match" }
+        },
+        {
+          "prompt": "Associez chaque enfant de la famille de Mutoni à sa tâche ménagère (Page 6).",
+          "options": ["Ganza", "Uwera"],
+          "answer": { "Ganza": "cuisine", "Uwera": "nettoie la maison" },
+          "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "grading_method": "partial_match" }
+        },
+        {
+          "prompt": "Associez la phrase à sa valeur logique (Vrai/Faux) selon la page 2.",
+          "options": ["Les pères ne font que travailler et n'aident jamais.", "Les enfants font leurs devoirs à la maison."],
+          "answer": { "Les pères ne font que travailler et n'aident jamais.": "FAUX", "Les enfants font leurs devoirs à la maison.": "VRAI" },
+          "points": 2,
+          "metadata": { "subtopic": "Membres de la famille", "source": "page 12", "grading_method": "partial_match" }
+        },
+        {
+          "prompt": "Associez le rôle financier à la personne responsable sur l'image de la page 6.",
+          "options": ["La mère", "Le père"],
+          "answer": { "La mère": "paie les frais de scolarité", "Le père": "achète de la nourriture" },
+          "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "grading_method": "partial_match" }
+        },
+        {
+          "prompt": "Associez les responsabilités de la page 7 à la bonne catégorie.",
+          "options": ["Paient les frais de scolarité", "Font leurs devoirs"],
+          "answer": { "Paient les frais de scolarité": "Les parents", "Font leurs devoirs": "Les enfants" },
+          "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "grading_method": "partial_match" }
+        },
+        {
+          "prompt": "Associez les actions d'amour envers la famille aux bons membres (Page 7).",
+          "options": ["Enseignent le bon comportement", "Respectent les personnes âgées"],
+          "answer": { "Enseignent le bon comportement": "les parents", "Respectent les personnes âgées": "les enfants" },
+          "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "grading_method": "partial_match" }
+        },
+        {
+          "prompt": "Associez les affirmations de l'activité d'application 1.3 à leur valeur (Page 8).",
+          "options": ["Seuls les pères doivent travailler.", "Tout le monde devrait aider à la maison."],
+          "answer": { "Seuls les pères doivent travailler.": "Faux", "Tout le monde devrait aider à la maison.": "Vrai" },
+          "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 18", "grading_method": "partial_match" }
+        },
+        {
+          "prompt": "Associez les membres de la famille nucléaire aux termes généraux (Page 5).",
+          "options": ["Un père et une mère", "Des frères et des sœurs"],
+          "answer": { "Un père et une mère": "Les parents", "Des brothers et des sœurs": "Les enfants" },
+          "points": 2,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 15", "grading_method": "partial_match" }
+        },
+        {
+          "prompt": "Associez les éléments de santé de la page 7 à leur gestionnaire.",
+          "options": ["Achètent des médicaments", "Lave des assiettes"],
+          "answer": { "Achètent des médicaments": "les parents", "Lave des assiettes": "un enfant" },
+          "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "pages 16-17", "grading_method": "partial_match" }
+        }
+      ]
+    },
+    "medium": {
+      "multiple_choice": [
+        {
+          "prompt": "De quoi est composée une petite famille (famille nucléaire) selon la page 1?",
+          "options": ["Des grands-parents et des cousins.", "D'une mère, un père et des enfants.", "Des oncles et des tantes.", "Des voisins et des amis."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 11", "accepted_answers": ["D'une mère, un père et des enfants."] }
+        },
+        {
+          "prompt": "Dans l'histoire de la famille de Mukire, comment s'appelle le père de Furaha (Page 4)?",
+          "options": ["Muhirwa", "Mugabo", "Mukire", "Gisa"],
+          "answer": 0, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 14", "accepted_answers": ["Muhirwa"] }
+        },
+        {
+          "prompt": "Dans l'histoire de la famille de Mukire, comment s'appelle la mère de Furaha (Page 4)?",
+          "options": ["Keza", "Mutima", "Uwera", "Ineza"],
+          "answer": 0, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 14", "accepted_answers": ["Keza"] }
+        },
+        {
+          "prompt": "Complétez la phrase de la page 5 : 'Keza est la sœur aînée d'________.'",
+          "options": ["Isaro", "Ganza", "Shema", "Simbi"],
+          "answer": 0, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 15", "accepted_answers": ["Isaro"] }
+        },
+        {
+          "prompt": "Selon le texte de la page 5, au sein d'une famille nucléaire, il peut y avoir :",
+          "options": ["Uniquement des amis du quartier.", "Des enfants plus jeunes et d'autres plus âgés.", "Seulement des grands-parents.", "Des personnes inconnues."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 15", "accepted_answers": ["Des enfants plus jeunes et d'autres plus âgés."] }
+        },
+        {
+          "prompt": "Qui met les assiettes sur la table dans la famille de Mutoni (Page 6)?",
+          "options": ["Le père", "La mère", "Ganza", "Mutoni"],
+          "answer": 2, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "accepted_answers": ["Ganza"] }
+        },
+        {
+          "prompt": "Quelle est l'activité montrée sur la première image en bas à gauche de la page 6?",
+          "options": ["Un enfant lave des assiettes.", "Les élèves étudient.", "Le père achète de la nourriture.", "Les parents nettoient."],
+          "answer": 0, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "accepted_answers": ["Un enfant lave des assiettes."] }
+        },
+        {
+          "prompt": "Quelle est la responsabilité des parents concernant la santé des enfants (Page 7)?",
+          "options": ["Ils achètent des jouets uniquement.", "Ils achètent des médicaments pour les enfants.", "Ils disent aux enfants de ne pas se soigner.", "Ils ne font rien."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["Ils achètent des médicaments pour les enfants."] }
+        },
+        {
+          "prompt": "Que doivent faire les enfants concernant les personnes âgées selon la page 7?",
+          "options": ["Ils doivent les ignorer.", "Ils respectent les personnes âgées.", "Ils jouent loin d'elles.", "Ils ne leur parlent pas."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["Ils respectent les personnes âgées."] }
+        },
+        {
+          "prompt": "Quelle phrase est vraie concernant le rôle des enfants à la maison (Page 8)?",
+          "options": ["Seules les mères nettoient.", "Les enfants doivent garder leur chambre propre.", "Les enfants ne travaillent jamais.", "Les pères font tout le travail."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 18", "accepted_answers": ["Les enfants doivent garder leur chambre propre."] }
+        },
+        {
+          "prompt": "Que font les élèves à la maison selon le résumé de la page 8?",
+          "options": ["Ils dorment toute la journée.", "Ils vont à l'école et aident leurs parents.", "Ils cassent les assiettes.", "Ils refusent d'étudier."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 18", "accepted_answers": ["Ils vont à l'école et aident leurs parents."] }
+        },
+        {
+          "prompt": "Qui paie les frais de scolarité selon l'image du haut à gauche de la page 6?",
+          "options": ["Le grand-père", "La mère", "L'enfant", "Le frère"],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "accepted_answers": ["La mère"] }
+        },
+        {
+          "prompt": "Quelle est l'attitude attendue des enfants à la maison (Page 9)?",
+          "options": ["Être paresseux.", "Être gentils et respecter les parents.", "Ne pas faire les devoirs.", "Dormir toute la journée."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 19", "accepted_answers": ["Être gentils et respecter les parents."] }
+        },
+        {
+          "prompt": "Quelle est la tâche principale de la mère mentionnée à l'évaluation de la page 9?",
+          "options": ["Partir en vacances tous les jours.", "Cuisiner et prendre soin de la famille.", "Ne pas aider à la maison.", "Regarder la télévision."],
+          "answer": 1, "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 19", "accepted_answers": ["Cuisiner et prendre soin de la famille."] }
+        }
+      ],
+      "fill_in_gap": [
+        {
+          "prompt": "Une famille est un groupe de personnes qui vivent ensemble dans une ________. (Page 1)",
+          "answer": "maison", "points": 1,
+          "metadata": { "subtopic": "Membres de la famille", "source": "page 11", "accepted_answers": ["maison"], "grading_method": "accepted_answers", "correction_engine": { "rules": "Case-insensitive exact string match.", "partial_marking": false } }
+        },
+        {
+          "prompt": "Une famille nucléaire comprend un père, une mère et des ________. (Page 4)",
+          "answer": "enfants", "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 14", "accepted_answers": ["enfants"] }
+        },
+        {
+          "prompt": "Le mari de Simbi est ________. (Page 5)",
+          "answer": "Jabo", "points": 1,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 15", "accepted_answers": ["Jabo"] }
+        },
+        {
+          "prompt": "Dans la famille de Mutoni, Uwera ________ la maison et toutes les chambres. (Page 6)",
+          "answer": "nettoie", "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "accepted_answers": ["nettoie"] }
+        },
+        {
+          "prompt": "Les parents fournissent de la ________ à la famille. (Page 7)",
+          "answer": "nourriture", "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["nourriture"] }
+        },
+        {
+          "prompt": "Les enfants vont à l'école et ________. (Page 7)",
+          "answer": "apprennent", "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["apprennent"] }
+        },
+        {
+          "prompt": "Les parents gardent la maison propre et ________. (Page 7)",
+          "answer": "sûre", "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["sûre"] }
+        },
+        {
+          "prompt": "Les enfants font leurs ________ à la maison. (Page 2)",
+          "answer": "devoirs", "points": 1,
+          "metadata": { "subtopic": "Membres de la famille", "source": "page 12", "accepted_answers": ["devoirs"] }
+        },
+        {
+          "prompt": "Les parents enseignent aux enfants le bon ________. (Page 7)",
+          "answer": "comportement", "points": 1,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["comportement"] }
+        },
+        {
+          "prompt": "Chaque membre de la famille apporte son ________. (Page 1)",
+          "answer": "aide", "points": 1,
+          "metadata": { "subtopic": "Membres de la MAISON", "source": "page 11", "accepted_answers": ["aide"] }
+        }
+      ],
+      "rearrange": [
+        {
+          "prompt": "Rearrange these words to define a family: [maison, ensemble, vivent, personnes, Les]",
+          "answer": "Les personnes vivent ensemble maison", "points": 2,
+          "metadata": { "subtopic": "Membres de la famille", "source": "page 11", "accepted_answers": ["Les personnes vivent ensemble", "les personnes vivent ensemble dans une maison"], "correction_engine": { "rules": "Verify case-insensitive string match with trimming of trailing spaces.", "partial_marking": false } }
+        },
+        {
+          "prompt": "Rearrange these words to name components: [enfants, mère, père, un, une]",
+          "answer": "un père une mère enfants", "points": 2,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 14", "accepted_answers": ["un père une mère enfants", "un père, une mère et des enfants"] }
+        },
+        {
+          "prompt": "Rearrange words to show an action: [devoirs, font, Leurs, enfants, les]",
+          "answer": "les enfants font leurs devoirs", "points": 2,
+          "metadata": { "subtopic": "Membres de la famille", "source": "page 12", "accepted_answers": ["les enfants font leurs devoirs"] }
+        },
+        {
+          "prompt": "Rearrange words to show family setup: [Jabo, Simbi, parents, les, sont]",
+          "answer": "Jabo et Simbi sont les parents", "points": 2,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 15", "accepted_answers": ["Jabo et Simbi sont les parents"] }
+        },
+        {
+          "prompt": "Rearrange words to show a task: [maison, la, Uwera, nettoie]",
+          "answer": "Uwera nettoie la maison", "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "accepted_answers": ["Uwera nettoie la maison"] }
+        },
+        {
+          "prompt": "Rearrange words to show care: [enfants, soin, des, prennent, Parents]",
+          "answer": "Parents prennent soin des enfants", "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["Parents prennent soin des enfants", "les parents prennent soin des enfants"] }
+        },
+        {
+          "prompt": "Rearrange words for children's values: [parents, respectent, Leurs, enfants, les]",
+          "answer": "les enfants respectent leurs parents", "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["les enfants respectent leurs parents"] }
+        },
+        {
+          "prompt": "Rearrange words for basic provision: [nourriture, la, fournissent, de, Parents]",
+          "answer": "Parents fournissent de la nourriture", "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["Parents fournissent de la nourriture"] }
+        },
+        {
+          "prompt": "Rearrange words to show school attendance: [école, à, vont, l', Enfants]",
+          "answer": "Enfants vont à l'école", "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "accepted_answers": ["Enfants vont à l'école", "les enfants vont à l'école"] }
+        },
+        {
+          "prompt": "Rearrange words for household hygiene: [chambre, propre, leur, gardent, Enfants]",
+          "answer": "Enfants gardent leur chambre propre", "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 18", "accepted_answers": ["Enfants gardent leur chambre propre"] }
+        }
+      ]
+    },
+    "strong": {
+      "open_question": [
+        {
+          "prompt": "Regardez la page 1. Expliquez en vos propres mots ce que font les membres de la famille pour s'aider mutuellement à la maison.",
+          "answer": null, "points": 3,
+          "metadata": { "subtopic": "Membres de la famille", "source": "page 11", "grading": { "method": "rubric", "criteria": [{ "criterion": "mentionne_cuisiner_ou_nettoyer", "points": 1 }, { "criterion": "mentionne_travailler", "points": 1 }, { "criterion": "contient_aide_mutuelle", "points": 1 }] }, "correction_engine": { "rules": "Evaluate sentence frameworks dynamically. Award points based on criteria indicators.", "partial_marking": true } }
+        },
+        {
+          "prompt": "Décrivez la composition complète d'une famille nucléaire en vous basant sur les informations de la page 4.",
+          "answer": null, "points": 3,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 14", "grading": { "method": "rubric", "criteria": [{ "criterion": "contient_pere", "points": 1 }, { "criterion": "contient_mere", "points": 1 }, { "criterion": "contient_enfants", "points": 1 }] } }
+        },
+        {
+          "prompt": "Selon l'histoire de la famille de Mutoni à la page 6, citez deux tâches ménagères spécifiques faites par ses enfants Ganza et Uwera.",
+          "answer": null, "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "grading": { "method": "rubric", "criteria": [{ "criterion": "mentionne_ganza_cuisine", "points": 1 }, { "criterion": "mentionne_uwera_nettoie", "points": 1 }] } }
+        },
+        {
+          "prompt": "Donnez trois responsabilités principales des parents envers leurs enfants selon la liste officielle de la page 7.",
+          "answer": null, "points": 3,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "grading": { "method": "rubric", "criteria": [{ "criterion": "fournir_nourriture_ou_vetements", "points": 1 }, { "criterion": "payer_frais_scolarite", "points": 1 }, { "criterion": "acheter_medicaments_ou_prendre_soin", "points": 1 }] } }
+        },
+        {
+          "prompt": "Donnez trois responsabilités importantes des enfants au sein du foyer selon les règles apprises à la page 7.",
+          "answer": null, "points": 3,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "grading": { "method": "rubric", "criteria": [{ "criterion": "respecter_les_parents_ou_personnes_agees", "points": 1 }, { "criterion": "aider_a_nettoyer_la_maison", "points": 1 }, { "criterion": "faire_les_devoirs_ou_aller_ecole", "points": 1 }] } }
+        },
+        {
+          "prompt": "Expliquez pourquoi il est écrit à la page 8 que 'tout le monde devrait aider à la maison' au lieu d'une seule personne.",
+          "answer": null, "points": 3,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 18", "grading": { "method": "rubric", "criteria": [{ "criterion": "mentionne_cooperation_ou_travail_equipe", "points": 1 }, { "criterion": "eviter_la_paresse", "points": 2 }] } }
+        },
+        {
+          "prompt": "En vous basant sur l'arbre généalogique de la page 5, décrivez la relation familiale qui existe entre Ganza, Keza, Shema et Isaro.",
+          "answer": null, "points": 2,
+          "metadata": { "subtopic": "Une famille nucléaire", "source": "page 15", "grading": { "method": "rubric", "criteria": [{ "criterion": "mentionne_freres_et_soeurs", "points": 1 }, { "criterion": "enfants_de_jabo_et_simbi", "points": 1 }] } }
+        },
+        {
+          "prompt": "D'après les images de la page 6, décrivez comment les parents soutiennent l'éducation de leurs enfants financièrement.",
+          "answer": null, "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 16", "grading": { "method": "rubric", "criteria": [{ "criterion": "la_mere_paie_les_frais", "points": 2 }] } }
+        },
+        {
+          "prompt": "Pourquoi les parents doivent-ils enseigner le 'bon comportement' aux enfants selon la page 7?",
+          "answer": null, "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 17", "grading": { "method": "rubric", "criteria": [{ "criterion": "devenir_citoyen_responsable_ou_respect", "points": 2 }] } }
+        },
+        {
+          "prompt": "Résumez en une phrase claire l'importance d'une famille heureuse et en bonne santé selon le résumé de la page 8.",
+          "answer": null, "points": 2,
+          "metadata": { "subtopic": "Rôles et responsabilités", "source": "page 18", "grading": { "method": "rubric", "criteria": [{ "criterion": "chacun_remplit_son_role", "points": 2 }] } }
+        }
+      ]
+    }
+  }
+}

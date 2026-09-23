@@ -1,0 +1,109 @@
+{
+  "student_id": "stu_001",
+  "student_name": "Alice Uwamahoro",
+  "quiz_title": "Unit 2: Classroom Objects - Vocabulary Quiz",
+  "subject": "English",
+  "class_name": "P1",
+  "summary": {
+    "total_possible_points": 23,
+    "total_earned_points": 9,
+    "percentage_grade": 39.13,
+    "total_questions": 8,
+    "correct_questions": 4
+  },
+  "performance_by_type": [
+    {
+      "question_type": "multiple_choice",
+      "question_count": 5,
+      "correct_count": 4,
+      "attempted_count": 5,
+      "total_points": 11,
+      "earned_points": 9,
+      "accuracy_percent": 81.82
+    },
+    {
+      "question_type": "open_ended",
+      "question_count": 3,
+      "correct_count": 0,
+      "attempted_count": 3,
+      "total_points": 12,
+      "earned_points": 0,
+      "accuracy_percent": 0.0
+    }
+  ],
+  "lowest_accuracy_type": "open_ended",
+  "detailed_results": [
+    {
+      "question_id": "q01",
+      "type": "multiple_choice",
+      "points": 2,
+      "earned_points": 2,
+      "is_correct": true,
+      "feedback": "Correct: 'A pen'.",
+      "graded_by": "python"
+    },
+    {
+      "question_id": "q02",
+      "type": "multiple_choice",
+      "points": 2,
+      "earned_points": 2,
+      "is_correct": true,
+      "feedback": "Correct: 'hands'.",
+      "graded_by": "python"
+    },
+    {
+      "question_id": "q03",
+      "type": "multiple_choice",
+      "points": 2,
+      "earned_points": 0,
+      "is_correct": false,
+      "feedback": "Expected 'Yellow' but received 'Blue'.",
+      "graded_by": "python"
+    },
+    {
+      "question_id": "q04",
+      "type": "multiple_choice",
+      "points": 2,
+      "earned_points": 2,
+      "is_correct": true,
+      "feedback": "Correct: 'B'.",
+      "graded_by": "python"
+    },
+    {
+      "question_id": "q05",
+      "type": "multiple_choice",
+      "points": 3,
+      "earned_points": 3,
+      "is_correct": true,
+      "feedback": "Correct: 'My name is Kalinda.'.",
+      "graded_by": "python"
+    },
+    {
+      "question_id": "q06",
+      "type": "open_ended",
+      "points": 4,
+      "earned_points": 0,
+      "is_correct": false,
+      "feedback": "OPENAI_API_KEY not set; open-ended question could not be graded by OpenAI. Skipping.",
+      "graded_by": "openai"
+    },
+    {
+      "question_id": "q07",
+      "type": "open_ended",
+      "points": 4,
+      "earned_points": 0,
+      "is_correct": false,
+      "feedback": "OPENAI_API_KEY not set; open-ended question could not be graded by OpenAI. Skipping.",
+      "graded_by": "openai"
+    },
+    {
+      "question_id": "q08",
+      "type": "open_ended",
+      "points": 4,
+      "earned_points": 0,
+      "is_correct": false,
+      "feedback": "OPENAI_API_KEY not set; open-ended question could not be graded by OpenAI. Skipping.",
+      "graded_by": "openai"
+    }
+  ]
+}
